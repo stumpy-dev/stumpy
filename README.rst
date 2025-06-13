@@ -1,6 +1,6 @@
 |PyPI Version| |Conda Forge Version| |PyPI Downloads| |License| |Test Status| |Code Coverage|
 
-|RTD Status| |Binder| |JOSS| |NumFOCUS| |FOSSA|
+|RTD Status| |Binder| |JOSS| |NumFOCUS| 
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/stumpy.svg
     :target: https://pypi.org/project/stumpy/
