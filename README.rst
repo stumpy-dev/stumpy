@@ -12,19 +12,19 @@
     :target: https://pepy.tech/project/stumpy
     :alt: PyPI Downloads
 .. |License| image:: https://img.shields.io/pypi/l/stumpy.svg
-    :target: https://github.com/TDAmeritrade/stumpy/blob/master/LICENSE.txt
+    :target: https://github.com/stumpy-dev/stumpy/blob/master/LICENSE.txt
     :alt: License
-.. |Test Status| image:: https://github.com/TDAmeritrade/stumpy/workflows/Tests/badge.svg
-    :target: https://github.com/TDAmeritrade/stumpy/actions?query=workflow%3ATests+branch%3Amain
+.. |Test Status| image:: https://github.com/stumpy-dev/stumpy/workflows/Tests/badge.svg
+    :target: https://github.com/stumpy-dev/stumpy/actions?query=workflow%3ATests+branch%3Amain
     :alt: Test Status
-.. |Code Coverage| image:: https://codecov.io/gh/TDAmeritrade/stumpy/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/TDAmeritrade/stumpy
+.. |Code Coverage| image:: https://codecov.io/gh/stumpy-dev/stumpy/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/stumpy-dev/stumpy
     :alt: Code Coverage
 .. |RTD Status| image:: https://readthedocs.org/projects/stumpy/badge/?version=latest
     :target: https://stumpy.readthedocs.io/
     :alt: ReadTheDocs Status
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/TDAmeritrade/stumpy/main?filepath=notebooks
+    :target: https://mybinder.org/v2/gh/stumpy-dev/stumpy/main?filepath=notebooks
     :alt: Binder
 .. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01504/status.svg
     :target: https://doi.org/10.21105/joss.01504
@@ -35,17 +35,14 @@
 .. |NumFOCUS| image:: https://img.shields.io/badge/NumFOCUS-Affiliated%20Project-orange.svg?style=flat&colorA=E1523D&colorB=007D8A
     :target: https://numfocus.org/sponsored-projects/affiliated-projects
     :alt: NumFOCUS Affiliated Project
-.. |FOSSA| image:: https://app.fossa.com/api/projects/custom%2B9056%2Fgithub.com%2FTDAmeritrade%2Fstumpy.svg?type=shield
-    :target: https://app.fossa.io/projects/custom%2B9056%2Fgithub.com%2FTDAmeritrade%2Fstumpy?ref=badge_shield
-    :alt: FOSSA
 .. |Twitter| image:: https://img.shields.io/twitter/follow/stumpy_dev.svg?style=social
     :target: https://twitter.com/stumpy_dev
     :alt: Twitter
 
 |
 
-.. image:: https://raw.githubusercontent.com/TDAmeritrade/stumpy/master/docs/images/stumpy_logo_small.png
-    :target: https://github.com/TDAmeritrade/stumpy
+.. image:: https://raw.githubusercontent.com/stumpy-dev/stumpy/master/docs/images/stumpy_logo_small.png
+    :target: https://github.com/stumpy-dev/stumpy
     :alt: STUMPY Logo
 
 ======
@@ -54,7 +51,7 @@ STUMPY
 
 STUMPY is a powerful and scalable Python library that efficiently computes something called the `matrix profile <https://stumpy.readthedocs.io/en/latest/Tutorial_The_Matrix_Profile.html>`__, which is just an academic way of saying "for every (green) subsequence within your time series, automatically identify its corresponding nearest-neighbor (grey)":
 
-.. image:: https://github.com/TDAmeritrade/stumpy/blob/main/docs/images/stumpy_demo.gif?raw=true
+.. image:: https://github.com/stumpy-dev/stumpy/blob/main/docs/images/stumpy_demo.gif?raw=true
     :alt: STUMPY Animated GIF
 
 What's important is that once you've computed your matrix profile (middle panel above) it can then be used for a variety of time series data mining tasks such as:
@@ -230,7 +227,7 @@ Performance
 
 We tested the performance of computing the exact matrix profile using the Numba JIT compiled version of the code on randomly generated time series data with various lengths (i.e., ``np.random.rand(n)``) along with different `CPU and GPU hardware resources <hardware_>`_. 
 
-.. image:: https://raw.githubusercontent.com/TDAmeritrade/stumpy/master/docs/images/performance.png
+.. image:: https://raw.githubusercontent.com/stumpy-dev/stumpy/master/docs/images/performance.png
     :alt: STUMPY Performance Plot
 
 The raw results are displayed in the table below as Hours:Minutes:Seconds.Milliseconds and with a constant window size of `m = 50`. Note that these reported runtimes include the time that it takes to move the data from the host to all of the GPU device(s). You may need to scroll to the right side of the table in order to see all of the runtimes.
@@ -331,13 +328,13 @@ STUMPY supports `Python 3.9+ <https://python3statement.org/>`__ and, due to the 
 Getting Help
 ------------
 
-First, please check the `discussions <https://github.com/TDAmeritrade/stumpy/discussions>`__ and `issues <https://github.com/TDAmeritrade/stumpy/issues?utf8=%E2%9C%93&q=>`__ on Github to see if your question has already been answered there. If no solution is available there feel free to open a new discussion or issue and the authors will attempt to respond in a reasonably timely fashion.
+First, please check the `discussions <https://github.com/stumpy-dev/stumpy/discussions>`__ and `issues <https://github.com/stumpy-dev/stumpy/issues?utf8=%E2%9C%93&q=>`__ on Github to see if your question has already been answered there. If no solution is available there feel free to open a new discussion or issue and the authors will attempt to respond in a reasonably timely fashion.
 
 ------------
 Contributing
 ------------
 
-We welcome `contributions <https://github.com/TDAmeritrade/stumpy/blob/master/CONTRIBUTING.md>`__ in any form! Assistance with documentation, particularly expanding tutorials, is always welcome. To contribute please `fork the project <https://github.com/TDAmeritrade/stumpy/fork>`__, make your changes, and submit a pull request. We will do our best to work through any issues with you and get your code merged into the main branch.
+We welcome `contributions <https://github.com/stumpy-dev/stumpy/blob/master/CONTRIBUTING.md>`__ in any form! Assistance with documentation, particularly expanding tutorials, is always welcome. To contribute please `fork the project <https://github.com/stumpy-dev/stumpy/fork>`__, make your changes, and submit a pull request. We will do our best to work through any issues with you and get your code merged into the main branch.
 
 ------
 Citing

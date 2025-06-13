@@ -4,7 +4,7 @@ STUMPY API
 
 Have A Question?
 ================
-`Ask Here <https://github.com/TDAmeritrade/stumpy/discussions>`_
+`Ask Here <https://github.com/stumpy-dev/stumpy/discussions>`_
 
 .. rubric:: Overview
 

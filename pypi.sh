@@ -40,8 +40,8 @@
 # twine check dist/* 
 #
 # Github Release
-# 1. Navigate to the Github release page: https://github.com/TDAmeritrade/stumpy/releases
-# 2. Click "Draft a new release": https://github.com/TDAmeritrade/stumpy/releases/new
+# 1. Navigate to the Github release page: https://github.com/stumpy-dev/stumpy/releases
+# 2. Click "Draft a new release": https://github.com/stumpy-dev/stumpy/releases/new
 # 3. In the "Tag version" box, add the version number i.e., "v1.0.0"
 # 4. In the Release title" box, add the version number i.e., "v1.0.0"
 # 5. In the "Describe this release" box, add the description i.e., "Version 1.1.0 Release"

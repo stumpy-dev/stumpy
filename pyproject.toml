@@ -57,7 +57,7 @@ ci = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/TDAmeritrade/stumpy"
+Homepage = "https://github.com/stumpy-dev/stumpy"
 Documentation = "https://stumpy.readthedocs.io/en/latest/"
-Repository = "https://github.com/TDAmeritrade/stumpy"
+Repository = "https://github.com/stumpy-dev/stumpy"
 

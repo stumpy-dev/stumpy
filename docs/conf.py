@@ -112,7 +112,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/TDAmeritrade/stumpy",
+            "url": "https://github.com/stumpy-dev/stumpy",
             "icon": "fab fa-github-square",
         },
         {
