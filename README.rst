@@ -18,7 +18,7 @@
     :target: https://github.com/stumpy-dev/stumpy/actions?query=workflow%3ATests+branch%3Amain
     :alt: Test Status
 .. |Code Coverage| image:: https://codecov.io/gh/stumpy-dev/stumpy/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/stumpy-dev/stumpy
+    :target: https://codecov.io/gh/stumpy-dev/stumpy/tree/main
     :alt: Code Coverage
 .. |RTD Status| image:: https://readthedocs.org/projects/stumpy/badge/?version=latest
     :target: https://stumpy.readthedocs.io/
