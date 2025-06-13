@@ -12,12 +12,12 @@
     :target: https://pepy.tech/project/stumpy
     :alt: PyPI Downloads
 .. |License| image:: https://img.shields.io/pypi/l/stumpy.svg
-    :target: https://github.com/stumpy-dev/stumpy/blob/master/LICENSE.txt
+    :target: https://github.com/stumpy-dev/stumpy/blob/main/LICENSE.txt
     :alt: License
 .. |Test Status| image:: https://github.com/stumpy-dev/stumpy/workflows/Tests/badge.svg
     :target: https://github.com/stumpy-dev/stumpy/actions?query=workflow%3ATests+branch%3Amain
     :alt: Test Status
-.. |Code Coverage| image:: https://codecov.io/gh/stumpy-dev/stumpy/branch/master/graph/badge.svg
+.. |Code Coverage| image:: https://codecov.io/gh/stumpy-dev/stumpy/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/stumpy-dev/stumpy
     :alt: Code Coverage
 .. |RTD Status| image:: https://readthedocs.org/projects/stumpy/badge/?version=latest
@@ -41,7 +41,7 @@
 
 |
 
-.. image:: https://raw.githubusercontent.com/stumpy-dev/stumpy/master/docs/images/stumpy_logo_small.png
+.. image:: https://raw.githubusercontent.com/stumpy-dev/stumpy/main/docs/images/stumpy_logo_small.png
     :target: https://github.com/stumpy-dev/stumpy
     :alt: STUMPY Logo
 
@@ -227,7 +227,7 @@ Performance
 
 We tested the performance of computing the exact matrix profile using the Numba JIT compiled version of the code on randomly generated time series data with various lengths (i.e., ``np.random.rand(n)``) along with different `CPU and GPU hardware resources <hardware_>`_. 
 
-.. image:: https://raw.githubusercontent.com/stumpy-dev/stumpy/master/docs/images/performance.png
+.. image:: https://raw.githubusercontent.com/stumpy-dev/stumpy/main/docs/images/performance.png
     :alt: STUMPY Performance Plot
 
 The raw results are displayed in the table below as Hours:Minutes:Seconds.Milliseconds and with a constant window size of `m = 50`. Note that these reported runtimes include the time that it takes to move the data from the host to all of the GPU device(s). You may need to scroll to the right side of the table in order to see all of the runtimes.
@@ -334,7 +334,7 @@ First, please check the `discussions <https://github.com/stumpy-dev/stumpy/discu
 Contributing
 ------------
 
-We welcome `contributions <https://github.com/stumpy-dev/stumpy/blob/master/CONTRIBUTING.md>`__ in any form! Assistance with documentation, particularly expanding tutorials, is always welcome. To contribute please `fork the project <https://github.com/stumpy-dev/stumpy/fork>`__, make your changes, and submit a pull request. We will do our best to work through any issues with you and get your code merged into the main branch.
+We welcome `contributions <https://github.com/stumpy-dev/stumpy/blob/main/CONTRIBUTING.md>`__ in any form! Assistance with documentation, particularly expanding tutorials, is always welcome. To contribute please `fork the project <https://github.com/stumpy-dev/stumpy/fork>`__, make your changes, and submit a pull request. We will do our best to work through any issues with you and get your code merged into the main branch.
 
 ------
 Citing
