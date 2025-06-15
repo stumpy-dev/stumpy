@@ -156,7 +156,10 @@ jobs:
         run: ./test.sh report coverage.stumpy.xml
         shell: bash
       - name: List Reports
-        run: ls
+        run: ls *xml
+        shell: bash
+      - name: Show Reports
+        run: head coverage.stumpy.xml
         shell: bash
       - name: Upload Coverage Tests Results
         uses: codecov/codecov-action@v4
