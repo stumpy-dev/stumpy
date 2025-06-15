@@ -155,6 +155,9 @@ jobs:
       - name: Generate Coverage Report
         run: ./test.sh report coverage.stumpy.xml
         shell: bash
+      - name: List Reports
+        run: ls
+        shell: bash
       - name: Upload Coverage Tests Results
         uses: codecov/codecov-action@v4
         with:
