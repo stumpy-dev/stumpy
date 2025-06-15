@@ -155,9 +155,14 @@ jobs:
       - name: Generate Coverage Report
         run: ./test.sh report coverage.stumpy.xml
         shell: bash
-      - name: Upload Coverage Tests Results
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.stumpy.xml
-          verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: List Reports
+        run: ls *json
+        shell: bash
+      - name: Show Reports
+        run: head coverage.stumpy.json
+        shell: bash
+      - name: Get Coverage Percentage
+        run: |
+          export TOTAL=$(python -c "import json;print(json.load(open('coverage.stumpy.json'))['totals']['percent_covered_display'])")
+          echo $TOTAL
+        shell: bash

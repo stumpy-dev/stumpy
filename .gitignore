@@ -8,8 +8,8 @@
 LOG*
 PID
 .coverage*
-coverage.xml
-stumpy.coverage.xml
+coverage.json
+coverage.stumpy.json
 dask-worker-space
 stumpy.egg-info
 build
