@@ -163,6 +163,6 @@ jobs:
         shell: bash
       - name: Get Coverage Percentage
         run: |
-          export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
+          export TOTAL=$(python -c "import json;print(json.load(open('coverage.stumpy.json'))['totals']['percent_covered_display'])")
           echo $TOTAL
         shell: bash
