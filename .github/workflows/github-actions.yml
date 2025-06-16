@@ -208,7 +208,7 @@ jobs:
           pattern: coverage-data-*
           merge-multiple: true
       - name: Combine Coverage Files and Fail If Under 100%
-        run: ./test.sh combine*
+        run: ./test.sh combine
         shell: bash
       - name: Generate Coverage Report
         run: ./test.sh report coverage.stumpy.json
