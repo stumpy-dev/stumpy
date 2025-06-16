@@ -171,12 +171,44 @@ jobs:
       - uses: actions/checkout@v4
         with:
           python-version: '3.12'
+      - name: Display Python Version
+        run: python -c "import sys; print(sys.version)"
+        shell: bash
+      - name: Upgrade Pip
+        run: python -m pip install --upgrade pip
+        shell: bash
+      - name: Install STUMPY And Other Dependencies
+        run: python -m pip install --editable .[ci]
+        shell: bash
+      - name: Run Black
+        run: black --check --diff ./
+        shell: bash
+      - name: Run Flake8
+        run: flake8 ./
+        shell: bash
+      - name: Link OpenMP
+        run: |
+             if [ "$RUNNER_OS" == "macOS" ]; then
+                  echo "Installing OpenMP"
+                  brew install libomp
+                  echo "Linking OpenMP"
+                  brew link --force libomp
+                  echo "Find OpenMP Linking Location"
+                  libfile=`brew list libomp --verbose | grep libomp.dylib`
+                  echo $libfile
+                  echo "Changing  @rpath for the omppool.cpython-x-darwin.so shared object to look in $libfile"
+                  ls "$(python -c 'import site; print(site.getsitepackages()[0])')"/numba/np/ufunc/omppool.*.so | xargs install_name_tool -change @rpath/libomp.dylib $libfile
+             fi
+        shell: bash
+      - name: Show Full Numba Environment
+        run: python -m numba -s
+        shell: bash
       - uses: actions/download-artifact@v4
         with:
           pattern: coverage-data-*
           merge-multiple: true
       - name: Combine Coverage Files and Fail If Under 100%
-        run: ls .coverage.*
+        run: ./test.sh combine*
         shell: bash
       - name: Generate Coverage Report
         run: ./test.sh report coverage.stumpy.json
