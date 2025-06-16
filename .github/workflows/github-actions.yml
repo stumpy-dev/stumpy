@@ -162,17 +162,6 @@ jobs:
           path: .coverage.${{ matrix.os }}.${{ matrix.python-version }}
           include-hidden-files: true
           if-no-files-found: ignore
-      - name: Generate Coverage Report
-        run: ./test.sh report coverage.stumpy.json
-        shell: bash
-      - name: List Reports
-        run: ls *json
-        shell: bash
-      - name: Get Coverage Percentage
-        run: |
-          export TOTAL=$(python -c "import json;print(json.load(open('coverage.stumpy.json'))['totals']['percent_covered_display'])")
-          echo $TOTAL
-        shell: bash
   coverage-aggregation:
     name: Combine and Check Coverage
     if: always()
@@ -195,3 +184,4 @@ jobs:
       - name: Get Coverage Percentage
         run: |
           export TOTAL=$(python -c "import json;print(json.load(open('coverage.stumpy.json'))['totals']['percent_covered_display'])")
+        shell: bash
