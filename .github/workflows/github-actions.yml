@@ -176,7 +176,7 @@ jobs:
   coverage-aggregation:
     name: Combine and Check Coverage
     if: always()
-    needs: coverage
+    needs: coverage-testing
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
