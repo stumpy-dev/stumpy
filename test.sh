@@ -258,14 +258,14 @@ test_coverage()
         # Execute all tests
         for testfile in tests/test_*.py;
         do
-            coverage run --append --source=. -m pytest -rsx -W ignore::RuntimeWarning -W ignore::DeprecationWarning -W ignore::UserWarning $testfile
+            coverage run --parallel-mode --append --source=. -m pytest -rsx -W ignore::RuntimeWarning -W ignore::DeprecationWarning -W ignore::UserWarning $testfile
             check_errs $?
         done
     else
         # Execute custom tests
         for testfile in "${custom_testfiles[@]}";
         do
-            coverage run --append --source=. -m pytest -rsx -W ignore::RuntimeWarning -W ignore::DeprecationWarning -W ignore::UserWarning $testfile
+            coverage run --parallel-mode --append --source=. -m pytest -rsx -W ignore::RuntimeWarning -W ignore::DeprecationWarning -W ignore::UserWarning $testfile
             check_errs $?
         done
     fi
