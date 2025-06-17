@@ -207,12 +207,9 @@ jobs:
         with:
           pattern: coverage-data-*
           merge-multiple: true
-      - name: Combine Coverage Files and Fail If Under 100%
+      - name: Combine Coverage Files 
         run: ./test.sh combine
         shell: bash
-      - name: List Files
-        run: ls
-        shell: bash
-      - name: Generate Coverage Report
-        run: ./test.sh report coverage.html
+      - name: Show Coverage Report
+        run: ./test.sh report
         shell: bash
