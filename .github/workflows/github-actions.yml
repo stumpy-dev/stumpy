@@ -214,9 +214,5 @@ jobs:
         run: ls
         shell: bash
       - name: Generate Coverage Report
-        run: ./test.sh report coverage.stumpy.json
-        shell: bash
-      - name: Get Coverage Percentage
-        run: |
-          export TOTAL=$(python -c "import json;print(json.load(open('coverage.stumpy.json'))['totals']['percent_covered_display'])")
+        run: ./test.sh report coverage.html
         shell: bash
