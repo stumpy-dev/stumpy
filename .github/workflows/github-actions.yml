@@ -152,6 +152,3 @@ jobs:
       - name: Run Coverage Tests
         run: ./test.sh coverage
         shell: bash
-      - name: Show Coverage Results
-        run: ./test.sh report
-        shell: bash
