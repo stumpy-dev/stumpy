@@ -179,7 +179,7 @@ gen_coverage_json_report()
 {
     # This function saves the coverage report in JSON format
     set_ray_coveragerc
-    coverage json -o $fcoveragejson --fail-under=100 --omit=fastmath.py,docstring.py,min_versions.py,ray_python_version.py $fcoveragerc
+    coverage json -o $fcoveragejson -i --fail-under=100 --omit=fastmath.py,docstring.py,min_versions.py,ray_python_version.py $fcoveragerc
 }
 
 combine_coverage_data_files()
