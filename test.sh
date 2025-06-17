@@ -24,8 +24,6 @@ do
         test_mode="custom"
     elif [[ $var == "report" ]]; then
         test_mode="report"
-    elif [[ $var == "combine" ]]; then
-        test_mode="combine"
     elif [[ $var == "silent" || $var == "print" ]]; then
         print_mode="silent"
     elif [[ "$var" == *"test_"*".py"* ]]; then
@@ -169,12 +167,7 @@ set_ray_coveragerc()
 show_coverage_report()
 {
     set_ray_coveragerc
-    coverage report -m --fail-under=100 --skip-covered --omit=fastmath.py,docstring.py,min_versions.py,ray_python_version.py,conftest.py,"*__init__.py" $fcoveragerc
-}
-
-combine_coverage_data_files()
-{
-    coverage combine
+    coverage report --show-missing --fail-under=100 --skip-covered --omit=fastmath.py,docstring.py,min_versions.py,ray_python_version.py $fcoveragerc
 }
 
 test_custom()
@@ -382,11 +375,6 @@ elif [[ $test_mode == "report" ]]; then
     # Assume coverage tests have already been executed
     # and a coverage file exists
     show_coverage_report
-elif [[ $test_mode == "combine" ]]; then
-    echo "Combine All Coverage Data Files"
-    # Assume coverage tests have already been executed
-    # and a coverage file exists
-    combine_coverage_data_files
 elif [[ $test_mode == "gpu" ]]; then
     echo "Executing GPU Unit Tests Only"
     test_gpu
