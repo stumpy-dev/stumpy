@@ -5,7 +5,6 @@ print_mode="verbose"
 custom_testfiles=()
 max_iter=10
 site_pkgs=$(python -c 'import site; print(site.getsitepackages()[0])')
-fcoveragexml="coverage.stumpy.xml"
 # Parse command line arguments
 for var in "$@"
 do
@@ -31,8 +30,6 @@ do
         custom_testfiles+=("$var")
     elif [[ $var =~ ^[\-0-9]+$ ]]; then
         max_iter=$var
-    elif [[ "$var" == *".xml" ]]; then
-        fcoveragexml=$var
     elif [[ "$var" == "links" ]]; then
         test_mode="links"
     else
@@ -170,14 +167,7 @@ set_ray_coveragerc()
 show_coverage_report()
 {
     set_ray_coveragerc
-    coverage report -m --fail-under=100 --skip-covered --omit=fastmath.py,docstring.py,min_versions.py,ray_python_version.py $fcoveragerc
-}
-
-gen_coverage_xml_report()
-{
-    # This function saves the coverage report in Cobertura XML format, which is compatible with codecov
-    set_ray_coveragerc
-    coverage xml -o $fcoveragexml --fail-under=100 --omit=fastmath.py,docstring.py,min_versions.py,ray_python_version.py $fcoveragerc
+    coverage report --show-missing --fail-under=100 --skip-covered --omit=fastmath.py,docstring.py,min_versions.py,ray_python_version.py $fcoveragerc
 }
 
 test_custom()
@@ -384,7 +374,7 @@ elif [[ $test_mode == "report" ]]; then
     echo "Generate Coverage Report Only"
     # Assume coverage tests have already been executed
     # and a coverage file exists
-    gen_coverage_xml_report
+    show_coverage_report
 elif [[ $test_mode == "gpu" ]]; then
     echo "Executing GPU Unit Tests Only"
     test_gpu

@@ -17,8 +17,7 @@
 .. |Test Status| image:: https://github.com/stumpy-dev/stumpy/workflows/Tests/badge.svg
     :target: https://github.com/stumpy-dev/stumpy/actions?query=workflow%3ATests+branch%3Amain
     :alt: Test Status
-.. |Code Coverage| image:: https://codecov.io/gh/stumpy-dev/stumpy/graph/badge.svg?token=u0DooAbGji
-    :target: https://codecov.io/gh/stumpy-dev/stumpy
+.. |Code Coverage| image:: https://img.shields.io/badge/Coverage-100%25-green
     :alt: Code Coverage
 .. |RTD Status| image:: https://readthedocs.org/projects/stumpy/badge/?version=latest
     :target: https://stumpy.readthedocs.io/

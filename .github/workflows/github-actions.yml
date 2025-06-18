@@ -152,12 +152,3 @@ jobs:
       - name: Run Coverage Tests
         run: ./test.sh coverage
         shell: bash
-      - name: Generate Coverage Report
-        run: ./test.sh report coverage.stumpy.xml
-        shell: bash
-      - name: Upload Coverage Tests Results
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.stumpy.xml
-          verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
