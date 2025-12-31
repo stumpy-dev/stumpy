@@ -621,6 +621,7 @@ class scraamp:
 
         if T_B is None:
             T_B = T_A
+            core.check_self_join(self._ignore_trivial)
             self._ignore_trivial = True
 
         self._m = m

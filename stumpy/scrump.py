@@ -810,8 +810,11 @@ class scrump:
             subsequence in T_A, its nearest neighbor in T_B will be recorded.
 
         ignore_trivial : bool, default True
-            Set to `True` if this is a self-join. Otherwise, for AB-join, set this to
-            `False`. Default is `True`.
+            Set to ``True`` if this is a self-join (i.e., for a single time series
+            ``T_A`` without ``T_B``). This ensures that an exclusion zone is applied
+            to each subsequence in ``T_A`` and all trivial/self-matches are ignored.
+            Otherwise, for an AB-join (i.e., between two times series, ``T_A`` and
+            ``T_B``), set this to ``False``.
 
         percentage : float, default 0.01
             Approximate percentage completed. The value is between 0.0 and 1.0.
@@ -867,6 +870,7 @@ class scrump:
 
         if T_B is None:
             T_B = T_A
+            core.check_self_join(self._ignore_trivial)
             self._ignore_trivial = True
             T_B_subseq_isconstant = T_A_subseq_isconstant
 

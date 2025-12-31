@@ -542,8 +542,11 @@ def stump(
         Default is ``None`` which corresponds to a self-join.
 
     ignore_trivial : bool, default True
-        Set to ``True`` if this is a self-join. Otherwise, for AB-join, set this
-        to ``False``.
+        Set to ``True`` if this is a self-join (i.e., for a single time series
+        ``T_A`` without ``T_B``). This ensures that an exclusion zone is applied
+        to each subsequence in ``T_A`` and all trivial/self-matches are ignored.
+        Otherwise, for an AB-join (i.e., between two times series, ``T_A`` and
+        ``T_B``), set this to ``False``.
 
     normalize : bool, default True
         When set to ``True``, this z-normalizes subsequences prior to computing
@@ -677,6 +680,7 @@ def stump(
     mparray([4, 3, 0, 1, 0])
     """
     if T_B is None:
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
         T_B = T_A
         T_B_subseq_isconstant = T_A_subseq_isconstant

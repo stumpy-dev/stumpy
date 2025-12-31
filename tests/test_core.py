@@ -1963,3 +1963,9 @@ def test_update_incremental_PI_egressTrue_MemoryCheck():
 
         npt.assert_almost_equal(P_ref, P_comp)
         npt.assert_almost_equal(I_ref, I_comp)
+
+
+def test_check_self_join():
+    with pytest.warns(UserWarning):
+        ignore_trivial = False
+        core.check_self_join(ignore_trivial)

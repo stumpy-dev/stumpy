@@ -515,8 +515,11 @@ def gpu_stump(
         Default is  ``None`` which corresponds to a self-join.
 
     ignore_trivial : bool, default True
-        Set to ``True`` if this is a self-join. Otherwise, for AB-join, set this
-        to ``False``.
+        Set to ``True`` if this is a self-join (i.e., for a single time series
+        ``T_A`` without ``T_B``). This ensures that an exclusion zone is applied
+        to each subsequence in ``T_A`` and all trivial/self-matches are ignored.
+        Otherwise, for an AB-join (i.e., between two times series, ``T_A`` and
+        ``T_B``), set this to ``False``.
 
     device_id : int or list, default 0
         The (GPU) device number to use. The default value is ``0``. A list of
@@ -644,6 +647,7 @@ def gpu_stump(
     """
     if T_B is None:  # Self join!
         T_B = T_A
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
         T_B_subseq_isconstant = T_A_subseq_isconstant
 

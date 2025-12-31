@@ -4509,3 +4509,24 @@ def _update_incremental_PI(D, P, I, excl_zone, n_appended=0):
             _shift_insert_at_index(I[-1], idx, i + n_appended)
 
     return
+
+
+def check_self_join(ignore_trivial):
+    """
+    A simple function to check whether `ignore_trivial` is `True` for a self-join
+
+    Otherwise, warn the user.
+
+    Parameters
+    ----------
+    ignore_trivial : bool
+        Set to True if this is a self-join. Otherwise, for AB-join, set this to False.
+
+    Returns
+    -------
+    None
+    """
+    if not ignore_trivial:
+        msg = "`ignore_trivial` cannot be `False` for a self-join and "
+        msg += "has been automatically overridden and set to `True`."
+        warnings.warn(msg)

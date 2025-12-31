@@ -70,6 +70,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
 
     if T_B is None:
         T_B = T_A
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
 
     T_A, μ_Q, σ_Q, Q_subseq_isconstant = core.preprocess(T_A, m)

@@ -396,6 +396,7 @@ def aamp(T_A, m, T_B=None, ignore_trivial=True, p=2.0, k=1):
     """
     if T_B is None:
         T_B = T_A.copy()
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
 
     T_A, T_A_subseq_isfinite = core.preprocess_non_normalized(T_A, m)
