@@ -3752,7 +3752,7 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
 
     Notes
     -----
-    These warnings may be supressed by using a context manager
+    These warnings may be suppressed by using a context manager
     ```
     import stumpy
     import numpy as np
@@ -4528,7 +4528,7 @@ def check_self_join(ignore_trivial):
 
     Notes
     -----
-    These warnings may be supressed by using a context manager
+    These warnings may be suppressed by using a context manager
     ```
     import stumpy
     import numpy as np
