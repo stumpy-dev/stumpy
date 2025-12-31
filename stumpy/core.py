@@ -4525,6 +4525,22 @@ def check_self_join(ignore_trivial):
     Returns
     -------
     None
+
+    Notes
+    -----
+    These warnings may be supressed by using a context manager
+    ```
+    import stumpy
+    import numpy as np
+    import warnings
+
+    T = np.random.rand(10_000)
+    m = 50
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="`ignore_trivial` cannot be `False`")
+        for _ in range(5):
+            stumpy.stump(T, m, ignore_trivial=False)
+    ```
     """
     if not ignore_trivial:
         msg = "`ignore_trivial` cannot be `False` for a self-join and "
