@@ -4541,7 +4541,7 @@ def check_self_join(ignore_trivial):
             stumpy.stump(T, m, ignore_trivial=False)
     ```
     """
-    if not ignore_trivial:
+    if ignore_trivial is False:
         msg = "`ignore_trivial` cannot be `False` for a self-join and "
         msg += "has been automatically overridden and set to `True`."
         warnings.warn(msg)
