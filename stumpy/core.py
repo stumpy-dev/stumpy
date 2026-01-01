@@ -3738,11 +3738,10 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
 
     T_B : numpy.ndarray
         The time series or sequence that will be used to annotate T_A. For every
-        subsequence in T_A, its nearest neighbor in T_B will be recorded. Default is
-        `None` which corresponds to a self-join.
+        subsequence in T_A, its nearest neighbor in T_B will be recorded.
 
     ignore_trivial : bool
-        Set to `True` if this is a self-join. Otherwise, for AB-join, set this
+        Set to `True` if this is a self-join. Otherwise, for an AB-join, set this
         to `False`.
 
     Returns
