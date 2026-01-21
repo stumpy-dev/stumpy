@@ -112,3 +112,5 @@ tbb = ">=2019.5"
 tests = "./test.sh"
 coverage = "./test.sh coverage"
 docs = "cd docs && ./setup.sh"
+black = 'black --exclude=".*\.ipynb" --extend-exclude=".venv|.pixi" --diff ./'
+isort = 'isort --profile black --skip .venv --skip .pixi ./'

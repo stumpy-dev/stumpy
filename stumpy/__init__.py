@@ -1,9 +1,9 @@
-import importlib
+import ast
 import os.path
+import pathlib
 from importlib.metadata import distribution
 from site import getsitepackages
 
-import numba
 from numba import cuda
 
 from . import cache, config
@@ -38,14 +38,27 @@ from .stumpi import stumpi  # noqa: F401
 # Get the default fastmath flags for all njit functions
 # and update the _STUMPY_DEFAULTS dictionary
 
-if not numba.config.DISABLE_JIT:  # pragma: no cover
-    njit_funcs = cache.get_njit_funcs()
-    for module_name, func_name in njit_funcs:
-        module = importlib.import_module(f".{module_name}", package="stumpy")
-        func = getattr(module, func_name)
-        key = module_name + "." + func_name  # e.g., core._mass
-        key = "STUMPY_FASTMATH_" + key.upper()  # e.g., STUMPY_FASTHMATH_CORE._MASS
-        config._STUMPY_DEFAULTS[key] = func.targetoptions["fastmath"]
+
+def _get_fastmath_value(module_name, func_name):  # pragma: no cover
+    fname = module_name + ".py"
+    fname = pathlib.Path(__file__).parent / fname
+    with open(fname, "r", encoding="utf-8") as f:
+        src = f.read()
+        tree = ast.parse(src)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == func_name:
+                for dec in node.decorator_list:
+                    for kw in dec.keywords:
+                        if kw.arg == "fastmath":
+                            fastmath_flag = ast.get_source_segment(src, kw.value)
+                            return eval(fastmath_flag)
+
+
+njit_funcs = cache.get_njit_funcs()
+for module_name, func_name in njit_funcs:
+    key = module_name + "." + func_name  # e.g., core._mass
+    key = "STUMPY_FASTMATH_" + key.upper()  # e.g., STUMPY_FASTHMATH_CORE._MASS
+    config._STUMPY_DEFAULTS[key] = _get_fastmath_value(module_name, func_name)
 
 if cuda.is_available():
     from .gpu_aamp import gpu_aamp  # noqa: F401
@@ -71,9 +84,6 @@ else:  # pragma: no cover
 
     core._gpu_searchsorted_left = core._gpu_searchsorted_left_driver_not_found
     core._gpu_searchsorted_right = core._gpu_searchsorted_right_driver_not_found
-
-    import ast
-    import pathlib
 
     # Fix GPU-STUMP Docs
     gpu_stump.__doc__ = ""

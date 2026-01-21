@@ -1,7 +1,10 @@
+import importlib
+
 import numba
 import numpy as np
+import pytest
 
-from stumpy import cache, fastmath
+from stumpy import _get_fastmath_value, cache, fastmath
 
 
 def test_set():
@@ -50,3 +53,14 @@ def test_reset():
         assert np.isnan(fastmath._add_assoc(0.0, np.inf))
     else:  # pragma: no cover
         assert fastmath._add_assoc(0.0, np.inf) == 0.0
+
+
+@pytest.mark.skipif(numba.config.DISABLE_JIT, reason="JIT Disabled")
+def test_get_fastmath_value():  # pragma: no cover
+    njit_funcs = cache.get_njit_funcs()
+    for module_name, func_name in njit_funcs:
+        module = importlib.import_module(f".{module_name}", package="stumpy")
+        func = getattr(module, func_name)
+        ref = func.targetoptions["fastmath"]
+        cmp = _get_fastmath_value(module_name, func_name)
+        assert ref == cmp
