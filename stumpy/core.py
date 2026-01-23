@@ -2133,6 +2133,9 @@ def _preprocess(T, copy=True):
 
     T = transpose_dataframe(T)
 
+    if "pandas" in str(type(T)):
+        T = T.to_numpy(copy=True)
+
     if "polars" in str(type(T)):
         T = T.to_numpy(writable=True)
 
