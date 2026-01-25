@@ -6,7 +6,13 @@ import numpy.testing as npt
 import pandas as pd
 from numba import cuda
 
-from stumpy import config, gpu_stump
+from stumpy import config
+
+if cuda.is_available():
+    from stumpy.gpu_stump import gpu_stump
+else:  # pragma: no cover
+    from stumpy.core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
+
 
 try:
     from numba.errors import NumbaPerformanceWarning

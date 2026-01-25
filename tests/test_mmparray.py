@@ -3,7 +3,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import maamp, mstump
+from stumpy.maamp import maamp
+from stumpy.mstump import mstump
 
 test_data = [
     (np.array([[584, -11, 23, 79, 1001, 0, -19]], dtype=np.float64), 3),

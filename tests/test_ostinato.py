@@ -6,7 +6,8 @@ import numpy.testing as npt
 import pytest
 from dask.distributed import Client, LocalCluster
 
-import stumpy
+from stumpy import core
+from stumpy.ostinato import ostinato, ostinatoed
 
 
 @pytest.fixture(scope="module")
@@ -30,7 +31,7 @@ def test_random_ostinato(seed):
     Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinato(Ts, m)
+    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m)
 
     npt.assert_almost_equal(ref_radius, comp_radius)
     npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -44,7 +45,7 @@ def test_deterministic_ostinato(seed):
     Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinato(Ts, m)
+    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m)
 
     npt.assert_almost_equal(ref_radius, comp_radius)
     npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -61,9 +62,7 @@ def test_random_ostinatoed(seed, dask_cluster):
         Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinatoed(
-            dask_client, Ts, m
-        )
+        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(dask_client, Ts, m)
 
         npt.assert_almost_equal(ref_radius, comp_radius)
         npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -78,9 +77,7 @@ def test_deterministic_ostinatoed(seed, dask_cluster):
         Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinatoed(
-            dask_client, Ts, m
-        )
+        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(dask_client, Ts, m)
 
         npt.assert_almost_equal(ref_radius, comp_radius)
         npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -103,7 +100,7 @@ def test_random_ostinato_with_isconstant(seed):
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
         Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
     )
-    comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinato(
+    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(
         Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
     )
 
@@ -135,7 +132,7 @@ def test_deterministic_ostinatoed_with_isconstant(seed, dask_cluster):
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
             Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
         )
-        comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinatoed(
+        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(
             dask_client, Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
         )
 
@@ -155,7 +152,7 @@ def test_input_not_overwritten_ostinato():
 
     # raise error if ostinato overwrite its input
     Ts_input = [T.copy() for T in Ts]
-    stumpy.ostinato(Ts_input, m)
+    ostinato(Ts_input, m)
     for i in range(len(Ts)):
         T_ref = Ts[i]
         T_comp = Ts_input[i]
@@ -176,7 +173,7 @@ def test_extract_several_consensus_ostinato():
         # Find consensus motif and its NN in each time series in Ts_comp
         # Remove them from Ts_comp as well as Ts_ref, and assert that the
         # two time series are the same
-        radius, Ts_idx, subseq_idx = stumpy.ostinato(Ts_comp, m)
+        radius, Ts_idx, subseq_idx = ostinato(Ts_comp, m)
         consensus_motif = Ts_comp[Ts_idx][subseq_idx : subseq_idx + m].copy()
         for i in range(len(Ts_comp)):
             if i == Ts_idx:
@@ -184,9 +181,7 @@ def test_extract_several_consensus_ostinato():
             else:
                 query_idx = None
 
-            idx = np.argmin(
-                stumpy.core.mass(consensus_motif, Ts_comp[i], query_idx=query_idx)
-            )
+            idx = np.argmin(core.mass(consensus_motif, Ts_comp[i], query_idx=query_idx))
             Ts_comp[i][idx : idx + m] = np.nan
             Ts_ref[i][idx : idx + m] = np.nan
 
@@ -207,7 +202,7 @@ def test_input_not_overwritten_ostinatoed(dask_cluster):
 
         # raise error if ostinato overwrite its input
         Ts_input = [T.copy() for T in Ts]
-        stumpy.ostinatoed(dask_client, Ts_input, m)
+        ostinatoed(dask_client, Ts_input, m)
         for i in range(len(Ts)):
             T_ref = Ts[i]
             T_comp = Ts_input[i]
@@ -231,7 +226,7 @@ def test_extract_several_consensus_ostinatoed(dask_cluster):
             # Find consensus motif and its NN in each time series in Ts_comp
             # Remove them from Ts_comp as well as Ts_ref, and assert that the
             # two time series are the same
-            radius, Ts_idx, subseq_idx = stumpy.ostinatoed(dask_client, Ts_comp, m)
+            radius, Ts_idx, subseq_idx = ostinatoed(dask_client, Ts_comp, m)
             consensus_motif = Ts_comp[Ts_idx][subseq_idx : subseq_idx + m].copy()
             for i in range(len(Ts_comp)):
                 if i == Ts_idx:
@@ -240,7 +235,7 @@ def test_extract_several_consensus_ostinatoed(dask_cluster):
                     query_idx = None
 
                 idx = np.argmin(
-                    stumpy.core.mass(consensus_motif, Ts_comp[i], query_idx=query_idx)
+                    core.mass(consensus_motif, Ts_comp[i], query_idx=query_idx)
                 )
                 Ts_comp[i][idx : idx + m] = np.nan
                 Ts_ref[i][idx : idx + m] = np.nan

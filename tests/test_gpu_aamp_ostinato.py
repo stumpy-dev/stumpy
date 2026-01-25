@@ -12,7 +12,14 @@ except ModuleNotFoundError:
 import naive
 import pytest
 
-from stumpy import core, gpu_aamp_ostinato
+from stumpy import core
+
+if cuda.is_available():
+    from stumpy.gpu_aamp_ostinato import gpu_aamp_ostinato
+else:  # pragma: no cover
+    from stumpy.core import (  # noqa: F401
+        _gpu_aamp_ostinato_driver_not_found as gpu_aamp_ostinato,
+    )
 
 TEST_THREADS_PER_BLOCK = 10
 

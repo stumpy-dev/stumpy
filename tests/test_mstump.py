@@ -7,12 +7,15 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from stumpy import config, core, mdl, mstump, subspace
+from stumpy import config, core
 from stumpy.mstump import (
     _get_first_mstump_profile,
     _get_multi_QT,
     _multi_mass,
+    mdl,
+    mstump,
     multi_distance_profile,
+    subspace,
 )
 
 

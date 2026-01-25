@@ -1,39 +1,63 @@
 import ast
+import importlib
 import os.path
 import pathlib
+import types
 from importlib.metadata import distribution
 from site import getsitepackages
 
 from numba import cuda
 
 from . import cache, config
-from .aamp import aamp  # noqa: F401
-from .aamp_mmotifs import aamp_mmotifs  # noqa: F401
-from .aamp_motifs import aamp_match, aamp_motifs  # noqa: F401
-from .aamp_ostinato import aamp_ostinato, aamp_ostinatoed  # noqa: F401
-from .aamp_stimp import aamp_stimp, aamp_stimped  # noqa: F401
-from .aampdist import aampdist, aampdisted  # noqa: F401
-from .aampdist_snippets import aampdist_snippets  # noqa: F401
-from .aamped import aamped  # noqa: F401
-from .aampi import aampi  # noqa: F401
-from .chains import allc, atsc  # noqa: F401
-from .core import mass  # noqa: F401
-from .floss import floss, fluss  # noqa: F401
-from .maamp import maamp, maamp_mdl, maamp_subspace  # noqa: F401
-from .maamped import maamped  # noqa: F401
-from .mmotifs import mmotifs  # noqa: F401
-from .motifs import match, motifs  # noqa: F401
-from .mpdist import mpdist, mpdisted  # noqa: F401
-from .mstump import mdl, mstump, subspace  # noqa: F401
-from .mstumped import mstumped  # noqa: F401
-from .ostinato import ostinato, ostinatoed  # noqa: F401
-from .scraamp import prescraamp, scraamp  # noqa: F401
-from .scrump import prescrump, scrump  # noqa: F401
-from .snippets import snippets  # noqa: F401
-from .stimp import stimp, stimped  # noqa: F401
-from .stump import stump  # noqa: F401
-from .stumped import stumped  # noqa: F401
-from .stumpi import stumpi  # noqa: F401
+
+# Define which functions belong to which submodules
+# Key: function name to expose at top level
+# Value: name of the submodule
+_lazy_imports = {
+    "aamp": "aamp",
+    "aamp_mmotifs": "aamp_mmotifs",
+    "aamp_match": "aamp_motifs",
+    "aamp_motifs": "aamp_motifs",
+    "aamp_ostinato": "aamp_ostinato",
+    "aamp_ostinatoed": "aamp_ostinato",
+    "aamp_stimp": "aamp_stimp",
+    "aamp_stimped": "aamp_stimp",
+    "aampdist": "aampdist",
+    "aampdisted": "aampdist",
+    "aampdist_snippets": "aampdist_snippets",
+    "aamped": "aamped",
+    "aampi": "aampi",
+    "allc": "chains",
+    "atsc": "chains",
+    "mass": "core",
+    "floss": "floss",
+    "fluss": "floss",
+    "maamp": "maamp",
+    "maamp_mdl": "maamp",
+    "maamp_subspace": "maamp",
+    "maamped": "maamped",
+    "mmotifs": "mmotifs",
+    "match": "motifs",
+    "motifs": "motifs",
+    "mpdist": "mpdist",
+    "mpdisted": "mpdist",
+    "mdl": "mstump",
+    "mstump": "mstump",
+    "subspace": "mstump",
+    "mstumped": "mstumped",
+    "ostinato": "ostinato",
+    "ostinatoed": "ostinato",
+    "prescraamp": "scraamp",
+    "scraamp": "scraamp",
+    "prescrump": "scrump",
+    "scrump": "scrump",
+    "snippets": "snippets",
+    "stimp": "stimp",
+    "stimped": "stimp",
+    "stump": "stump",
+    "stumped": "stumped",
+    "stumpi": "stumpi",
+}
 
 # Get the default fastmath flags for all njit functions
 # and update the _STUMPY_DEFAULTS dictionary
@@ -61,14 +85,18 @@ for module_name, func_name in njit_funcs:
     config._STUMPY_DEFAULTS[key] = _get_fastmath_value(module_name, func_name)
 
 if cuda.is_available():
-    from .gpu_aamp import gpu_aamp  # noqa: F401
-    from .gpu_aamp_ostinato import gpu_aamp_ostinato  # noqa: F401
-    from .gpu_aamp_stimp import gpu_aamp_stimp  # noqa: F401
-    from .gpu_aampdist import gpu_aampdist  # noqa: F401
-    from .gpu_mpdist import gpu_mpdist  # noqa: F401
-    from .gpu_ostinato import gpu_ostinato  # noqa: F401
-    from .gpu_stimp import gpu_stimp  # noqa: F401
-    from .gpu_stump import gpu_stump  # noqa: F401
+    _lazy_imports.update(
+        {
+            "gpu_aamp": "gpu_aamp",
+            "gpu_aamp_ostinato": "gpu_aamp_ostinato",
+            "gpu_aamp_stimp": "gpu_aamp_stimp",
+            "gpu_aampdist": "gpu_aampdist",
+            "gpu_mpdist": "gpu_mpdist",
+            "gpu_ostinato": "gpu_ostinato",
+            "gpu_stimp": "gpu_stimp",
+            "gpu_stump": "gpu_stump",
+        }
+    )
 else:  # pragma: no cover
     from . import core
     from .core import _gpu_aamp_driver_not_found as gpu_aamp  # noqa: F401
@@ -220,3 +248,36 @@ except ModuleNotFoundError:  # pragma: no cover
     __version__ = "Please install this project with setup.py"
 else:  # pragma: no cover
     __version__ = _dist.version
+
+
+# PEP 562: module-level __getattr__ for lazy imports
+def __getattr__(name):  # pragma: no cover
+    if name in _lazy_imports:
+        submodule_name = _lazy_imports[name]
+        full_module_path = f"{__package__}.{submodule_name}"
+        module = importlib.import_module(full_module_path)
+        # Retrieve the attribute from the loaded submodule and cache it
+        attr = getattr(module, name)
+        globals()[name] = attr
+        return attr
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+# Ensure that if a submodule was imported during package import
+# (causing the package attribute to point to the submodule object), we
+# replace that entry with the actual attribute (e.g., function) so that
+# users get the expected callable at `stumpy.aamp` rather than the module.
+for _name, _sub in _lazy_imports.items():  # pragma: no cover
+    val = globals().get(_name)
+    if isinstance(val, types.ModuleType):
+        try:
+            replacement = getattr(val, _name)
+        except AttributeError:
+            # Nothing to do if the submodule doesn't define the attribute
+            continue
+        globals()[_name] = replacement
+
+
+def __dir__():  # pragma: no cover
+    # Expose lazy names in dir() for discoverability
+    return sorted(list(globals().keys()) + list(_lazy_imports.keys()))

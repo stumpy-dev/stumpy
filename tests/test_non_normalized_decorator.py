@@ -4,9 +4,54 @@ import numpy.testing as npt
 from dask.distributed import Client, LocalCluster
 from numba import cuda
 
-import stumpy
-from stumpy.maamp import maamp_multi_distance_profile
-from stumpy.mstump import multi_distance_profile
+from stumpy import core
+from stumpy.aamp import aamp
+from stumpy.aamp_mmotifs import aamp_mmotifs
+from stumpy.aamp_motifs import aamp_match, aamp_motifs
+from stumpy.aamp_ostinato import aamp_ostinato, aamp_ostinatoed
+from stumpy.aamp_stimp import aamp_stimp, aamp_stimped
+from stumpy.aampdist import aampdist, aampdisted
+from stumpy.aampdist_snippets import aampdist_snippets
+from stumpy.aamped import aamped
+from stumpy.aampi import aampi
+
+if cuda.is_available():
+    from stumpy.gpu_aamp import gpu_aamp
+    from stumpy.gpu_aamp_ostinato import gpu_aamp_ostinato
+    from stumpy.gpu_aamp_stimp import gpu_aamp_stimp
+    from stumpy.gpu_aampdist import gpu_aampdist
+    from stumpy.gpu_mpdist import gpu_mpdist
+    from stumpy.gpu_ostinato import gpu_ostinato
+    from stumpy.gpu_stimp import gpu_stimp
+    from stumpy.gpu_stump import gpu_stump
+else:  # pragma: no cover
+    from stumpy.core import _gpu_aamp_driver_not_found as gpu_aamp  # noqa: F401
+    from stumpy.core import (
+        _gpu_aamp_ostinato_driver_not_found as gpu_aamp_ostinato,
+    )  # noqa: F401
+    from stumpy.core import (
+        _gpu_aamp_stimp_driver_not_found as gpu_aamp_stimp,
+    )  # noqa: F401
+    from stumpy.core import _gpu_aampdist_driver_not_found as gpu_aampdist  # noqa: F401
+    from stumpy.core import _gpu_mpdist_driver_not_found as gpu_mpdist  # noqa: F401
+    from stumpy.core import _gpu_ostinato_driver_not_found as gpu_ostinato  # noqa: F401
+    from stumpy.core import _gpu_stimp_driver_not_found as gpu_stimp  # noqa: F401
+    from stumpy.core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
+from stumpy.maamp import maamp, maamp_mdl, maamp_multi_distance_profile, maamp_subspace
+from stumpy.maamped import maamped
+from stumpy.mmotifs import mmotifs
+from stumpy.motifs import match, motifs
+from stumpy.mpdist import mpdist, mpdisted
+from stumpy.mstump import mdl, mstump, multi_distance_profile, subspace
+from stumpy.mstumped import mstumped
+from stumpy.ostinato import ostinato, ostinatoed
+from stumpy.scraamp import prescraamp, scraamp
+from stumpy.scrump import prescrump, scrump
+from stumpy.snippets import snippets
+from stumpy.stimp import stimp, stimped
+from stumpy.stump import stump
+from stumpy.stumped import stumped
+from stumpy.stumpi import stumpi
 
 try:
     from numba.errors import NumbaPerformanceWarning
@@ -37,20 +82,20 @@ test_data = [
 def test_mass():
     Q = np.random.rand(10)
     T = np.random.rand(20)
-    ref = stumpy.core.mass_absolute(Q, T)
-    comp = stumpy.core.mass(Q, T, normalize=False)
+    ref = core.mass_absolute(Q, T)
+    comp = core.mass(Q, T, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
     Q = np.random.rand(10)
     T = np.random.rand(20)
-    T, T_subseq_isfinite = stumpy.core.preprocess_non_normalized(T, 10)
-    T_squared = np.sum(stumpy.core.rolling_window(T * T, Q.shape[0]), axis=-1)
-    ref = stumpy.core.mass_absolute(Q, T)
-    comp = stumpy.core.mass(Q, T, M_T=T_subseq_isfinite, normalize=False)
+    T, T_subseq_isfinite = core.preprocess_non_normalized(T, 10)
+    T_squared = np.sum(core.rolling_window(T * T, Q.shape[0]), axis=-1)
+    ref = core.mass_absolute(Q, T)
+    comp = core.mass(Q, T, M_T=T_subseq_isfinite, normalize=False)
     npt.assert_almost_equal(ref, comp)
-    comp = stumpy.core.mass(Q, T, Σ_T=T_squared, normalize=False)
+    comp = core.mass(Q, T, Σ_T=T_squared, normalize=False)
     npt.assert_almost_equal(ref, comp)
-    comp = stumpy.core.mass(Q, T, M_T=T_subseq_isfinite, Σ_T=T_squared, normalize=False)
+    comp = core.mass(Q, T, M_T=T_subseq_isfinite, Σ_T=T_squared, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -60,8 +105,8 @@ def test_stump(T, m):
         T = T.copy()
         T = T[0]
 
-    ref = stumpy.aamp(T, m)
-    comp = stumpy.stump(T, m, normalize=False)
+    ref = aamp(T, m)
+    comp = stump(T, m, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -71,8 +116,8 @@ def test_prescrump(T, m):
         T = T.copy()
         T = T[0]
 
-    ref = stumpy.prescraamp(T, m)
-    comp = stumpy.prescrump(T, m, normalize=False)
+    ref = prescraamp(T, m)
+    comp = prescrump(T, m, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -85,9 +130,9 @@ def test_scrump(T, m):
     seed = np.random.randint(100000)
 
     np.random.seed(seed)
-    ref = stumpy.scraamp(T, m)
+    ref = scraamp(T, m)
     np.random.seed(seed)
-    comp = stumpy.scrump(T, m, normalize=False)
+    comp = scrump(T, m, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
     for i in range(10):
@@ -104,9 +149,9 @@ def test_scrump_plus_plus(T, m):
     seed = np.random.randint(100000)
 
     np.random.seed(seed)
-    ref = stumpy.scraamp(T, m, pre_scraamp=True)
+    ref = scraamp(T, m, pre_scraamp=True)
     np.random.seed(seed)
-    comp = stumpy.scrump(T, m, pre_scrump=True, normalize=False)
+    comp = scrump(T, m, pre_scrump=True, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
     for i in range(10):
@@ -124,9 +169,9 @@ def test_scrump_plus_plus_full(T, m):
     seed = np.random.randint(100000)
 
     np.random.seed(seed)
-    ref = stumpy.scraamp(T, m, percentage=0.1, pre_scraamp=True)
+    ref = scraamp(T, m, percentage=0.1, pre_scraamp=True)
     np.random.seed(seed)
-    comp = stumpy.scrump(T, m, percentage=0.1, pre_scrump=True, normalize=False)
+    comp = scrump(T, m, percentage=0.1, pre_scrump=True, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
     for i in range(10):
@@ -143,8 +188,8 @@ def test_stumped(T, m, dask_cluster):
         T = T[0]
 
     with Client(dask_cluster) as dask_client:
-        ref = stumpy.aamped(dask_client, T, m)
-        comp = stumpy.stumped(dask_client, T, m, normalize=False)
+        ref = aamped(dask_client, T, m)
+        comp = stumped(dask_client, T, m, normalize=False)
         npt.assert_almost_equal(ref, comp)
 
 
@@ -158,8 +203,8 @@ def test_gpu_stump(T, m):
         T = T.copy()
         T = T[0]
 
-    ref = stumpy.gpu_aamp(T, m)
-    comp = stumpy.gpu_stump(T, m, normalize=False)
+    ref = gpu_aamp(T, m)
+    comp = gpu_stump(T, m, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -169,8 +214,8 @@ def test_stumpi(T, m):
         T = T.copy()
         T = T[0]
 
-    ref_stream = stumpy.aampi(T, m)
-    comp_stream = stumpy.stumpi(T, m, normalize=False)
+    ref_stream = aampi(T, m)
+    comp_stream = stumpi(T, m, normalize=False)
     for i in range(10):
         t = np.random.rand()
         ref_stream.update(t)
@@ -182,8 +227,8 @@ def test_ostinato():
     m = 50
     Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
-    ref_radius, ref_Ts_idx, ref_subseq_idx = stumpy.aamp_ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinato(Ts, m, normalize=False)
+    ref_radius, ref_Ts_idx, ref_subseq_idx = aamp_ostinato(Ts, m)
+    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m, normalize=False)
 
     npt.assert_almost_equal(ref_radius, comp_radius)
     npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -196,10 +241,8 @@ def test_ostinatoed(dask_cluster):
     Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
     with Client(dask_cluster) as dask_client:
-        ref_radius, ref_Ts_idx, ref_subseq_idx = stumpy.aamp_ostinatoed(
-            dask_client, Ts, m
-        )
-        comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.ostinatoed(
+        ref_radius, ref_Ts_idx, ref_subseq_idx = aamp_ostinatoed(dask_client, Ts, m)
+        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(
             dask_client, Ts, m, normalize=False
         )
 
@@ -216,10 +259,8 @@ def test_gpu_ostinato():
     m = 50
     Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
-    ref_radius, ref_Ts_idx, ref_subseq_idx = stumpy.gpu_aamp_ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.gpu_ostinato(
-        Ts, m, normalize=False
-    )
+    ref_radius, ref_Ts_idx, ref_subseq_idx = gpu_aamp_ostinato(Ts, m)
+    comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m, normalize=False)
 
     npt.assert_almost_equal(ref_radius, comp_radius)
     npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -231,8 +272,8 @@ def test_mpdist():
     T_B = np.random.uniform(-1000, 1000, [64]).astype(np.float64)
     m = 5
 
-    ref = stumpy.aampdist(T_A, T_B, m)
-    comp = stumpy.mpdist(T_A, T_B, m, normalize=False)
+    ref = aampdist(T_A, T_B, m)
+    comp = mpdist(T_A, T_B, m, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -243,8 +284,8 @@ def test_mpdisted(dask_cluster):
     m = 5
 
     with Client(dask_cluster) as dask_client:
-        ref = stumpy.aampdisted(dask_client, T_A, T_B, m)
-        comp = stumpy.mpdisted(dask_client, T_A, T_B, m, normalize=False)
+        ref = aampdisted(dask_client, T_A, T_B, m)
+        comp = mpdisted(dask_client, T_A, T_B, m, normalize=False)
         npt.assert_almost_equal(ref, comp)
 
 
@@ -257,8 +298,8 @@ def test_gpu_mpdist():
     T_B = np.random.uniform(-1000, 1000, [64]).astype(np.float64)
     m = 5
 
-    ref = stumpy.gpu_aampdist(T_A, T_B, m)
-    comp = stumpy.gpu_mpdist(T_A, T_B, m, normalize=False)
+    ref = gpu_aampdist(T_A, T_B, m)
+    comp = gpu_mpdist(T_A, T_B, m, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -272,8 +313,8 @@ def test_multi_distance_profile(T, m):
 
 @pytest.mark.parametrize("T, m", test_data)
 def test_mstump(T, m):
-    ref = stumpy.maamp(T, m)
-    comp = stumpy.mstump(T, m, normalize=False)
+    ref = maamp(T, m)
+    comp = mstump(T, m, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -281,8 +322,8 @@ def test_mstump(T, m):
 @pytest.mark.parametrize("T, m", test_data)
 def test_mstumped(T, m, dask_cluster):
     with Client(dask_cluster) as dask_client:
-        ref = stumpy.maamped(dask_client, T, m)
-        comp = stumpy.mstumped(dask_client, T, m, normalize=False)
+        ref = maamped(dask_client, T, m)
+        comp = mstumped(dask_client, T, m, normalize=False)
         npt.assert_almost_equal(ref, comp)
 
 
@@ -292,8 +333,8 @@ def test_subspace(T, m):
     nn_idx = 4
 
     for k in range(T.shape[0]):
-        ref_S = stumpy.maamp_subspace(T, m, subseq_idx, nn_idx, k)
-        comp_S = stumpy.subspace(T, m, subseq_idx, nn_idx, k, normalize=False)
+        ref_S = maamp_subspace(T, m, subseq_idx, nn_idx, k)
+        comp_S = subspace(T, m, subseq_idx, nn_idx, k, normalize=False)
         npt.assert_almost_equal(ref_S, comp_S)
 
 
@@ -302,8 +343,8 @@ def test_mdl(T, m):
     subseq_idx = np.full(T.shape[0], 1)
     nn_idx = np.full(T.shape[0], 4)
 
-    ref_MDL, ref_S = stumpy.maamp_mdl(T, m, subseq_idx, nn_idx)
-    comp_MDL, comp_S = stumpy.mdl(T, m, subseq_idx, nn_idx, normalize=False)
+    ref_MDL, ref_S = maamp_mdl(T, m, subseq_idx, nn_idx)
+    comp_MDL, comp_S = mdl(T, m, subseq_idx, nn_idx, normalize=False)
     npt.assert_almost_equal(ref_MDL, comp_MDL)
 
     for ref, cmp in zip(ref_S, comp_S):
@@ -316,9 +357,9 @@ def test_motifs(T, m):
         T = T.copy()
         T = T[0]
 
-    mp = stumpy.aamp(T, m)
-    ref = stumpy.aamp_motifs(T, mp[:, 0])
-    comp = stumpy.motifs(T, mp[:, 0], normalize=False)
+    mp = aamp(T, m)
+    ref = aamp_motifs(T, mp[:, 0])
+    comp = motifs(T, mp[:, 0], normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
@@ -329,18 +370,16 @@ def test_match(T, m):
         T = T[0]
 
     Q = T[:m]
-    ref = stumpy.aamp_match(Q, T)
-    comp = stumpy.match(Q, T, normalize=False)
+    ref = aamp_match(Q, T)
+    comp = match(Q, T, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
 
 @pytest.mark.parametrize("T, m", test_data)
 def test_mmotifs(T, m):
-    mps, indices = stumpy.maamp(T, m)
-    ref_distances, ref_indices, ref_subspaces, ref_mdls = stumpy.aamp_mmotifs(
-        T, mps, indices
-    )
-    cmp_distances, cmp_indices, cmp_subspaces, cmp_mdls = stumpy.mmotifs(
+    mps, indices = maamp(T, m)
+    ref_distances, ref_indices, ref_subspaces, ref_mdls = aamp_mmotifs(T, mps, indices)
+    cmp_distances, cmp_indices, cmp_subspaces, cmp_mdls = mmotifs(
         T, mps, indices, normalize=False
     )
     npt.assert_almost_equal(ref_distances, cmp_distances)
@@ -359,7 +398,7 @@ def test_snippets():
         ref_fractions,
         ref_areas,
         ref_regimes,
-    ) = stumpy.aampdist_snippets(T, m, k)
+    ) = aampdist_snippets(T, m, k)
     (
         cmp_snippets,
         cmp_indices,
@@ -367,7 +406,7 @@ def test_snippets():
         cmp_fractions,
         cmp_areas,
         cmp_regimes,
-    ) = stumpy.snippets(T, m, k, normalize=False)
+    ) = snippets(T, m, k, normalize=False)
     npt.assert_almost_equal(ref_snippets, cmp_snippets)
 
 
@@ -380,12 +419,12 @@ def test_stimp(T, m):
     seed = np.random.randint(100000)
 
     np.random.seed(seed)
-    ref = stumpy.aamp_stimp(T, m)
+    ref = aamp_stimp(T, m)
     for i in range(n):
         ref.update()
 
     np.random.seed(seed)
-    cmp = stumpy.stimp(T, m, normalize=False)
+    cmp = stimp(T, m, normalize=False)
     for i in range(n):
         cmp.update()
 
@@ -412,12 +451,12 @@ def test_stimped(T, m, dask_cluster):
     seed = np.random.randint(100000)
     with Client(dask_cluster) as dask_client:
         np.random.seed(seed)
-        ref = stumpy.aamp_stimped(dask_client, T, m)
+        ref = aamp_stimped(dask_client, T, m)
         for i in range(n):
             ref.update()
 
         np.random.seed(seed)
-        cmp = stumpy.stimped(dask_client, T, m, normalize=False)
+        cmp = stimped(dask_client, T, m, normalize=False)
         for i in range(n):
             cmp.update()
 
@@ -447,12 +486,12 @@ def test_gpu_stimp(T, m):
     seed = np.random.randint(100000)
 
     np.random.seed(seed)
-    ref = stumpy.gpu_aamp_stimp(T, m)
+    ref = gpu_aamp_stimp(T, m)
     for i in range(n):
         ref.update()
 
     np.random.seed(seed)
-    cmp = stumpy.gpu_stimp(T, m, normalize=False)
+    cmp = gpu_stimp(T, m, normalize=False)
     for i in range(n):
         cmp.update()
 

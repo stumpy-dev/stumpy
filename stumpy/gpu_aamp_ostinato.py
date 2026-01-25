@@ -2,8 +2,9 @@
 # Copyright 2019 TD Ameritrade. Released under the terms of the 3-Clause BSD license.
 # STUMPY is a trademark of TD Ameritrade IP Company, Inc. All rights reserved.
 
-from . import core, gpu_aamp
+from . import core
 from .aamp_ostinato import _aamp_ostinato, _get_aamp_central_motif
+from .gpu_aamp import gpu_aamp
 
 
 def gpu_aamp_ostinato(Ts, m, device_id=0, p=2.0):

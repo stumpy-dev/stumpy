@@ -4,8 +4,9 @@
 
 import numpy as np
 
-from . import config, core, stump
+from . import config, core
 from .aampi import aampi
+from .stump import stump
 
 
 @core.non_normalized(

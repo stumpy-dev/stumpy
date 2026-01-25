@@ -5,8 +5,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import config, snippets
-from stumpy.snippets import _get_all_profiles
+from stumpy import config
+from stumpy.snippets import _get_all_profiles, snippets
 
 test_data = [np.random.uniform(-1000, 1000, [64]).astype(np.float64)]
 s = [3, 6, 7, 8]

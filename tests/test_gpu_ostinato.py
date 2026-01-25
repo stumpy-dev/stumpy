@@ -14,7 +14,13 @@ from unittest.mock import patch
 import naive
 import pytest
 
-from stumpy import core, gpu_ostinato
+from stumpy import core
+
+if cuda.is_available():
+    from stumpy.gpu_ostinato import gpu_ostinato
+else:  # pragma: no cover
+    from stumpy.core import _gpu_ostinato_driver_not_found as gpu_ostinato  # noqa: F401
+
 
 TEST_THREADS_PER_BLOCK = 10
 

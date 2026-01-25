@@ -11,7 +11,8 @@ import pytest
 from numba import cuda
 from scipy.spatial.distance import cdist
 
-from stumpy import config, core, stump
+from stumpy import config, core
+from stumpy.stump import stump
 
 if cuda.is_available():
 

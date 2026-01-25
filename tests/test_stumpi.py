@@ -6,7 +6,8 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import config, core, stumpi
+from stumpy import config, core
+from stumpy.stumpi import stumpi
 
 substitution_locations = [(slice(0, 0), 0, -1, slice(1, 3), [0, 3])]
 substitution_values = [np.nan, np.inf]

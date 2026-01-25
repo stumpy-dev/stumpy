@@ -4,8 +4,7 @@ import numpy.testing as npt
 import pytest
 from dask.distributed import Client, LocalCluster
 
-from stumpy import aampdist, aampdisted
-from stumpy.aampdist import _aampdist_vect
+from stumpy.aampdist import _aampdist_vect, aampdist, aampdisted
 
 
 @pytest.fixture(scope="module")

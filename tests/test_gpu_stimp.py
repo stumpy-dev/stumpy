@@ -5,7 +5,10 @@ import numpy as np
 import numpy.testing as npt
 from numba import cuda
 
-from stumpy import gpu_stimp
+if cuda.is_available():
+    from stumpy.gpu_stimp import gpu_stimp
+else:  # pragma: no cover
+    from stumpy.core import _gpu_stimp_driver_not_found as gpu_stimp  # noqa: F401
 
 try:
     from numba.errors import NumbaPerformanceWarning

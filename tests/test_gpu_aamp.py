@@ -5,7 +5,13 @@ import numpy.testing as npt
 import pandas as pd
 from numba import cuda
 
-from stumpy import config, gpu_aamp
+from stumpy import config
+
+if cuda.is_available():
+    from stumpy.gpu_aamp import gpu_aamp
+else:  # pragma: no cover
+    from stumpy.core import _gpu_aamp_driver_not_found as gpu_aamp  # noqa: F401
+
 
 try:
     from numba.errors import NumbaPerformanceWarning

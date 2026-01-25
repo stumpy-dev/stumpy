@@ -5,8 +5,9 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import config, scrump, stump
-from stumpy.scrump import prescrump
+from stumpy import config
+from stumpy.scrump import prescrump, scrump
+from stumpy.stump import stump
 
 test_data = [
     (

@@ -5,7 +5,8 @@ import pandas as pd
 import pytest
 from dask.distributed import Client, LocalCluster
 
-from stumpy import config, maamped
+from stumpy import config
+from stumpy.maamped import maamped
 
 
 @pytest.fixture(scope="module")

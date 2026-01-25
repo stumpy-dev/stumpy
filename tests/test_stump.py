@@ -7,7 +7,8 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from stumpy import config, stump
+from stumpy import config
+from stumpy.stump import stump
 
 test_data = [
     (

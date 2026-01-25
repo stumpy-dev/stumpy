@@ -4,8 +4,9 @@
 
 import numpy as np
 
-from . import core, scrump
+from . import core
 from .aamp_stimp import aamp_stimp, aamp_stimped
+from .scrump import scrump
 from .stump import stump
 from .stumped import stumped
 

@@ -4,7 +4,8 @@ import numpy.testing as npt
 import pytest
 from dask.distributed import Client, LocalCluster
 
-import stumpy
+from stumpy import core
+from stumpy.aamp_ostinato import aamp_ostinato, aamp_ostinatoed
 
 
 @pytest.fixture(scope="module")
@@ -28,7 +29,7 @@ def test_random_ostinato(seed):
     Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.aamp_ostinato(Ts, m)
+    comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinato(Ts, m)
 
     npt.assert_almost_equal(ref_radius, comp_radius)
     npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -43,7 +44,7 @@ def test_deterministic_ostinato(seed):
 
     for p in [1.0, 2.0, 3.0]:
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m, p=p)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.aamp_ostinato(Ts, m, p=p)
+        comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinato(Ts, m, p=p)
 
         npt.assert_almost_equal(ref_radius, comp_radius)
         npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -60,9 +61,7 @@ def test_random_ostinatoed(seed, dask_cluster):
         Ts = [np.random.rand(n) for n in [64, 128, 256]]
 
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.aamp_ostinatoed(
-            dask_client, Ts, m
-        )
+        comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinatoed(dask_client, Ts, m)
 
         npt.assert_almost_equal(ref_radius, comp_radius)
         npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
@@ -78,7 +77,7 @@ def test_deterministic_ostinatoed(seed, dask_cluster):
 
         for p in [1.0, 2.0, 3.0]:
             ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m, p=p)
-            comp_radius, comp_Ts_idx, comp_subseq_idx = stumpy.aamp_ostinatoed(
+            comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinatoed(
                 dask_client, Ts, m, p=p
             )
 
@@ -98,7 +97,7 @@ def test_input_not_overwritten_ostinato():
 
     # raise error if aamp_ostinato overwrite its input
     Ts_input = [T.copy() for T in Ts]
-    stumpy.aamp_ostinato(Ts_input, m)
+    aamp_ostinato(Ts_input, m)
     for i in range(len(Ts)):
         T_ref = Ts[i]
         T_comp = Ts_input[i]
@@ -119,7 +118,7 @@ def test_extract_several_consensus_ostinato():
         # Find consensus motif and its NN in each time series in Ts_comp
         # Remove them from Ts_comp as well as Ts_ref, and assert that the
         # two time series are the same
-        radius, Ts_idx, subseq_idx = stumpy.aamp_ostinato(Ts_comp, m)
+        radius, Ts_idx, subseq_idx = aamp_ostinato(Ts_comp, m)
         consensus_motif = Ts_comp[Ts_idx][subseq_idx : subseq_idx + m].copy()
         for i in range(len(Ts_comp)):
             if i == Ts_idx:
@@ -128,7 +127,7 @@ def test_extract_several_consensus_ostinato():
                 query_idx = None
 
             idx = np.argmin(
-                stumpy.core.mass(
+                core.mass(
                     consensus_motif, Ts_comp[i], normalize=False, query_idx=query_idx
                 )
             )
@@ -152,7 +151,7 @@ def test_input_not_overwritten_ostinatoed(dask_cluster):
 
         # raise error if ostinato overwrite its input
         Ts_input = [T.copy() for T in Ts]
-        stumpy.aamp_ostinatoed(dask_client, Ts_input, m)
+        aamp_ostinatoed(dask_client, Ts_input, m)
         for i in range(len(Ts)):
             T_ref = Ts[i]
             T_comp = Ts_input[i]
@@ -176,7 +175,7 @@ def test_extract_several_consensus_ostinatoed(dask_cluster):
             # Find consensus motif and its NN in each time series in Ts_comp
             # Remove them from Ts_comp as well as Ts_ref, and assert that the
             # two time series are the same
-            radius, Ts_idx, subseq_idx = stumpy.aamp_ostinatoed(dask_client, Ts_comp, m)
+            radius, Ts_idx, subseq_idx = aamp_ostinatoed(dask_client, Ts_comp, m)
             consensus_motif = Ts_comp[Ts_idx][subseq_idx : subseq_idx + m].copy()
             for i in range(len(Ts_comp)):
                 if i == Ts_idx:
@@ -185,7 +184,7 @@ def test_extract_several_consensus_ostinatoed(dask_cluster):
                     query_idx = None
 
                 idx = np.argmin(
-                    stumpy.core.mass(
+                    core.mass(
                         consensus_motif,
                         Ts_comp[i],
                         normalize=False,

@@ -1,7 +1,8 @@
 import numba
 import numpy as np
 
-from stumpy import cache, stump
+from stumpy import cache
+from stumpy.stump import stump
 
 
 def test_cache_get_njit_funcs():

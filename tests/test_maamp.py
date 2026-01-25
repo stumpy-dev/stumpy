@@ -4,11 +4,14 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import config, core, maamp, maamp_mdl, maamp_subspace
+from stumpy import config, core
 from stumpy.maamp import (
     _get_first_maamp_profile,
     _multi_mass_absolute,
+    maamp,
+    maamp_mdl,
     maamp_multi_distance_profile,
+    maamp_subspace,
 )
 
 test_data = [

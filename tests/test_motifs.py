@@ -5,7 +5,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import core, match, motifs
+from stumpy import core
+from stumpy.motifs import match, motifs
 
 
 def naive_motifs(T, m, max_motifs, max_matches, T_subseq_isconstant=None):

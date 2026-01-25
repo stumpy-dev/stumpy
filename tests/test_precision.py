@@ -8,8 +8,13 @@ import numpy.testing as npt
 import pytest
 from numba import cuda
 
-import stumpy
 from stumpy import cache, config, core, fastmath
+
+if cuda.is_available():
+    from stumpy.gpu_stump import gpu_stump
+else:  # pragma: no cover
+    from stumpy.core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
+from stumpy.snippets import snippets
 
 try:
     from numba.errors import NumbaPerformanceWarning
@@ -46,7 +51,7 @@ def test_mpdist_snippets_s():
         cmp_fractions,
         cmp_areas,
         cmp_regimes,
-    ) = stumpy.snippets(T, m, k, s=s)
+    ) = snippets(T, m, k, s=s)
 
     npt.assert_almost_equal(
         ref_fractions, cmp_fractions, decimal=config.STUMPY_TEST_PRECISION
@@ -146,7 +151,7 @@ def test_snippets():
         cmp_fractions,
         cmp_areas,
         cmp_regimes,
-    ) = stumpy.snippets(T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func)
+    ) = snippets(T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func)
 
     if (
         not np.allclose(ref_snippets, cmp_snippets) and not numba.config.DISABLE_JIT
@@ -165,9 +170,7 @@ def test_snippets():
             cmp_fractions,
             cmp_areas,
             cmp_regimes,
-        ) = stumpy.snippets(
-            T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func
-        )
+        ) = snippets(T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func)
 
     npt.assert_almost_equal(
         ref_snippets, cmp_snippets, decimal=config.STUMPY_TEST_PRECISION
@@ -216,8 +219,8 @@ def test_distance_symmetry_property_in_gpu():
     T_A = T[i : i + m]
     T_B = T[j : j + m]
 
-    mp_AB = stumpy.gpu_stump(T_A, m, T_B)
-    mp_BA = stumpy.gpu_stump(T_B, m, T_A)
+    mp_AB = gpu_stump(T_A, m, T_B)
+    mp_BA = gpu_stump(T_B, m, T_A)
 
     d_ij = mp_AB[0, 0]
     d_ji = mp_BA[0, 0]

@@ -4,8 +4,8 @@
 
 import functools
 
-from . import gpu_aamp
 from .core import _mpdist
+from .gpu_aamp import gpu_aamp
 
 
 def gpu_aampdist(T_A, T_B, m, percentage=0.05, k=None, device_id=0, p=2.0):

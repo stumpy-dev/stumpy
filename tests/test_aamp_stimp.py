@@ -4,7 +4,7 @@ import numpy.testing as npt
 import pytest
 from dask.distributed import Client, LocalCluster
 
-from stumpy import aamp_stimp, aamp_stimped
+from stumpy.aamp_stimp import aamp_stimp, aamp_stimped
 
 T = [
     np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),

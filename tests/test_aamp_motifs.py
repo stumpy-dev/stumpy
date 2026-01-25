@@ -3,7 +3,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import aamp_match, aamp_motifs, core
+from stumpy import core
+from stumpy.aamp_motifs import aamp_match, aamp_motifs
 
 test_data = [
     (

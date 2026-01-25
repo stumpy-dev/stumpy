@@ -4,8 +4,10 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import aamp, config, stump
+from stumpy import config
+from stumpy.aamp import aamp
 from stumpy.mparray import mparray
+from stumpy.stump import stump
 
 test_data = [
     (

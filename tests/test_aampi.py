@@ -4,7 +4,8 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import aampi, config, core
+from stumpy import config, core
+from stumpy.aampi import aampi
 
 substitution_locations = [(slice(0, 0), 0, -1, slice(1, 3), [0, 3])]
 substitution_values = [np.nan, np.inf]

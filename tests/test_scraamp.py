@@ -3,8 +3,9 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import aamp, config, scraamp
-from stumpy.scraamp import prescraamp
+from stumpy import config
+from stumpy.aamp import aamp
+from stumpy.scraamp import prescraamp, scraamp
 
 test_data = [
     (

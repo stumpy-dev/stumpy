@@ -4,7 +4,8 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import aamp, config
+from stumpy import config
+from stumpy.aamp import aamp
 
 test_data = [
     (

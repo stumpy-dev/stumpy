@@ -6,7 +6,8 @@ import warnings
 
 import numpy as np
 
-from . import config, core, stamp
+from . import config, core
+from .stamp import _mass_PI
 
 
 def _stomp(T_A, m, T_B=None, ignore_trivial=True):
@@ -105,7 +106,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
         IR = -1
     else:
         if ignore_trivial:
-            P, I = stamp._mass_PI(
+            P, I = _mass_PI(
                 T_A[:m],
                 T_B,
                 M_T,
@@ -115,7 +116,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
                 T_subseq_isconstant=T_subseq_isconstant,
                 Q_subseq_isconstant=Q_subseq_isconstant[[0]],
             )
-            PR, IR = stamp._mass_PI(
+            PR, IR = _mass_PI(
                 T_A[:m],
                 T_B,
                 M_T,
@@ -127,7 +128,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
                 Q_subseq_isconstant=Q_subseq_isconstant[[0]],
             )
         else:
-            P, I = stamp._mass_PI(
+            P, I = _mass_PI(
                 T_A[:m],
                 T_B,
                 M_T,

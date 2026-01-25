@@ -8,7 +8,8 @@ import polars as pl
 import pytest
 from dask.distributed import Client, LocalCluster
 
-from stumpy import config, stumped
+from stumpy import config
+from stumpy.stumped import stumped
 
 
 @pytest.fixture(scope="module")

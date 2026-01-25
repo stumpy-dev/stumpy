@@ -9,7 +9,12 @@ try:  # pragma: no cover
     RAY_IMPORTED = True
 except ImportError:  # pragma: no cover
     RAY_IMPORTED = False
-from stumpy import aamp_stimped, aamped, maamped, mstumped, stimped, stumped
+from stumpy.aamp_stimp import aamp_stimped
+from stumpy.aamped import aamped
+from stumpy.maamped import maamped
+from stumpy.mstumped import mstumped
+from stumpy.stimp import stimped
+from stumpy.stumped import stumped
 
 
 @pytest.fixture(scope="module")

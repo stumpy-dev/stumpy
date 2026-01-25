@@ -2,8 +2,8 @@
 # Copyright 2019 TD Ameritrade. Released under the terms of the 3-Clause BSD license.
 # STUMPY is a trademark of TD Ameritrade IP Company, Inc. All rights reserved.
 
-from . import gpu_aamp
 from .aamp_stimp import _aamp_stimp
+from .gpu_aamp import gpu_aamp
 
 
 class gpu_aamp_stimp(_aamp_stimp):

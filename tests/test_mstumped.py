@@ -7,7 +7,8 @@ import pandas as pd
 import pytest
 from dask.distributed import Client, LocalCluster
 
-from stumpy import config, mstumped
+from stumpy import config
+from stumpy.mstumped import mstumped
 
 
 @pytest.fixture(scope="module")

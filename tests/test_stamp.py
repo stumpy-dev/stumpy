@@ -5,7 +5,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import core, stamp
+from stumpy import core
+from stumpy.stamp import _mass_PI, stamp
 
 test_data = [
     (
@@ -32,14 +33,12 @@ def test_stamp_mass_PI(T_A, T_B):
     ref_P, ref_I, ref_left_I, ref_right_I = naive.mass_PI(
         Q, T_B, m, trivial_idx=trivial_idx, excl_zone=zone, ignore_trivial=True
     )
-    comp_P, comp_I = stamp._mass_PI(
-        Q, T_B, M_T, Σ_T, trivial_idx=trivial_idx, excl_zone=zone
-    )
+    comp_P, comp_I = _mass_PI(Q, T_B, M_T, Σ_T, trivial_idx=trivial_idx, excl_zone=zone)
 
     npt.assert_almost_equal(ref_P, comp_P)
     npt.assert_almost_equal(ref_I, comp_I)
 
-    comp_left_P, comp_left_I = stamp._mass_PI(
+    comp_left_P, comp_left_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -51,7 +50,7 @@ def test_stamp_mass_PI(T_A, T_B):
 
     npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-    comp_right_P, comp_right_I = stamp._mass_PI(
+    comp_right_P, comp_right_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -75,7 +74,7 @@ def test_stamp_self_join(T_A, T_B):
     m = 3
     zone = int(np.ceil(m / 2))
     ref_mp = naive.stump(T_B, m, exclusion_zone=zone, row_wise=True)
-    comp_mp = stamp.stamp(T_B, T_B, m, ignore_trivial=True)
+    comp_mp = stamp(T_B, T_B, m, ignore_trivial=True)
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_almost_equal(ref_mp[:, :2], comp_mp)
@@ -85,7 +84,7 @@ def test_stamp_self_join(T_A, T_B):
 def test_stamp_A_B_join(T_A, T_B):
     m = 3
     ref_mp = naive.stump(T_A, m, T_B=T_B, row_wise=True)
-    comp_mp = stamp.stamp(T_A, T_B, m)
+    comp_mp = stamp(T_A, T_B, m)
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_almost_equal(ref_mp[:, :2], comp_mp)
@@ -105,7 +104,7 @@ def test_stamp_nan_inf_self_join(T_A, T_B, substitute_B, substitution_locations)
 
         zone = int(np.ceil(m / 2))
         ref_mp = naive.stump(T_B_sub, m, exclusion_zone=zone, row_wise=True)
-        comp_mp = stamp.stamp(T_B_sub, T_B_sub, m, ignore_trivial=True)
+        comp_mp = stamp(T_B_sub, T_B_sub, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
         naive.replace_inf(comp_mp)
         npt.assert_almost_equal(ref_mp[:, :2], comp_mp)
@@ -131,7 +130,7 @@ def test_stamp_nan_inf_A_B_join(
             T_B_sub[substitution_location_B] = substitute_B
 
             ref_mp = naive.stump(T_A_sub, m, T_B=T_B_sub, row_wise=True)
-            comp_mp = stamp.stamp(T_A_sub, T_B_sub, m)
+            comp_mp = stamp(T_A_sub, T_B_sub, m)
             naive.replace_inf(ref_mp)
             naive.replace_inf(comp_mp)
             npt.assert_almost_equal(ref_mp[:, :2], comp_mp)
@@ -143,7 +142,7 @@ def test_stamp_nan_zero_mean_self_join():
 
     zone = int(np.ceil(m / 2))
     ref_mp = naive.stump(T, m, exclusion_zone=zone, row_wise=True)
-    comp_mp = stamp.stamp(T, T, m, ignore_trivial=True)
+    comp_mp = stamp(T, T, m, ignore_trivial=True)
 
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
@@ -176,7 +175,7 @@ def test_stamp_mass_PI_with_isconstant_case1():
         T_subseq_isconstant=isconstant_custom_func,
         Q_subseq_isconstant=isconstant_custom_func,
     )
-    comp_P, comp_I = stamp._mass_PI(
+    comp_P, comp_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -190,7 +189,7 @@ def test_stamp_mass_PI_with_isconstant_case1():
     npt.assert_almost_equal(ref_P, comp_P)
     npt.assert_almost_equal(ref_I, comp_I)
 
-    comp_left_P, comp_left_I = stamp._mass_PI(
+    comp_left_P, comp_left_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -204,7 +203,7 @@ def test_stamp_mass_PI_with_isconstant_case1():
 
     npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-    comp_right_P, comp_right_I = stamp._mass_PI(
+    comp_right_P, comp_right_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -245,7 +244,7 @@ def test_stamp_mass_PI_with_isconstant_case2():
         T_subseq_isconstant=isconstant_custom_func,
         Q_subseq_isconstant=isconstant_custom_func,
     )
-    comp_P, comp_I = stamp._mass_PI(
+    comp_P, comp_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -259,7 +258,7 @@ def test_stamp_mass_PI_with_isconstant_case2():
     npt.assert_almost_equal(ref_P, comp_P)
     npt.assert_almost_equal(ref_I, comp_I)
 
-    comp_left_P, comp_left_I = stamp._mass_PI(
+    comp_left_P, comp_left_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -273,7 +272,7 @@ def test_stamp_mass_PI_with_isconstant_case2():
 
     npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-    comp_right_P, comp_right_I = stamp._mass_PI(
+    comp_right_P, comp_right_I = _mass_PI(
         Q,
         T_B,
         M_T,
@@ -303,7 +302,7 @@ def test_stamp_self_join_with_isconstant(T_A, T_B):
         row_wise=True,
         T_A_subseq_isconstant=isconstant_custom_func,
     )
-    comp_mp = stamp.stamp(
+    comp_mp = stamp(
         T_B,
         T_B,
         m,
