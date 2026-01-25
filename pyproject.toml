@@ -88,6 +88,7 @@ pip = "*"
 lxml = "*"
 fftw = "*"
 pyfftw = "*"
+numba-cuda = "*"
 # readthedocs
 sphinx = ">=3.5.3"
 pydata-sphinx-theme = "*"
