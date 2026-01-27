@@ -499,6 +499,10 @@ class floss:
             `functools.partial`. Any subsequence with at least one np.nan/np.inf will
             automatically have its corresponding value set to False in this boolean
             array.
+        
+        Returns
+        -------
+        None
         """
         self._mp = copy.deepcopy(np.asarray(mp))
         self._T = copy.deepcopy(np.asarray(T))
@@ -608,6 +612,10 @@ class floss:
         t : float
             A single new data point to be appended to `T`
 
+        Returns
+        -------
+        None
+
         Notes
         -----
         DOI: 10.1109/ICDM.2017.21 \
@@ -702,7 +710,8 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The 1-dimensional corrected arc curve (CAC_1D)
         """
         return self._cac.astype(np.float64)
 
@@ -717,7 +726,8 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The matrix profile
         """
         return self._mp[:, 0].astype(np.float64)
 
@@ -736,7 +746,8 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (right) matrix profile indices
         """
         # Comparing the right matrix profile index value with the self index
         # position (i.e., self._mp[:, 3] == np.arange(len(self._mp)) is avoided
@@ -759,6 +770,7 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The time series
         """
         return self._T.astype(np.float64)

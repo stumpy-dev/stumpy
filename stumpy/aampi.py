@@ -109,6 +109,10 @@ class aampi:
             corresponding indices. The last two columns correspond to the top-1 left
             and top-1 right matrix profile indices. When None (default), this array is
             computed internally using `stumpy.aamp`.
+        
+        Returns
+        -------
+        None
         """
         self._T = core._preprocess(T)
         core.check_window_size(m, max_size=self._T.shape[0])
@@ -179,6 +183,10 @@ class aampi:
         ----------
         t : float
             A single new data point to be appended to `T`
+        
+        Returns
+        -------
+        None
 
         Notes
         -----
@@ -203,6 +211,10 @@ class aampi:
         ----------
         t : float
             A single new data point to be appended to `T`
+        
+        Returns
+        -------
+        None
         """
         self._n = self._T.shape[0]
         l = self._n - self._m + 1 - 1  # Subtract 1 due to egress
@@ -268,6 +280,10 @@ class aampi:
         ----------
         t : float
             A single new data point to be appended to `T`
+        
+        Returns
+        -------
+        None
         """
         self._n = self._T.shape[0]
         l = self._n - self._m + 1
@@ -331,6 +347,11 @@ class aampi:
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-k) matrix profile
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
@@ -348,6 +369,11 @@ class aampi:
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-k) matrix profile indices
         """
         if self._k == 1:
             return self._I.flatten().astype(np.int64)
@@ -362,6 +388,11 @@ class aampi:
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-1) left matrix profile
         """
         return self._left_P.astype(np.float64)
 
@@ -373,6 +404,11 @@ class aampi:
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-1) left matrix profile indices
         """
         return self._left_I.astype(np.int64)
 
@@ -384,5 +420,10 @@ class aampi:
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The time series
         """
         return self._T

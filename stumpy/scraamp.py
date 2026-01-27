@@ -615,6 +615,10 @@ class scraamp:
             The number of top `k` smallest distances used to construct the matrix
             profile. Note that this will increase the total computational time and
             memory usage when k > 1.
+        
+        Returns
+        -------
+        None
         """
         self._ignore_trivial = ignore_trivial
         self._p = p
@@ -798,7 +802,10 @@ class scraamp:
 
         Returns
         -------
-        None
+        out1 : numpy.ndarray
+            The updated (top-k) matrix profile. When `k=1` (default), this output is
+            a 1D array consisting of the updated matrix profile. When `k > 1`, the output
+            is a 2D array that has exactly `k` columns consisting of the updated top-k matrix profile.
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
@@ -819,7 +826,11 @@ class scraamp:
 
         Returns
         -------
-        None
+        out2 : numpy.ndarray
+            The updated (top-k) matrix profile indices. When `k=1` (default), this
+            output is a 1D array consisting of the updated matrix profile indices.
+            When `k > 1`, the output is a 2D array that has exactly `k` columns
+            consisting of the updated top-k matrix profile indices.
         """
         if self._k == 1:
             return self._I.flatten().astype(np.int64)
@@ -837,7 +848,8 @@ class scraamp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated left (top-1) matrix profile indices
         """
         return self._IL.astype(np.int64)
 
@@ -852,6 +864,7 @@ class scraamp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated right (top-1) matrix profile indices
         """
         return self._IR.astype(np.int64)

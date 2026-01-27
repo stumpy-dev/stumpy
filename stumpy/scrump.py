@@ -865,6 +865,10 @@ class scrump:
             by currying the user-defined function using `functools.partial`. Any
             subsequence with at least one np.nan/np.inf will automatically have its
             corresponding value set to False in this boolean array.
+        
+        Returns
+        -------
+        None
         """
         self._ignore_trivial = ignore_trivial
 
@@ -1084,7 +1088,8 @@ class scrump:
 
         Returns
         -------
-        None
+        out1 : numpy.ndarray
+            The updated (top-k) matrix profile
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
@@ -1105,7 +1110,8 @@ class scrump:
 
         Returns
         -------
-        None
+        out2 : numpy.ndarray
+            The updated (top-k) matrix profile indices
         """
         if self._k == 1:
             return self._I.flatten().astype(np.int64)
@@ -1123,7 +1129,8 @@ class scrump:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated left (top-1) matrix profile indices
         """
         return self._IL.astype(np.int64)
 
@@ -1138,6 +1145,7 @@ class scrump:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated right (top-1) matrix profile indices
         """
         return self._IR.astype(np.int64)

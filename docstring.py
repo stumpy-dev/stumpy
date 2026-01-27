@@ -23,12 +23,9 @@ def get_docstring_args(fd, file_name, func_name, class_name=None):
         msg += f"function/method: {func_name}\n"
         raise RuntimeError(msg)
 
-    if class_name is None:
-        params_section = re.findall(
-            r"(?<=Parameters)(.*)(?=Returns)", docstring, re.DOTALL
-        )[0]
-    else:
-        params_section = re.findall(r"(?<=Parameters)(.*)", docstring, re.DOTALL)[0]
+    params_section = re.findall(
+        r"(?<=Parameters)(.*)(?=Returns)", docstring, re.DOTALL
+    )[0]
 
     args = re.findall(r"(\w+)\s+\:", params_section)
     args = set([a for a in args if a != "i"])  # `i` should never be a parameter

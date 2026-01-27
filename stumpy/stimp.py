@@ -186,6 +186,10 @@ class _stimp:
             `functools.partial`. Any subsequence with at least one np.nan/np.inf will
             automatically have its corresponding value set to False in this boolean
             array.
+        
+        Returns
+        -------
+        None
         """
         self._T = T.copy()
         if max_m is None:
@@ -303,7 +307,9 @@ class _stimp:
 
         Returns
         -------
-        None
+        PAN : numpy.ndarray
+            The transformed (i.e., normalized, contrasted, binarized, and repeated)
+            pan matrix profile
         """
         PAN = self._PAN.copy()
         # Retrieve the row indices where the matrix profile was actually computed
@@ -342,7 +348,9 @@ class _stimp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The transformed (i.e., normalized, contrasted, binarized, and repeated)
+            pan matrix profile
         """
         return self.pan().astype(np.float64)
 
@@ -357,7 +365,8 @@ class _stimp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (breadth first searched (level) ordered) subsequence window sizes
         """
         return self._M.astype(np.int64)
 
@@ -373,7 +382,8 @@ class _stimp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The raw (i.e., non-transformed) matrix profiles matrix profile
         """
         P = []
         for i, idx in enumerate(self._bfs_indices):
@@ -556,6 +566,10 @@ class stimp(_stimp):
             function using ``functools.partial``. Any subsequence with at least one
             ``np.nan``/``np.inf`` will automatically have its corresponding value set
             to ``False`` in this boolean array.
+        
+        Returns
+        -------
+        None
         """
         super().__init__(
             T,
@@ -733,6 +747,10 @@ class stimped(_stimp):
             function using  `functools.partial  `. Any subsequence with at least one
             ``np.nan``/``np.inf`` will automatically have its corresponding value set
             to ``False`` in this boolean array.
+        
+        Returns
+        -------
+        None
         """
         super().__init__(
             T,

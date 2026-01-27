@@ -189,6 +189,10 @@ class _aamp_stimp:
             The p-norm to apply for computing the Minkowski distance. Minkowski distance
             is typically used with `p` being 1 or 2, which correspond to the Manhattan
             distance and the Euclidean distance, respectively.
+        
+        Returns
+        -------
+        None
         """
         self._T = T.copy()
         self._T_min = np.min(self._T[np.isfinite(self._T)])
@@ -226,6 +230,10 @@ class _aamp_stimp:
 
         Parameters
         ----------
+        None
+
+        Returns
+        -------
         None
 
         Notes
@@ -290,7 +298,9 @@ class _aamp_stimp:
 
         Returns
         -------
-        None
+        PAN : numpy.ndarray
+            The transformed (i.e., normalized, contrasted, binarized, and repeated)
+            pan matrix profile
         """
         PAN = self._PAN.copy()
         # Retrieve the row indices where the matrix profile was actually computed
@@ -334,6 +344,12 @@ class _aamp_stimp:
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The transformed (i.e., normalized, contrasted, binarized, and repeated) pan
+            matrix profile
         """
         return self.pan().astype(np.float64)
 
@@ -345,6 +361,12 @@ class _aamp_stimp:
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The full list of (breadth first search (level) ordered) subsequence window
+            sizes
         """
         return self._M.astype(np.int64)
 
@@ -360,7 +382,9 @@ class _aamp_stimp:
 
         Returns
         -------
-        None
+        P : list of numpy.ndarray
+            A list of all of the raw (i.e., non-transformed) matrix profiles matrix
+            profile in (breadth first searched (level) ordered)
         """
         P = []
         for i, idx in enumerate(self._bfs_indices):
@@ -491,6 +515,10 @@ class aamp_stimp(_aamp_stimp):
             The p-norm to apply for computing the Minkowski distance. Minkowski distance
             is typically used with `p` being 1 or 2, which correspond to the Manhattan
             distance and the Euclidean distance, respectively.
+        
+        Returns
+        -------
+        None
         """
         super().__init__(
             T,
@@ -597,6 +625,10 @@ class aamp_stimped(_aamp_stimp):
             The p-norm to apply for computing the Minkowski distance. Minkowski distance
             is typically used with `p` being 1 or 2, which correspond to the Manhattan
             distance and the Euclidean distance, respectively.
+        
+        Returns
+        -------
+        None
         """
         super().__init__(
             T,

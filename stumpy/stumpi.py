@@ -178,6 +178,10 @@ class stumpi:
             `functools.partial`. Any subsequence with at least one np.nan/np.inf will
             automatically have its corresponding value set to False in this boolean
             array.
+        
+        Returns
+        -------
+        None
         """
         self._T = core._preprocess(T)
         core.check_window_size(m, max_size=self._T.shape[0])
@@ -274,6 +278,10 @@ class stumpi:
         t : float
             A single new data point to be appended to `T`
 
+        Returns
+        -------
+        None
+    
         Notes
         -----
         `DOI: 10.1007/s10618-017-0519-9 \
@@ -297,6 +305,10 @@ class stumpi:
         ----------
         t : float
             A single new data point to be appended to `T`
+        
+        Returns
+        -------
+        None
         """
         self._n = self._T.shape[0]
         l = self._n - self._m + 1 - 1  # Subtract 1 due to egress
@@ -376,6 +388,10 @@ class stumpi:
         ----------
         t : float
             A single new data point to be appended to `T`
+        
+        Returns
+        -------
+        None
         """
         n = self._T.shape[0]
         l = n - self._m + 1
@@ -457,7 +473,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-k) matrix profile
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
@@ -478,7 +495,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-k) matrix profile indices
         """
         if self._k == 1:
             return self._I.flatten().astype(np.int64)
@@ -496,7 +514,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-1) left matrix profile
         """
         return self._left_P.astype(np.float64)
 
@@ -511,7 +530,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-1) left matrix profile indices
         """
         return self._left_I.astype(np.int64)
 
@@ -526,6 +546,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The time series or sequence for which the matrix profile and matrix
+            profile indices are computed
         """
         return self._T
