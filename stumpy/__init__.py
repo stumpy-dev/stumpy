@@ -10,9 +10,9 @@ from numba import cuda
 
 from . import cache, config
 
-# Define which functions belong to which submodules
+# Define which functions belong to which module
 # Key: function name to expose at top level
-# Value: name of the submodule
+# Value: name of the module
 _lazy_imports = {
     "aamp": "aamp",
     "aamp_mmotifs": "aamp_mmotifs",
@@ -253,18 +253,17 @@ else:  # pragma: no cover
 # PEP 562: module-level __getattr__ for lazy imports
 def __getattr__(name):  # pragma: no cover
     if name in _lazy_imports:
-        submodule_name = _lazy_imports[name]
-        full_module_path = f"{__package__}.{submodule_name}"
-        module = importlib.import_module(full_module_path)
-        # Retrieve the attribute from the loaded submodule and cache it
+        mod_name = _lazy_imports[name]
+        module = importlib.import_module(f"{__package__}.{mod_name}")
+        # Retrieve the attribute from the loaded module and cache it
         attr = getattr(module, name)
         globals()[name] = attr
         return attr
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-# Ensure that if a submodule was imported during package import
-# (causing the package attribute to point to the submodule object), we
+# Ensure that if a module was imported during package import
+# (causing the package attribute to point to the module object), we
 # replace that entry with the actual attribute (e.g., function) so that
 # users get the expected callable at `stumpy.aamp` rather than the module.
 for _name, _sub in _lazy_imports.items():  # pragma: no cover
@@ -273,28 +272,15 @@ for _name, _sub in _lazy_imports.items():  # pragma: no cover
         try:
             replacement = getattr(val, _name)
         except AttributeError:
-            # Nothing to do if the submodule doesn't define the attribute
+            # Nothing to do if the module doesn't define the attribute
             continue
         globals()[_name] = replacement
 
 
-# Lightweight lazy proxy objects so the attribute exists in the
-# module dict immediately. This helps REPLs and completers that
-# inspect `module.__dict__` or `dir(module)` prefer the callable/class
-# export over a same-named submodule while still deferring the real
-# import until first use.
-def _resolve_lazy(name, submodule):  # pragma: no cover
-    full_module_path = f"{__package__}.{submodule}"
-    module = importlib.import_module(full_module_path)
-    obj = getattr(module, name)
-    globals()[name] = obj
-    return obj
-
-
 # Eagerly import exports that would otherwise collide with
-# same-named submodules. This keeps lazy imports for most names but
+# same-named modules. This keeps lazy imports for most names but
 # ensures that when a top-level exported name exactly matches its
-# submodule (e.g., `stump` -> `stump.py`), the exported attribute is
+# module (e.g., `stump` -> `stump.py`), the exported attribute is
 # available immediately so REPL completers prefer the callable/class
 # instead of the module.
 for _name, _sub in _lazy_imports.items():  # pragma: no cover
@@ -306,7 +292,7 @@ for _name, _sub in _lazy_imports.items():  # pragma: no cover
                 try:
                     globals()[_name] = getattr(module, _name)
                 except AttributeError:
-                    # If the submodule doesn't define the attribute, keep it lazy
+                    # If the module doesn't define the attribute, keep it lazy
                     pass
     except Exception:
         # Be conservative: don't let eager-import attempts raise during package import
@@ -317,14 +303,14 @@ def __dir__():  # pragma: no cover
     # Expose lazy names in dir() for discoverability
     # Also include __all__ so tools that consult it will see the intended
     # top-level exports (this helps some REPL completers prefer the
-    # callable/class exports over same-named submodules).
+    # callable/class exports over same-named modules).
     all_names = list(globals().keys()) + list(_lazy_imports.keys())
     all_names += list(globals().get("__all__", []))
     return sorted(all_names)
 
 
 # Make the lazy-exported names explicit for tools that respect __all__.
-# This helps REPL tab-completion prefer functions/classes over submodules
+# This helps REPL tab-completion prefer functions/classes over modules
 # when names collide (e.g., `stumpy.stump` should point to the function
 # rather than the module during completion).
 __all__ = sorted(list(_lazy_imports.keys()))
