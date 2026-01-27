@@ -68,7 +68,7 @@ class mparray(np.ndarray):
 
         excl_zone_denom : int
             The denominator used in computing the exclusion zone
-        
+
         Returns
         -------
         obj : mparray
@@ -91,7 +91,7 @@ class mparray(np.ndarray):
         ----------
         obj : object
             This is the class object
-        
+
         Returns
         -------
         None

@@ -189,7 +189,7 @@ class _aamp_stimp:
             The p-norm to apply for computing the Minkowski distance. Minkowski distance
             is typically used with `p` being 1 or 2, which correspond to the Manhattan
             distance and the Euclidean distance, respectively.
-        
+
         Returns
         -------
         None
@@ -515,7 +515,7 @@ class aamp_stimp(_aamp_stimp):
             The p-norm to apply for computing the Minkowski distance. Minkowski distance
             is typically used with `p` being 1 or 2, which correspond to the Manhattan
             distance and the Euclidean distance, respectively.
-        
+
         Returns
         -------
         None
@@ -625,7 +625,7 @@ class aamp_stimped(_aamp_stimp):
             The p-norm to apply for computing the Minkowski distance. Minkowski distance
             is typically used with `p` being 1 or 2, which correspond to the Manhattan
             distance and the Euclidean distance, respectively.
-        
+
         Returns
         -------
         None

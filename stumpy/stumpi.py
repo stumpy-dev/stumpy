@@ -178,7 +178,7 @@ class stumpi:
             `functools.partial`. Any subsequence with at least one np.nan/np.inf will
             automatically have its corresponding value set to False in this boolean
             array.
-        
+
         Returns
         -------
         None
@@ -281,7 +281,7 @@ class stumpi:
         Returns
         -------
         None
-    
+
         Notes
         -----
         `DOI: 10.1007/s10618-017-0519-9 \
@@ -305,7 +305,7 @@ class stumpi:
         ----------
         t : float
             A single new data point to be appended to `T`
-        
+
         Returns
         -------
         None
@@ -388,7 +388,7 @@ class stumpi:
         ----------
         t : float
             A single new data point to be appended to `T`
-        
+
         Returns
         -------
         None

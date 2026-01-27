@@ -109,7 +109,7 @@ class aampi:
             corresponding indices. The last two columns correspond to the top-1 left
             and top-1 right matrix profile indices. When None (default), this array is
             computed internally using `stumpy.aamp`.
-        
+
         Returns
         -------
         None
@@ -183,7 +183,7 @@ class aampi:
         ----------
         t : float
             A single new data point to be appended to `T`
-        
+
         Returns
         -------
         None
@@ -211,7 +211,7 @@ class aampi:
         ----------
         t : float
             A single new data point to be appended to `T`
-        
+
         Returns
         -------
         None
@@ -280,7 +280,7 @@ class aampi:
         ----------
         t : float
             A single new data point to be appended to `T`
-        
+
         Returns
         -------
         None

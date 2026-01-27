@@ -865,7 +865,7 @@ class scrump:
             by currying the user-defined function using `functools.partial`. Any
             subsequence with at least one np.nan/np.inf will automatically have its
             corresponding value set to False in this boolean array.
-        
+
         Returns
         -------
         None

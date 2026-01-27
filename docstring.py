@@ -17,9 +17,11 @@ def get_docstring_args(fd, file_name, func_name, class_name=None):
             msg += f"class: {class_name}\n"
         msg += f"function/method: {func_name}\n"
         raise RuntimeError(msg)
-    if class_name is None and len(re.findall(r"Returns", docstring)) != 1:
+    if len(re.findall(r"Returns", docstring)) != 1:
         msg = "Missing required 'Returns' section in docstring in \n"
         msg += f"file: {file_name}\n"
+        if class_name is not None:
+            msg += f"class: {class_name}\n"
         msg += f"function/method: {func_name}\n"
         raise RuntimeError(msg)
 

@@ -615,7 +615,7 @@ class scraamp:
             The number of top `k` smallest distances used to construct the matrix
             profile. Note that this will increase the total computational time and
             memory usage when k > 1.
-        
+
         Returns
         -------
         None
@@ -804,8 +804,9 @@ class scraamp:
         -------
         out1 : numpy.ndarray
             The updated (top-k) matrix profile. When `k=1` (default), this output is
-            a 1D array consisting of the updated matrix profile. When `k > 1`, the output
-            is a 2D array that has exactly `k` columns consisting of the updated top-k matrix profile.
+            a 1D array consisting of the updated matrix profile. When `k > 1`, the
+            output is a 2D array that has exactly `k` columns consisting of the updated
+            top-k matrix profile.
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
