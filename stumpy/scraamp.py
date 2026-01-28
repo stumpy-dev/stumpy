@@ -346,7 +346,7 @@ def _prescraamp(
 
     Returns
     -------
-    out1 : numpy.ndarray
+    out : numpy.ndarray
         The (top-k) matrix profile. When k=1 (default), the first (and only) column
         in this 2D array consists of the matrix profile. When k > 1, the output
         has exactly `k` columns consisting of the top-k matrix profile.
@@ -802,7 +802,7 @@ class scraamp:
 
         Returns
         -------
-        out1 : numpy.ndarray
+        out : numpy.ndarray
             The updated (top-k) matrix profile. When `k=1` (default), this output is
             a 1D array consisting of the updated matrix profile. When `k > 1`, the
             output is a 2D array that has exactly `k` columns consisting of the updated
