@@ -10,7 +10,7 @@ def get_docstring_args(fd, file_name, func_name, class_name=None):
     Extract docstring parameters from function definition
     """
     docstring = ast.get_docstring(fd)
-    if len(re.findall(r"Parameters", docstring)) != 1:
+    if docstring is None or len(re.findall(r"Parameters", docstring)) != 1:
         msg = "Missing required 'Parameters' section in docstring in \n"
         msg += f"file: {file_name}\n"
         if class_name is not None:
@@ -46,7 +46,7 @@ def check_args(doc_args, sig_args, file_name, func_name, class_name=None):
     """
     Compare docstring arguments and signature argments
     """
-    diff_args = signature_args.difference(docstring_args)
+    diff_args = sig_args.difference(doc_args)
     if len(diff_args) > 0:
         msg = "Found one or more arguments/parameters with missing docstring in \n"
         msg += f"file: {file_name}\n"
