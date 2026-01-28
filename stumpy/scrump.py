@@ -451,7 +451,7 @@ def _prescrump(
 
     Returns
     -------
-    out : numpy.ndarray
+    out1 : numpy.ndarray
         The (top-k) matrix profile. When k=1 (default), the first (and only) column
         in this 2D array consists of the matrix profile. When k > 1, the output
         has exactly `k` columns consisting of the top-k matrix profile.
@@ -1110,7 +1110,7 @@ class scrump:
 
         Returns
         -------
-        out2 : numpy.ndarray
+        out : numpy.ndarray
             The updated (top-k) matrix profile indices
         """
         if self._k == 1:

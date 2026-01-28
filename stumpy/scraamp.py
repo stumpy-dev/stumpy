@@ -827,7 +827,7 @@ class scraamp:
 
         Returns
         -------
-        out2 : numpy.ndarray
+        out : numpy.ndarray
             The updated (top-k) matrix profile indices. When `k=1` (default), this
             output is a 1D array consisting of the updated matrix profile indices.
             When `k > 1`, the output is a 2D array that has exactly `k` columns
