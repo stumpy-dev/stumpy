@@ -352,6 +352,10 @@ if [[ $test_mode == "show" ]]; then
     show
 fi
 
+# Set STUMPY_SEED for reproducible test failures
+export STUMPY_SEED=${STUMPY_SEED:-$RANDOM}
+echo "STUMPY_SEED=$STUMPY_SEED"
+
 clean_up
 check_black
 check_isort

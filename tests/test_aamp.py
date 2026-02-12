@@ -1,3 +1,5 @@
+import os
+
 import naive
 import numpy as np
 import numpy.testing as npt
@@ -7,14 +9,17 @@ import pytest
 from stumpy import config
 from stumpy.aamp import aamp
 
+seed = int(os.environ.get("STUMPY_SEED", np.random.randint(2**31)))
+rng = np.random.default_rng(seed)
+
 test_data = [
     (
         np.array([9, 8100, -60, 7], dtype=np.float64),
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.uniform(-1000, 1000, [8]).astype(np.float64),
+        rng.uniform(-1000, 1000, [64]).astype(np.float64),
     ),
 ]
 
@@ -72,7 +77,7 @@ def test_aamp_constant_subsequence_self_join():
 
 
 def test_aamp_one_constant_subsequence_A_B_join():
-    T_A = np.random.rand(20)
+    T_A = rng.random(20)
     T_B = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
     m = 3
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
@@ -122,8 +127,8 @@ def test_aamp_two_constant_subsequences_A_B_join():
 
 
 def test_aamp_identical_subsequence_self_join():
-    identical = np.random.rand(8)
-    T_A = np.random.rand(20)
+    identical = rng.random(8)
+    T_A = rng.random(20)
     T_A[1 : 1 + identical.shape[0]] = identical
     T_A[11 : 11 + identical.shape[0]] = identical
     m = 3
@@ -143,9 +148,9 @@ def test_aamp_identical_subsequence_self_join():
 
 
 def test_aamp_identical_subsequence_A_B_join():
-    identical = np.random.rand(8)
-    T_A = np.random.rand(20)
-    T_B = np.random.rand(20)
+    identical = rng.random(8)
+    T_A = rng.random(20)
+    T_B = rng.random(20)
     T_A[1 : 1 + identical.shape[0]] = identical
     T_B[11 : 11 + identical.shape[0]] = identical
     m = 3

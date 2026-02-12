@@ -1,4 +1,5 @@
 import functools
+import os
 from unittest.mock import patch
 
 import naive
@@ -23,15 +24,17 @@ except ModuleNotFoundError:
 
 TEST_THREADS_PER_BLOCK = 10
 
+seed = int(os.environ.get("STUMPY_SEED", np.random.randint(2**31)))
+rng = np.random.default_rng(seed)
+
 
 def test_mpdist_snippets_s():
     # This test function raises an error if the distance between
     # a subsequence (of length `s`) and itelf becomes non-zero
     # in the performant version. Fixing this loss-of-precision can
     # result in this test being passed.
-    seed = 0
-    np.random.seed(seed)
-    T = np.random.uniform(-1000, 1000, [64]).astype(np.float64)
+    local_rng = np.random.default_rng(0)
+    T = local_rng.uniform(-1000, 1000, [64]).astype(np.float64)
     m = 10
     k = 3
     s = 3
@@ -61,7 +64,7 @@ def test_mpdist_snippets_s():
 def test_distace_profile():
     # This test function raises an error when the distance profile between
     # the query `Q = T[i: i+m]`  and `T` becomes non-zero at index `i`.
-    T = np.random.rand(64)
+    T = rng.random(64)
     m = 3
     T, M_T, Σ_T, T_subseq_isconstant = core.preprocess(T, m)
 
@@ -78,9 +81,8 @@ def test_distace_profile():
 def test_calculate_squared_distance():
     # This test function raises an error if the distance between a subsequence
     # and another does not satisfy the symmetry property.
-    seed = 332
-    np.random.seed(seed)
-    T = np.random.uniform(-1000.0, 1000.0, [64])
+    local_rng = np.random.default_rng(332)
+    T = local_rng.uniform(-1000.0, 1000.0, [64])
     m = 3
 
     T_subseq_isconstant = core.rolling_isconstant(T, m)
@@ -126,9 +128,8 @@ def test_snippets():
     m = 10
     k = 3
     s = 3
-    seed = 332
-    np.random.seed(seed)
-    T = np.random.uniform(-1000.0, 1000.0, [64])
+    local_rng = np.random.default_rng(332)
+    T = local_rng.uniform(-1000.0, 1000.0, [64])
 
     isconstant_custom_func = functools.partial(
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
@@ -201,9 +202,8 @@ def test_distance_symmetry_property_in_gpu():
 
     # This test function raises an error if the distance between a subsequence
     # and another one does not satisfy the symmetry property.
-    seed = 332
-    np.random.seed(seed)
-    T = np.random.uniform(-1000.0, 1000.0, [64])
+    local_rng = np.random.default_rng(332)
+    T = local_rng.uniform(-1000.0, 1000.0, [64])
     m = 3
 
     i, j = 2, 10
