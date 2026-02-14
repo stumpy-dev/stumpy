@@ -83,7 +83,7 @@ check_flake()
 check_print()
 {
     if [[ $print_mode == "verbose" ]]; then
-        if [[ `grep print --exclude="conftext.py" */*.py | wc -l` -gt "0" ]]; then
+        if [[ `grep print */*.py | wc -l` -gt "0" ]]; then
             echo "Error: print statement found in code"
             grep print */*.py
             exit 1
