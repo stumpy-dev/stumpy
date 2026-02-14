@@ -1524,7 +1524,7 @@ def test_gpu_searchsorted():
         device_bfs = cuda.to_device(core._bfs_indices(k, fill_value=-1))
         nlevel = np.floor(np.log2(k) + 1).astype(np.int64)
 
-        A = np.sort(pytest.RNG.random(n, k), axis=1)
+        A = np.sort(pytest.RNG.random(size=(n, k)), axis=1)
         device_A = cuda.to_device(A)
 
         V[:] = pytest.RNG.random(n)
