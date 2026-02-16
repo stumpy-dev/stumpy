@@ -1906,7 +1906,7 @@ def test_update_incremental_PI_egressTrue_MemoryCheck():
     # a new data point is appended. However, the updated matrix profile index for the
     # middle subsequence `s` should still refer to  the first subsequence in
     # the historical data.
-
+    pytest.fix_rng_state()
     T = pytest.RNG.random(64)
     m = 3
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
@@ -1964,6 +1964,8 @@ def test_update_incremental_PI_egressTrue_MemoryCheck():
 
         npt.assert_almost_equal(P_ref, P_comp)
         npt.assert_almost_equal(I_ref, I_comp)
+
+    pytest.unfix_rng_state()
 
 
 def test_check_self_join():
