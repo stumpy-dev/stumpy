@@ -46,12 +46,7 @@ def _get_rng_state():
 def _set_rng_state(state):
     """
     Store existing RNG state and set RNG state
-
-    If no state is provided, a hardcoded, safe state will be used
     """
-    if state is None:
-        state = pytest.SEED_ZERO.copy()
-
     pytest.LAST_RNG_STATE = pytest.RNG.bit_generator.state.copy()
     pytest.RNG.bit_generator.state = state
 
