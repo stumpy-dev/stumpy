@@ -122,12 +122,12 @@ elif [[ $install_mode == "numba" ]]; then
     mamba env update --name $conda_env --file environment.numba.yml || conda env update --name $conda_env --file environment.numba.yml
 else
     mamba env update --name $conda_env --file environment.yml || conda env update --name $conda_env --file environment.yml
-    conda update -c conda-forge -y numpy scipy numba black twine
+    conda update -c conda-forge -y numpy scipy numba ruff twine
 fi
 
 fix_libopenblas
 
-#conda install -y -c conda-forge numpy scipy numba pandas flake8 flake8-docstrings black pytest-cov
+#conda install -y -c conda-forge numpy scipy numba pandas ruff pytest-cov
 #conda install -y -c conda-forge dask distributed
 
 clean_up

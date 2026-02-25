@@ -52,11 +52,11 @@ jobs:
       - name: Install STUMPY And Other Dependencies
         run: python -m pip install --editable .[ci]
         shell: bash
-      - name: Run Black
-        run: black --check --diff ./
+      - name: Run Ruff Linter
+        run: ruff check ./
         shell: bash
-      - name: Run Flake8
-        run: flake8 ./
+      - name: Run Ruff Formatter
+        run: ruff format --check --diff ./
         shell: bash
       - name: Install OpenMP
         run: |
@@ -70,7 +70,7 @@ jobs:
                   echo $libfile
                   echo "Changing  @rpath for the omppool.cpython-x-darwin.so shared object to look in $libfile"
                   ls "$(python -c 'import site; print(site.getsitepackages()[0])')"/numba/np/ufunc/omppool.*.so | xargs install_name_tool -change @rpath/libomp.dylib $libfile
-             fi        
+             fi
         shell: bash
       - name: Show Full Numba Environment
         run: python -m numba -s
@@ -100,11 +100,11 @@ jobs:
       - name: Install STUMPY And Other Dependencies
         run: python -m pip install --editable .[ci]
         shell: bash
-      - name: Run Black
-        run: black --check --diff ./
+      - name: Run Ruff Linter
+        run: ruff check ./
         shell: bash
-      - name: Run Flake8
-        run: flake8 ./
+      - name: Run Ruff Formatter
+        run: ruff format --check --diff ./
         shell: bash
       - name: Link OpenMP
         run: |

@@ -52,17 +52,17 @@ check_errs()
   fi
 }
 
-check_black()
+check_ruff_lint()
 {
-    echo "Checking Black Code Formatting"
-    black --check --exclude=".*\.ipynb" --extend-exclude=".venv|.pixi" --diff ./
+    echo "Checking Ruff Linting"
+    ruff check ./
     check_errs $?
 }
 
-check_isort()
+check_ruff_format()
 {
-    echo "Checking iSort Import Formatting"
-    isort --profile black --skip .venv --skip .pixi --check-only ./
+    echo "Checking Ruff Code Formatting"
+    ruff format --check --diff ./
     check_errs $?
 }
 
@@ -70,13 +70,6 @@ check_docstrings()
 {
     echo "Checking Missing Docstrings"
     ./docstring.py
-    check_errs $?
-}
-
-check_flake()
-{
-    echo "Checking Flake8 Style Guide Enforcement"
-    flake8 --extend-exclude=.venv/,.pixi/ ./
     check_errs $?
 }
 
@@ -287,8 +280,7 @@ test_gpu()
 show()
 {
     echo "Current working directory: " `pwd`
-    echo "Black version: " `python -c 'exec("try:\n\timport black;\n\tprint(black.__version__);\nexcept ModuleNotFoundError:\n\tprint(\"Module Not Found\");")'`
-    echo "Flake8 version: " `python -c 'exec("try:\n\timport flake8;\n\tprint(flake8.__version__);\nexcept ModuleNotFoundError:\n\tprint(\"Module Not Found\");")'`
+    echo "Ruff version: " `ruff --version 2>/dev/null || echo "Not Found"`
     echo "Python version: " `python -c "import platform; print(platform.python_version())"`
     echo "NumPy version: " `python -c 'exec("try:\n\timport numpy;\n\tprint(numpy.__version__);\nexcept ModuleNotFoundError:\n\tprint(\"Module Not Found\");")'`
     echo "SciPy version: " `python -c 'exec("try:\n\timport scipy;\n\tprint(scipy.__version__);\nexcept ModuleNotFoundError:\n\tprint(\"Module Not Found\");")'`
@@ -353,9 +345,8 @@ if [[ $test_mode == "show" ]]; then
 fi
 
 clean_up
-check_black
-check_isort
-check_flake
+check_ruff_lint
+check_ruff_format
 check_docstrings
 check_print
 check_pkg_imports

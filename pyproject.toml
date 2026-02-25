@@ -51,11 +51,8 @@ ci = [
     "dask >= 1.2.2",
     "distributed >= 1.28.1",
     "coverage >= 4.5.3",
-    "flake8 >= 3.7.7",
-    "flake8-docstrings >= 1.5.0",
-    "black >= 22.1.0",
+    "ruff >= 0.9.0",
     "pytest >= 4.4.1",
-    "isort >= 5.11.0",
     'tbb >= 2019.5 ; platform_system == "Linux"',
     "polars >= 1.14.0",
     "lxml"
@@ -82,11 +79,8 @@ pandas = ">=0.20.0"
 dask = ">=1.2.2"
 distributed =">=1.28.1"
 coverage = ">=4.5.3"
-flake8 = ">=3.7.7"
-flake8-docstrings = ">=1.5.0"
-black = ">=22.1.0"
+ruff = ">=0.9.0"
 pytest = ">=4.4.1"
-isort = ">=5.11.0"
 polars = ">=1.14.0"
 pip = "*"
 lxml = "*"
@@ -120,5 +114,49 @@ tbb = ">=2019.5"
 tests = "./test.sh"
 coverage = "./test.sh coverage"
 docs = "cd docs && ./setup.sh"
-black = 'black --exclude=".*\.ipynb" --extend-exclude=".venv|.pixi" ./'
-isort = 'isort --profile black --skip .venv --skip .pixi ./'
+lint = 'ruff check ./'
+format = 'ruff format ./'
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+exclude = [
+    "docs",
+    "notebooks",
+    ".venv",
+    ".pixi",
+]
+
+[tool.ruff.lint]
+# Enable pyflakes (F), pycodestyle (E, W), pydocstyle (D), and isort (I)
+select = ["F", "E", "W", "D", "I"]
+ignore = [
+    "E741",   # Ambiguous variable name (matches flake8 E741 ignore)
+    "D100",   # Missing docstring in public module
+    "D401",   # First line of docstring should be in imperative mood
+    "D200",   # No blank lines allowed after function docstring
+    "D205",   # 1 blank line required between summary line and description
+    "D400",   # First line should end with a period
+    "D301",   # Use r"" if any backslashes in a docstring
+]
+# W503 (line break before binary operator) does not exist in ruff —
+# ruff follows the updated PEP 8 guidance that prefers breaks before operators.
+# E203 (whitespace before ':') does not exist in ruff —
+# ruff is black-compatible by default and does not enforce this rule.
+
+[tool.ruff.lint.per-file-ignores]
+"stumpy/__init__.py" = ["D104"]           # Missing docstring in public package
+"build/lib/stumpy/__init__.py" = ["D104"] # Missing docstring in public package
+"tests/*" = ["D101", "D102", "D103"]      # Missing docstrings in test classes/methods/functions
+"stumpy/cache.py" = ["D414"]              # Section has no content
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.isort]
+# Match the previous isort config: isort --profile black
+known-first-party = ["stumpy"]
+
+[tool.ruff.format]
+# Ruff's formatter is black-compatible by default.
+# No additional configuration needed — line-length inherited from [tool.ruff].

@@ -305,7 +305,7 @@ def aamp_motifs(
 
     if motif_distances.shape[1] == 0:  # pragma: no cover
         msg = "No motifs were found. You may consider increasing the `cutoff` "
-        msg += f"(e.g., cutoff={2. * cutoff}) and/or increasing the `max_distance `"
+        msg += f"(e.g., cutoff={2.0 * cutoff}) and/or increasing the `max_distance `"
         msg += "(e.g., max_distance=np.inf)."
         warnings.warn(msg)
 

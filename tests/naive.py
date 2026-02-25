@@ -825,9 +825,9 @@ def maamp_mdl(
         subseqs = T[:, subseq_idx[k] : subseq_idx[k] + m]
         neighbors = T[:, nn_idx[k] : nn_idx[k] + m]
         disc_subseqs = (
-            np.round(
-                ((subseqs - T_min) / (T_max - T_min)) * ((2**n_bit) - 1.0)
-            ).astype(np.int64)
+            np.round(((subseqs - T_min) / (T_max - T_min)) * ((2**n_bit) - 1.0)).astype(
+                np.int64
+            )
             + 1
         )
         disc_neighbors = (

@@ -7,9 +7,7 @@ dependencies:
   - scipy>=1.10
   - numba>=0.61.2
   - pandas>=0.20.0
-  - flake8>=3.7.7
-  - flake8-docstrings>=1.5.0
-  - black>=22.1.0
+  - ruff>=0.9.0
   - pytest-cov>=2.10.0
   - dask>=1.2.2
   - distributed>=1.28.1
@@ -23,7 +21,6 @@ dependencies:
   - numpydoc>=1.1.0
   - python-build>=0.7.0
   - pytest-check-links>=0.7.1
-  - isort>=5.11.0
   - jupyterlab-myst>=2.0.0
   - myst-nb>=1.0.0
   - polars>=1.14.0

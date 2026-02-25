@@ -147,7 +147,9 @@ def get_min_scipy_version(min_python, min_numpy):
         .pipe(
             lambda df: df.assign(
                 SciPy_version=df.SciPy_version.str.replace(
-                    r"\d\/", "", regex=True  # noqa
+                    r"\d\/",
+                    "",
+                    regex=True,  # noqa
                 )
             )
         )
