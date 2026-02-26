@@ -15,7 +15,7 @@ test_data = [
         np.array([0.0, 1.0, 2.0]),
         np.array([0.1, 1.0, 2.0, 3.0, -1.0, 0.1, 1.0, 2.0, -0.5]),
     ),
-    (np.random.uniform(-1000, 1000, [8]), np.random.uniform(-1000, 1000, [64])),
+    (pytest.RNG.uniform(-1000, 1000, [8]), pytest.RNG.uniform(-1000, 1000, [64])),
 ]
 
 
@@ -71,12 +71,12 @@ def test_aamp_motifs_one_motif():
 def test_aamp_motifs_two_motifs():
     # Fix seed, because in some case motifs can be off by an index resulting in test
     # fails, which is caused since one of the motifs is not repeated perfectly in T.
-    np.random.seed(1234)
+    pytest.fix_rng_state()
 
     # The time series is random noise with two motifs for m=10:
     # * (almost) identical step functions at indices 10, 110 and 210
     # * identical linear slopes at indices 70 and 170
-    T = np.random.normal(size=300)
+    T = pytest.RNG.normal(size=300)
     m = 20
 
     T[10:30] = 1
@@ -125,7 +125,7 @@ def test_aamp_motifs_two_motifs():
     npt.assert_almost_equal(left_profile_values, right_distance_values, decimal=6)
 
     # Reset seed
-    np.random.seed(None)
+    pytest.unfix_rng_state()
 
 
 def test_aamp_naive_match_exact():
