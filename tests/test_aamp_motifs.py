@@ -73,10 +73,10 @@ def test_aamp_motifs_two_motifs():
     # fails, which is caused since one of the motifs is not repeated perfectly in T.
     pytest.fix_rng_state()
 
-    # The time series is random noise with two motifs for m=10:
+    # The time series is random noise with two motifs for m=20:
     # * (almost) identical step functions at indices 10, 110 and 210
     # * identical linear slopes at indices 70 and 170
-    T = pytest.RNG.normal(size=300)
+    T = pytest.RNG.random(size=300)
     m = 20
 
     T[10:30] = 1
@@ -90,14 +90,14 @@ def test_aamp_motifs_two_motifs():
     T[210:230] = 1
     T[212:228] = 2
     T[220] = 1.9
-    # naive.distance(naive.z_norm(T[10:30]), naive.z_norm(T[110:130])) = 0.47
-    # naive.distance(naive.z_norm(T[10:30]), naive.z_norm(T[210:230])) = 0.24
-    # naive.distance(naive.z_norm(T[110:130]), naive.z_norm(T[210:230])) = 0.72
+    # naive.distance(T[10:30], T[110:130]) == 16.65
+    # naive.distance(T[10:30], T[210:230]) == 0.1
+    # naive.distance(T[110:130], T[210:230]) == 16.68
     # Hence T[10:30] is the motif representative for this motif
 
     T[70:90] = np.arange(m) * 0.1
     T[170:190] = np.arange(m) * 0.1
-    # naive.distance(naive.z_norm(T[70:90]), naive.z_norm(T[170:190])) = 0.0
+    # naive.distance(T[70:90], T[170:190]) = 0.0
 
     max_motifs = 2
 
