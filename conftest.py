@@ -9,7 +9,8 @@ import json
 import numpy as np
 import pytest
 
-pytest.RNG = np.random.default_rng()
+bit_gen = np.random.PCG64()
+pytest.RNG = np.random.Generator(bit_gen)
 # pytest.RNG.bit_generator.state = {
 #     Set RNG state here
 # }
