@@ -2331,9 +2331,9 @@ def array_to_temp_file(a):
     fname : str
         The output file name
     """
-    fname = tempfile.NamedTemporaryFile(delete=False)
-    fname = fname.name + ".npy"
-    np.save(fname, a, allow_pickle=False)
+    with tempfile.NamedTemporaryFile(delete=True) as tmp:
+        fname = tmp.name + ".npy"
+        np.save(fname, a, allow_pickle=False)
 
     return fname
 
