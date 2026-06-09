@@ -23,6 +23,7 @@ Tutorials
     Tutorial_Matrix_Profiles_For_Streaming_Data.ipynb
     Tutorial_Pattern_Matching.ipynb
     Tutorial_AB_Joins.ipynb
+    Tutorial_Multivariate_Subsequence_Search.ipynb
     Tutorial_Consensus_Motif.ipynb
     Tutorial_Multidimensional_Motif_Discovery.ipynb
     Tutorial_Annotation_Vectors.ipynb
