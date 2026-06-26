@@ -6,6 +6,8 @@ import re
 from urllib import request
 
 import pandas as pd
+from docutils import nodes
+from docutils.core import publish_doctree
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
@@ -28,6 +30,7 @@ def get_all_python_versions():
             storage_options=HEADERS,
         )[0]
         .query('Branch != "main"')
+        .dropna()
         .Branch.to_list()
     )
     return python_versions
@@ -118,7 +121,7 @@ def check_scipy_compatibility(row, min_python, min_numpy):
     return python_compatible & numpy_compatible
 
 
-def get_scipy_version_df():
+def get_scipy_version_df_backup():
     """
     Retrieve raw SciPy version table as DataFrame
     """
@@ -136,6 +139,45 @@ def get_scipy_version_df():
         .rename(columns=lambda x: x.replace(" ", "_"))
         .replace({".x": ""}, regex=True)
     )
+
+
+def get_scipy_version_df():
+    """
+    Retrieve raw SciPy version table as DataFrame
+
+    This function retrieves the table directly from the SciPy Github docs and
+    replaces `get_scipy_version_df_backup`.
+    """
+    url = (
+        "https://raw.githubusercontent.com/scipy/scipy/"
+        "refs/heads/main/doc/source/dev/toolchain.rst"
+    )
+    rst = request.urlopen(url).read()
+
+    doctree = publish_doctree(rst, settings_overrides={"report_level": 5})
+
+    extracted_table = []
+    for node in doctree.findall(nodes.literal_block):
+        if "Python and NumPy version support per SciPy version" in node.astext():
+            idx = -1
+            for i, l in enumerate(node.astext().split("\n")):
+                if l.lstrip().startswith("="):
+                    idx = i
+                    break
+            table_str = "\n".join(node.astext().split("\n")[idx:])
+            table_node = publish_doctree(table_str)
+
+            for row_node in table_node.findall(nodes.row):
+                current_row = []
+                for entry_node in row_node.findall(nodes.entry):
+                    # Extract text from the cell
+                    current_row.append(entry_node.astext())
+                extracted_table.append(current_row)
+
+    df = pd.DataFrame(extracted_table[1:])
+    df.columns = extracted_table[0]
+
+    return df.rename(columns=lambda x: x.replace(" ", "_"))
 
 
 def get_min_scipy_version(min_python, min_numpy):

@@ -4,6 +4,7 @@ import naive
 import numpy as np
 import numpy.testing as npt
 import pytest
+import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
 from stumpy.mpdist import _mpdist_vect, mpdist, mpdisted
@@ -18,7 +19,10 @@ def dask_cluster():
         worker_dashboard_address=None,
     )
     yield cluster.scheduler_address
-    cluster.close()
+    try:
+        cluster.close(timeout=60)
+    except tornado.ioloop.TimeoutError:  # pragma: no cover
+        pass
 
 
 test_data = [

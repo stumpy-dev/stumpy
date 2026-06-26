@@ -1,10 +1,16 @@
 import numpy as np
 from numba import njit
 from scipy.fft import next_fast_len
-from scipy.fft._pocketfft.basic import c2r, r2c
 from scipy.signal import convolve, oaconvolve
 
 from . import config
+
+
+# _duccfft replaced _pocketfft in scipy 1.18
+try:
+    from scipy.fft._duccfft.basic import c2r, r2c
+except ModuleNotFoundError:  # pragma: no cover
+    from scipy.fft._pocketfft.basic import c2r, r2c
 
 try:  # pragma: no cover
     import pyfftw

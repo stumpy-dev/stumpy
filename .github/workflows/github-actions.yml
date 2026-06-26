@@ -20,7 +20,7 @@ jobs:
           repository: stumpy-dev/stumpy
       - name: Upgrade Pip, Install Minimum Requirements
         run: |
-          python -m pip install --upgrade pip pandas lxml packaging
+          python -m pip install --upgrade pip pandas lxml packaging docutils
         shell: bash
       - name: Generate Python versions
         id: set-matrix

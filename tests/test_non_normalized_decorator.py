@@ -1,6 +1,7 @@
 import naive
 import numpy as np
 import numpy.testing as npt
+import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 from numba import cuda
 
@@ -37,6 +38,7 @@ else:  # pragma: no cover
     from stumpy.core import _gpu_ostinato_driver_not_found as gpu_ostinato  # noqa: F401
     from stumpy.core import _gpu_stimp_driver_not_found as gpu_stimp  # noqa: F401
     from stumpy.core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
+
 from stumpy.maamp import maamp, maamp_mdl, maamp_multi_distance_profile, maamp_subspace
 from stumpy.maamped import maamped
 from stumpy.mmotifs import mmotifs
@@ -70,7 +72,10 @@ def dask_cluster():
         worker_dashboard_address=None,
     )
     yield cluster.scheduler_address
-    cluster.close()
+    try:
+        cluster.close(timeout=60)
+    except tornado.ioloop.TimeoutError:  # pragma: no cover
+        pass
 
 
 test_data = [

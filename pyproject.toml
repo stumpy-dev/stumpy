@@ -90,7 +90,6 @@ isort = ">=5.11.0"
 polars = ">=1.14.0"
 pip = "*"
 lxml = "*"
-numba-cuda = "*"
 # readthedocs
 sphinx = ">=3.5.3"
 pydata-sphinx-theme = "*"
@@ -107,6 +106,8 @@ python-build = "*"  # Equivalent to PyPI `build` package
 
 [tool.pixi.activation]
 # Always execute ./setup.sh when activating the default environment
+# Note that 'stumpy' will only be listed via 'pip list | grep stumpy'
+# and not via 'pixi list | grep stumpy' since 'pip install .' is used!
 scripts = ["setup.sh"]
 
 [tool.pixi.target.linux-64.dependencies]
