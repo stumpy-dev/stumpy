@@ -1,3 +1,8 @@
+# This file contains different implementations of
+# the sliding dot product (sdp). The name of any
+# callable object that computes the sliding dot product
+# should end with 'sliding_dot_product'.
+
 import numpy as np
 from numba import njit
 from scipy.fft import next_fast_len
