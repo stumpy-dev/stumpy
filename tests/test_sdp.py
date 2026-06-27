@@ -160,16 +160,16 @@ def test_pyfftw_sdp_max_n():
     if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
         pytest.skip("Skipping Test pyFFTW Not Installed")
 
-    # When `len(T)` larger than `real_arr` in pyfftw_sdp,
-    # the internal preallocated arrays should be resized.
-    # This test checks that functionality.
+    # When `len(T)` larger than original `max_n`,
+    # the callable object returned by `_make_pyfftw_sliding_dot_product`
+    # should still work correctly. This test checks that functionality.
 
     max_n = 2**10
     _pyfftw_sliding_dot_product = sdp._make_pyfftw_sliding_dot_product(
         max_n=max_n, real_dtype="float64"
     )
 
-    # len(T) > max_n to trigger array resizing
+    # len(T) > max_n to trigger internal array resizing
     T = np.random.rand(max_n + 1)
     Q = np.random.rand(2**2)
 
@@ -185,7 +185,9 @@ def test_pyfftw_sdp_longdoube():
     if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
         pytest.skip("Skipping Test pyFFTW Not Installed")
 
-    # This test checks that the pyfftw_sdp can be initialized with longdouble data type
+    # This test checks that the callable object
+    # returned by `_make_pyfftw_sliding_dot_product`
+    # can support `real_dtype="longdouble"`
     max_n = 2**10
     sdp_func = sdp._make_pyfftw_sliding_dot_product(max_n, real_dtype="longdouble")
 
@@ -204,8 +206,9 @@ def test_pyfftw_sdp_multithreaded():
     if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
         pytest.skip("Skipping Test pyFFTW Not Installed")
 
-    # This test checks that the pyfftw_sdp can be initialized
-    # with multiple threads
+    # This test checks that the callable object
+    # returned by `_make_pyfftw_sliding_dot_product`
+    # can support multithreading.
     T = np.random.rand(2**5)
     Q = np.random.rand(2**4)
 
@@ -221,8 +224,9 @@ def test_pyfftw_sdp_multithreaded_longdouble():
     if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
         pytest.skip("Skipping Test pyFFTW Not Installed")
 
-    # This test checks that the pyfftw_sdp can be initialized
-    # with multiple threads and longdouble data type
+    # This test checks that the callable object
+    # returned by `_make_pyfftw_sliding_dot_product`
+    # can support  multithreading and `real_dtype="longdouble"`
     max_n = 2**10
     sdp_func = sdp._make_pyfftw_sliding_dot_product(max_n, real_dtype="longdouble")
 

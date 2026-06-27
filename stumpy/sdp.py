@@ -136,13 +136,13 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
     Parameters
     ----------
-    max_n : int, default=2**20
+    max_n : int, default 2**20
         Maximum length to preallocate arrays for. This will be the size of the
         real-valued array. A complex-valued array of size 1 + (max_n // 2)
         will also be preallocated. If inputs exceed this size, arrays will be
         reallocated to accommodate larger sizes.
 
-    real_dtype : str, default="float64"
+    real_dtype : str, default "float64"
         The real data type to use for the preallocated arrays. Must be either
         "float64" or "longdouble". The complex data type will be set to
         "complex128" or "clongdouble", respectively.
