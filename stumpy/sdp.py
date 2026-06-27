@@ -146,7 +146,10 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
     -------
     sliding_dot_product : callable
         A callable that computes the sliding dot product between Q and T using FFTW
-        via pyfftw, and caches FFTW objects if not already cached.
+        via pyfftw, and caches FFTW objects if not already cached. The callable
+        automatically resizes the preallocated arrays if the inputs exceed
+        the current maximum size. In addition, the callable has a method
+        `reset_arr(max_n)` to reset the preallocated arrays to a new maximum length.
 
     Notes
     -----
@@ -292,6 +295,25 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
         return irfft_obj.output_array[m - 1 : n]  # valid portion
 
+    def reset_arr(max_n):  # pragma: no cover
+        """
+        Reset the preallocated arrays to a new maximum length.
+
+        Parameters
+        ----------
+        max_n : int
+            New maximum length for the preallocated arrays.
+
+        Returns
+        -------
+        None
+        """
+        nonlocal real_arr, complex_arr
+        complex_dtype = REAL_TO_COMPLEX_MAP[real_dtype]
+        real_arr = pyfftw.empty_aligned(max_n, dtype=real_dtype)
+        complex_arr = pyfftw.empty_aligned(1 + (max_n // 2), dtype=complex_dtype)
+
+    sliding_dot_product.reset_arr = reset_arr
     return sliding_dot_product
 
 
