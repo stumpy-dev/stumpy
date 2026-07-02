@@ -300,7 +300,7 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
         return irfft_obj.output_array[m - 1 : n]  # valid portion
 
-    def reset_arr(max_n):  # pragma: no cover
+    def set_max_n(max_n):  # pragma: no cover
         """
         Reset the preallocated arrays to a new maximum length.
 
@@ -314,11 +314,10 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
         None
         """
         nonlocal real_arr, complex_arr
-        complex_dtype = REAL_TO_COMPLEX_MAP[real_dtype]
-        real_arr = pyfftw.empty_aligned(max_n, dtype=real_dtype)
-        complex_arr = pyfftw.empty_aligned(1 + (max_n // 2), dtype=complex_dtype)
+        real_arr = pyfftw.empty_aligned(max_n, dtype=real_arr.dtype)
+        complex_arr = pyfftw.empty_aligned(1 + (max_n // 2), dtype=complex_arr.dtype)
 
-    sliding_dot_product.reset_arr = reset_arr
+    sliding_dot_product.set_max_n = set_max_n
     return sliding_dot_product
 
 
