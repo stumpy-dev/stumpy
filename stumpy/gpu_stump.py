@@ -170,6 +170,7 @@ def _compute_and_update_PI_kernel(
 
     adj_cov_a_j = cov_a_j * constant
     adj_cov_c_j = cov_c_j * constant
+    adj_cov_diff_j = adj_cov_a_j - adj_cov_c_j
     M_T_j_isinf = math.isinf(M_T[j])
     Σ_T_inverse_j = Σ_T_inverse[j]
     T_subseq_isconstant_j = T_subseq_isconstant[j]
@@ -182,22 +183,15 @@ def _compute_and_update_PI_kernel(
         cov_in = cov_even
 
     for i in range(start, w, stride):
-        zone_start = max(0, i - excl_zone)
-        zone_stop = min(w, i + excl_zone)
-
         if compute_cov:
-            μ_Q_m_1_i = μ_Q_m_1[i]
-            cov_b_i = T_A[i + m - 1] - μ_Q_m_1_i
-            if i == 0:
-                cov_d_i = T_A[m - 1] - μ_Q_m_1_i
-            else:
-                cov_d_i = T_A[i - 1] - μ_Q_m_1_i
-
             if i == 0:
                 cov_out[0] = cov_first[j]
             else:
+                μ_Q_m_1_i = μ_Q_m_1[i]
                 cov_out[i] = cov_in[i - 1] + (
-                    adj_cov_a_j * cov_b_i - adj_cov_c_j * cov_d_i
+                    adj_cov_a_j * T_A[i + m - 1] -
+                    adj_cov_c_j * T_A[i - 1] -
+                    μ_Q_m_1_i * adj_cov_diff_j
                 )
 
         if M_T_j_isinf or math.isinf(μ_Q[i]):
@@ -212,7 +206,7 @@ def _compute_and_update_PI_kernel(
             p_norm = two_m * (1.0 - pearson)
 
         if ignore_trivial:
-            if j <= zone_stop and j >= zone_start:
+            if j <= i + excl_zone and j >= i - excl_zone:
                 p_norm = np.inf
             if p_norm < profile_L[i] and j < i:
                 profile_L[i] = p_norm
@@ -279,9 +273,6 @@ def _gpu_stump(
     excl_zone : int
         The half width for the exclusion zone relative to the current
         sliding window
-
-    μ_Q_fname : str
-        The file name for the mean of the time series, Q, for each window size, m
 
     σ_Q_inverse_fname : str
         The file name for the inverse standard deviation of the time series, Q,
@@ -411,7 +402,7 @@ def _gpu_stump(
 
         if ignore_trivial:
             device_T_B = device_T_A
-            device_M_T = device_μ_Q
+            device_M_T = cuda.to_device(M_T)
             device_Σ_T_inverse = device_σ_Q_inverse
             device_T_subseq_isconstant = device_Q_subseq_isconstant
         else:
