@@ -153,11 +153,19 @@ def _compute_and_update_PI_kernel(
     Returns
     -------
     None
+
+    Notes
+    -----
+    `DOI: 10.1109/ICDM.2016.0085 \
+    <https://www.cs.ucr.edu/~eamonn/STOMP_GPU_final_submission_camera_ready.pdf>`__
+
+    See Table II, Figure 5, and Figure 6
     """
     start = cuda.grid(1)
     stride = cuda.gridsize(1)
 
     j = idx
+    # The name `i` is reserved to be used as an index for `T_A`
     m_inverse = 1.0 / m
     constant = (m - 1) * m_inverse * m_inverse
 
@@ -202,13 +210,13 @@ def _compute_and_update_PI_kernel(
                 indices_R[i] = j
 
         if p_norm < profile[i, -1]:
-            idx_pos = core._gpu_searchsorted_right(profile[i], p_norm, bfs, nlevel)
-            for g in range(k - 1, idx_pos, -1):
+            idx = core._gpu_searchsorted_right(profile[i], p_norm, bfs, nlevel)
+            for g in range(k - 1, idx, -1):
                 profile[i, g] = profile[i, g - 1]
                 indices[i, g] = indices[i, g - 1]
 
-            profile[i, idx_pos] = p_norm
-            indices[i, idx_pos] = j
+            profile[i, idx] = p_norm
+            indices[i, idx] = j
 
 
 def _gpu_stump(
@@ -340,6 +348,34 @@ def _gpu_stump(
 
     indices_R_fname : str
         The file name for the right matrix profile indices
+
+    Notes
+    -----
+    `DOI: 10.1109/ICDM.2016.0085 \
+    <https://www.cs.ucr.edu/~eamonn/STOMP_GPU_final_submission_camera_ready.pdf>`__
+
+    See Table II, Figure 5, and Figure 6
+
+    Timeseries, T_A, will be annotated with the distance location
+    (or index) of all its subsequences in another times series, T_B.
+
+    Return: For every subsequence, Q, in T_A, you will get a distance
+    and index for the closest subsequence in T_B. Thus, the array
+    returned will have length T_A.shape[0] - m + 1. Additionally, the
+    left and right matrix profiles are also returned.
+
+    Note: Unlike in the Table II where T_A.shape is expected to be equal
+    to T_B.shape, this implementation is generalized so that the shapes of
+    T_A and T_B can be different. In the case where T_A.shape == T_B.shape,
+    then our algorithm reduces down to the same algorithm found in Table II.
+
+    Additionally, unlike STAMP where the exclusion zone is m/2, the default
+    exclusion zone for STOMP is m/4 (See Definition 3 and Figure 3).
+
+    For self-joins, set ignore_trivial = True in order to avoid the
+    trivial match.
+
+    Note that left and right matrix profiles are only available for self-joins.
     """
     threads_per_block = config.STUMPY_THREADS_PER_BLOCK
     blocks_per_grid = math.ceil(w / threads_per_block)
@@ -359,6 +395,7 @@ def _gpu_stump(
     Q_subseq_isconstant = np.load(Q_subseq_isconstant_fname, allow_pickle=False)
     T_subseq_isconstant = np.load(T_subseq_isconstant_fname, allow_pickle=False)
 
+    # number of levels in binary search tree from which `bfs` is constructed.
     nlevel = np.floor(np.log2(k) + 1).astype(np.int64)
 
     with cuda.gpus[device_id]:
@@ -669,10 +706,10 @@ def gpu_stump(
         ignore_trivial = True
         T_B_subseq_isconstant = T_A_subseq_isconstant
 
-    T_A, μ_Q, σ_Q, Q_subseq_isconstant = core.preprocess(
+    T_A, μ_Q_with_inf, σ_Q, Q_subseq_isconstant = core.preprocess(
         T_A, m, T_subseq_isconstant=T_A_subseq_isconstant
     )
-    T_B, M_T, Σ_T, T_subseq_isconstant = core.preprocess(
+    T_B, M_T_with_inf, Σ_T, T_subseq_isconstant = core.preprocess(
         T_B, m, T_subseq_isconstant=T_B_subseq_isconstant
     )
 
@@ -704,8 +741,8 @@ def gpu_stump(
     )  # See Definition 3 and Figure 3
 
     # Precalculate for sliding covariance
-    M_T_clean, _ = core.compute_mean_std(T_B, m)
-    μ_Q_clean, _ = core.compute_mean_std(T_A, m)
+    M_T, _ = core.compute_mean_std(T_B, m)
+    μ_Q, _ = core.compute_mean_std(T_A, m)
 
     M_T_m_1, Σ_T_m_1 = core.compute_mean_std(T_B, m - 1)
     μ_Q_m_1, σ_Q_m_1 = core.compute_mean_std(T_A, m - 1)
@@ -729,9 +766,9 @@ def gpu_stump(
     cov_b_fname = core.array_to_temp_file(cov_b)
     cov_c_fname = core.array_to_temp_file(cov_c)
     cov_d_fname = core.array_to_temp_file(cov_d)
-    μ_Q_fname = core.array_to_temp_file(μ_Q)
+    μ_Q_fname = core.array_to_temp_file(μ_Q_with_inf)
     σ_Q_fname = core.array_to_temp_file(σ_Q)
-    M_T_fname = core.array_to_temp_file(M_T)
+    M_T_fname = core.array_to_temp_file(M_T_with_inf)
     Σ_T_fname = core.array_to_temp_file(Σ_T)
     Q_subseq_isconstant_fname = core.array_to_temp_file(Q_subseq_isconstant)
     T_subseq_isconstant_fname = core.array_to_temp_file(T_subseq_isconstant)
@@ -772,8 +809,8 @@ def gpu_stump(
         stop = min(l, start + step)
 
         QT, QT_first = core._get_QT(start, T_A, T_B, m)
-        cov = (QT / m) - (μ_Q_clean * M_T_clean[start])
-        cov_first = (QT_first / m) - (μ_Q_clean[0] * M_T_clean)
+        cov = (QT / m) - (μ_Q * M_T[start])
+        cov_first = (QT_first / m) - (μ_Q[0] * M_T)
 
         cov_fname = core.array_to_temp_file(cov)
         cov_first_fname = core.array_to_temp_file(cov_first)
