@@ -14,7 +14,7 @@ from .mparray import mparray
 
 
 @cuda.jit(
-    "(i8, f8[:], f8[:], i8, f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], b1[:], b1[:], i8, b1, i8, f8[:, :], f8[:], f8[:], i8[:, :], i8[:], i8[:], b1, i8[:], i8, i8)"  # noqa: E501
+    "(i8, f8[:], f8[:], i8, f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], b1[:], b1[:], i8, b1, i8, f8[:, :], f8[:], f8[:], i8[:, :], i8[:], i8[:], b1, i8[:], i8, i8)"  # noqa: E501
 )
 def _compute_and_update_PI_kernel(
     idx,
@@ -24,10 +24,8 @@ def _compute_and_update_PI_kernel(
     cov_even,
     cov_odd,
     cov_first,
-    cov_a,
-    cov_b,
-    cov_c,
-    cov_d,
+    μ_Q_m_1,
+    M_T_m_1,
     μ_Q,
     σ_Q_inverse,
     M_T,
@@ -75,17 +73,11 @@ def _compute_and_update_PI_kernel(
     cov_first : numpy.ndarray
         Covariance between the first query sequence, `Q`, and time series, `T`
 
-    cov_a : numpy.ndarray
-        Precalculated sliding mean offset for T_B
+    μ_Q_m_1 : numpy.ndarray
+        The mean of the time series, Q, for each window size, m-1
 
-    cov_b : numpy.ndarray
-        Precalculated sliding mean offset for T_A
-
-    cov_c : numpy.ndarray
-        Precalculated sliding mean offset helper for T_B
-
-    cov_d : numpy.ndarray
-        Precalculated sliding mean offset helper for T_A
+    M_T_m_1 : numpy.ndarray
+        The mean of the time series, T, for each window size, m-1
 
     μ_Q : ndarray
         The mean of the time series, Q, for each window size, m
@@ -169,8 +161,15 @@ def _compute_and_update_PI_kernel(
     constant = (m - 1) * m_inverse * m_inverse
     two_m = 2.0 * m
 
-    adj_cov_a_j = cov_a[j] * constant
-    adj_cov_c_j = cov_c[j] * constant
+    M_T_m_1_j = M_T_m_1[j]
+    cov_a_j = T_B[j + m - 1] - M_T_m_1_j
+    if j == 0:
+        cov_c_j = T_B[m - 1] - M_T_m_1_j
+    else:
+        cov_c_j = T_B[j - 1] - M_T_m_1_j
+
+    adj_cov_a_j = cov_a_j * constant
+    adj_cov_c_j = cov_c_j * constant
     M_T_j_isinf = math.isinf(M_T[j])
     Σ_T_inverse_j = Σ_T_inverse[j]
     T_subseq_isconstant_j = T_subseq_isconstant[j]
@@ -187,11 +186,18 @@ def _compute_and_update_PI_kernel(
         zone_stop = min(w, i + excl_zone)
 
         if compute_cov:
+            μ_Q_m_1_i = μ_Q_m_1[i]
+            cov_b_i = T_A[i + m - 1] - μ_Q_m_1_i
+            if i == 0:
+                cov_d_i = T_A[m - 1] - μ_Q_m_1_i
+            else:
+                cov_d_i = T_A[i - 1] - μ_Q_m_1_i
+
             if i == 0:
                 cov_out[0] = cov_first[j]
             else:
                 cov_out[i] = cov_in[i - 1] + (
-                    adj_cov_a_j * cov_b[i] - adj_cov_c_j * cov_d[i]
+                    adj_cov_a_j * cov_b_i - adj_cov_c_j * cov_d_i
                 )
 
         if M_T_j_isinf or math.isinf(μ_Q[i]):
@@ -235,10 +241,8 @@ def _gpu_stump(
     σ_Q_inverse_fname,
     cov_fname,
     cov_first_fname,
-    cov_a_fname,
-    cov_b_fname,
-    cov_c_fname,
-    cov_d_fname,
+    μ_Q_m_1_fname,
+    M_T_m_1_fname,
     M_T_fname,
     Σ_T_inverse_fname,
     Q_subseq_isconstant_fname,
@@ -289,17 +293,11 @@ def _gpu_stump(
     cov_first_fname : str
         The file name for the covariance of the first window
 
-    cov_a_fname : str
-        The file name for the sliding mean offset helper
+    μ_Q_m_1_fname : str
+        The file name for the sliding mean of Q with window m-1
 
-    cov_b_fname : str
-        The file name for the sliding mean offset helper
-
-    cov_c_fname : str
-        The file name for the sliding mean offset helper
-
-    cov_d_fname : str
-        The file name for the sliding mean offset helper
+    M_T_m_1_fname : str
+        The file name for the sliding mean of T with window m-1
 
     M_T_fname : str
         The file name for the mean of the time series, T, for each window size, m
@@ -388,10 +386,8 @@ def _gpu_stump(
     T_B = np.load(T_B_fname, allow_pickle=False)
     cov = np.load(cov_fname, allow_pickle=False)
     cov_first = np.load(cov_first_fname, allow_pickle=False)
-    cov_a = np.load(cov_a_fname, allow_pickle=False)
-    cov_b = np.load(cov_b_fname, allow_pickle=False)
-    cov_c = np.load(cov_c_fname, allow_pickle=False)
-    cov_d = np.load(cov_d_fname, allow_pickle=False)
+    μ_Q_m_1 = np.load(μ_Q_m_1_fname, allow_pickle=False)
+    M_T_m_1 = np.load(M_T_m_1_fname, allow_pickle=False)
     μ_Q = np.load(μ_Q_fname, allow_pickle=False)
     σ_Q_inverse = np.load(σ_Q_inverse_fname, allow_pickle=False)
     M_T = np.load(M_T_fname, allow_pickle=False)
@@ -407,10 +403,8 @@ def _gpu_stump(
         device_cov_odd = cuda.to_device(cov)
         device_cov_even = cuda.to_device(cov)
         device_cov_first = cuda.to_device(cov_first)
-        device_cov_a = cuda.to_device(cov_a)
-        device_cov_b = cuda.to_device(cov_b)
-        device_cov_c = cuda.to_device(cov_c)
-        device_cov_d = cuda.to_device(cov_d)
+        device_μ_Q_m_1 = cuda.to_device(μ_Q_m_1)
+        device_M_T_m_1 = cuda.to_device(M_T_m_1)
         device_μ_Q = cuda.to_device(μ_Q)
         device_σ_Q_inverse = cuda.to_device(σ_Q_inverse)
         device_Q_subseq_isconstant = cuda.to_device(Q_subseq_isconstant)
@@ -451,10 +445,8 @@ def _gpu_stump(
             device_cov_even,
             device_cov_odd,
             device_cov_first,
-            device_cov_a,
-            device_cov_b,
-            device_cov_c,
-            device_cov_d,
+            device_μ_Q_m_1,
+            device_M_T_m_1,
             device_μ_Q,
             device_σ_Q_inverse,
             device_M_T,
@@ -485,10 +477,8 @@ def _gpu_stump(
                 device_cov_even,
                 device_cov_odd,
                 device_cov_first,
-                device_cov_a,
-                device_cov_b,
-                device_cov_c,
-                device_cov_d,
+                device_μ_Q_m_1,
+                device_M_T_m_1,
                 device_μ_Q,
                 device_σ_Q_inverse,
                 device_M_T,
@@ -748,28 +738,13 @@ def gpu_stump(
     M_T, _ = core.compute_mean_std(T_B, m)
     μ_Q, _ = core.compute_mean_std(T_A, m)
 
-    M_T_m_1, Σ_T_m_1 = core.compute_mean_std(T_B, m - 1)
-    μ_Q_m_1, σ_Q_m_1 = core.compute_mean_std(T_A, m - 1)
-
-    cov_a = T_B[m - 1 :] - M_T_m_1[:-1]
-    cov_b = T_A[m - 1 :] - μ_Q_m_1[:-1]
-
-    cov_c = np.empty(M_T_m_1.shape[0], dtype=np.float64)
-    cov_c[1:] = T_B[: M_T_m_1.shape[0] - 1]
-    cov_c[0] = T_B[-1]
-    cov_c[:] = cov_c - M_T_m_1
-
-    cov_d = np.empty(μ_Q_m_1.shape[0], dtype=np.float64)
-    cov_d[1:] = T_A[: μ_Q_m_1.shape[0] - 1]
-    cov_d[0] = T_A[-1]
-    cov_d[:] = cov_d - μ_Q_m_1
+    M_T_m_1, _ = core.compute_mean_std(T_B, m - 1)
+    μ_Q_m_1, _ = core.compute_mean_std(T_A, m - 1)
 
     T_A_fname = core.array_to_temp_file(T_A)
     T_B_fname = core.array_to_temp_file(T_B)
-    cov_a_fname = core.array_to_temp_file(cov_a)
-    cov_b_fname = core.array_to_temp_file(cov_b)
-    cov_c_fname = core.array_to_temp_file(cov_c)
-    cov_d_fname = core.array_to_temp_file(cov_d)
+    μ_Q_m_1_fname = core.array_to_temp_file(μ_Q_m_1)
+    M_T_m_1_fname = core.array_to_temp_file(M_T_m_1)
     μ_Q_fname = core.array_to_temp_file(μ_Q_with_inf)
     σ_Q_inverse = 1.0 / np.maximum(σ_Q, config.STUMPY_DENOM_THRESHOLD)
     σ_Q_inverse_fname = core.array_to_temp_file(σ_Q_inverse)
@@ -837,10 +812,8 @@ def gpu_stump(
                     σ_Q_inverse_fname,
                     cov_fname,
                     cov_first_fname,
-                    cov_a_fname,
-                    cov_b_fname,
-                    cov_c_fname,
-                    cov_d_fname,
+                    μ_Q_m_1_fname,
+                    M_T_m_1_fname,
                     M_T_fname,
                     Σ_T_inverse_fname,
                     Q_subseq_isconstant_fname,
@@ -872,10 +845,8 @@ def gpu_stump(
                 σ_Q_inverse_fname,
                 cov_fname,
                 cov_first_fname,
-                cov_a_fname,
-                cov_b_fname,
-                cov_c_fname,
-                cov_d_fname,
+                μ_Q_m_1_fname,
+                M_T_m_1_fname,
                 M_T_fname,
                 Σ_T_inverse_fname,
                 Q_subseq_isconstant_fname,
@@ -906,10 +877,8 @@ def gpu_stump(
 
     os.remove(T_A_fname)
     os.remove(T_B_fname)
-    os.remove(cov_a_fname)
-    os.remove(cov_b_fname)
-    os.remove(cov_c_fname)
-    os.remove(cov_d_fname)
+    os.remove(μ_Q_m_1_fname)
+    os.remove(M_T_m_1_fname)
     os.remove(μ_Q_fname)
     os.remove(σ_Q_inverse_fname)
     os.remove(M_T_fname)
