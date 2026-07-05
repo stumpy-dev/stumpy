@@ -130,8 +130,8 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
     """
     A closure to compute the sliding dot product using FFTW via pyfftw.
 
-    This closure uses FFTW (via pyfftw) to efficiently compute the sliding dot product
-    between a query sequence, Q, and a time series, T. It preallocates arrays and caches
+    This closure returns a callable that computes the sliding dot product between
+    a query array, ``Q``, and a time series, ``T``. It preallocates arrays and caches
     FFTW objects to optimize repeated computations with similar-sized inputs.
 
     Parameters
@@ -154,7 +154,7 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
         via pyfftw, and caches FFTW objects if not already cached. The callable
         automatically resizes the preallocated arrays if the inputs exceed
         the current maximum size. In addition, the callable has a method
-        `reset_arr(max_n)` to reset the preallocated arrays to a new maximum length.
+        `set_max_n` to set the preallocated arrays to a new maximum length.
 
     Notes
     -----
@@ -189,7 +189,7 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
     def sliding_dot_product(Q, T, n_threads=1, planning_flag="FFTW_ESTIMATE"):
         """
-        Compute the sliding dot product between Q and T using FFTW via pyfftw,
+        Compute the sliding dot product between ``Q`` and `T`` using FFTW via pyfftw,
         and cache FFTW objects if not already cached.
 
         Parameters
@@ -214,7 +214,7 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
         Returns
         -------
         out : numpy.ndarray
-            Sliding dot product between Q and T.
+            Sliding dot product between ``Q`` and ``T``.
 
         Notes
         -----
@@ -329,7 +329,7 @@ if PYFFTW_IS_AVAILABLE:  # pragma: no cover
 
 def _sliding_dot_product(Q, T):
     """
-    Compute the sliding dot product between `Q` and `T`
+    Compute the sliding dot product between ``Q`` and ``T``
 
     Parameters
     ----------
