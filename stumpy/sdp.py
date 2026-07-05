@@ -128,7 +128,7 @@ def _pocketfft_sliding_dot_product(Q, T):
 
 def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
     """
-    A closure to compute the sliding dot product using FFTW via pyfftw.
+    A closure to compute the sliding dot product using FFTW via pyfftw
 
     This closure returns a callable that computes the sliding dot product between
     a query array, ``Q``, and a time series, ``T``. It preallocates arrays and caches
@@ -189,8 +189,8 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
     def sliding_dot_product(Q, T, n_threads=1, planning_flag="FFTW_ESTIMATE"):
         """
-        Compute the sliding dot product between ``Q`` and `T`` using FFTW via pyfftw,
-        and cache FFTW objects if not already cached.
+        Compute the sliding dot product between ``Q`` and ``T`` using FFTW via pyfftw,
+        and cache FFTW objects if not already cached
 
         Parameters
         ----------
@@ -200,10 +200,10 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
         T : numpy.ndarray
             Time series or sequence.
 
-        n_threads : int, default=1
+        n_threads : int, default 1
             Number of threads to use for FFTW computations.
 
-        planning_flag : str, default="FFTW_ESTIMATE"
+        planning_flag : str, default "FFTW_ESTIMATE"
             The planning flag that will be used in FFTW for planning.
             See pyfftw documentation for details. Current options, ordered
             ascendingly by the level of aggressiveness in planning, are:
@@ -302,7 +302,7 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
     def set_max_n(max_n):  # pragma: no cover
         """
-        Reset the preallocated arrays to a new maximum length.
+        Set the preallocated arrays to a new maximum length
 
         Parameters
         ----------
@@ -342,6 +342,6 @@ def _sliding_dot_product(Q, T):
     Returns
     -------
     out : numpy.ndarray
-        Sliding dot product between `Q` and `T`.
+        Sliding dot product between ``Q`` and ``T``
     """
     return _convolve_sliding_dot_product(Q, T)
