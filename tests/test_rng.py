@@ -4,11 +4,15 @@ from stumpy import rng
 
 
 def test_fix_state():
+    init_state = rng.get_state()
+
     rng._fix_state()
     state = rng.get_state()
     assert state == rng.FIXED_STATE
 
     rng.unfix_state()
+    state = rng.get_state()
+    assert state == init_state
 
 
 def test_random():
