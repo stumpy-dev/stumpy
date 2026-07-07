@@ -49,7 +49,7 @@ def _set_state(state):
     None
     """
     global PREV_STATE
-    PREV_STATE = RNG.bit_generator.state.copy()
+    PREV_STATE = _get_state()
     RNG.bit_generator.state = state
 
 
