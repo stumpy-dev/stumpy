@@ -130,17 +130,19 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
     """
     A closure to compute the sliding dot product using FFTW via pyfftw
 
-    This closure returns a callable that computes the sliding dot product between
-    a query array, ``Q``, and a time series, ``T``. It preallocates arrays and caches
-    FFTW objects to optimize repeated computations with similar-sized inputs.
+    This closure returns a callable object that computes the sliding dot product
+    between a query array, ``Q``, and a time series, ``T``. It preallocates arrays
+    and caches FFTW objects to optimize repeated computations with similar-sized
+    inputs.
 
     Parameters
     ----------
     init_len : int, default 2**20
         Initial length to preallocate arrays for. This will be the size of the
         real-valued array. A complex-valued array of size 1 + (init_len // 2)
-        will also be preallocated. If inputs exceed this size, arrays will be
-        reallocated to accommodate larger sizes.
+        will also be preallocated. If the length of input arrays exceed
+        ``init_len``, the preallocated arrays will be resized to accommodate
+        larger sizes.
 
     real_dtype : str, default "float64"
         The real data type to use for the preallocated arrays. Must be either
@@ -150,11 +152,12 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
     Returns
     -------
     sliding_dot_product : callable
-        A callable that computes the sliding dot product between Q and T using FFTW
-        via pyfftw, and caches FFTW objects if not already cached. The callable
-        automatically resizes the preallocated arrays if the inputs exceed
-        the current initial length. In addition, the callable has a method
-        `set_init_len` to set the preallocated arrays to a new initial length.
+        A callable object that computes the sliding dot product between ``Q``
+        and ``T`` using FFTW via pyfftw, and caches FFTW objects if not already
+        cached. The callable object automatically resizes the preallocated arrays
+        if the length of input arrays exceed the current initial length.
+        In addition, the callable object has the method `set_init_len` to set
+        the length of the preallocated arrays to a new initial length.
 
     Notes
     -----
@@ -209,7 +212,8 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
             ascendingly by the level of aggressiveness in planning, are:
             "FFTW_ESTIMATE", "FFTW_MEASURE", "FFTW_PATIENT", and "FFTW_EXHAUSTIVE".
             The more aggressive the planning, the longer the planning time, but
-            the faster the execution time.
+            the faster the execution time. Note that when ``planning_flag`` is
+            set to "FFTW_ESTIMATE" (default), there will be no planning operation!
 
         Returns
         -------
@@ -272,13 +276,13 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
             irfft_obj.update_arrays(complex_view, real_view)
 
         # Compute the (circular) convolution between T and Q[::-1],
-        # each zero-padded to length next_fast_n by performing
+        # each zero-padded to the length `next_fast_n`, by performing
         # the following three steps:
 
         # Step 1
         # Compute RFFT of T (zero-padded)
-        # Must make a copy of output to avoid losing it when the array is
-        # overwritten when computing the RFFT of Q in the next step
+        # Must make a copy of output to avoid losing it when the output array
+        # is overwritten when computing the RFFT of Q in the "Step 2" below
         rfft_obj.input_array[:n] = T
         rfft_obj.input_array[n:] = 0.0
         rfft_obj.execute()
