@@ -84,13 +84,13 @@ def _iac(
     IAC : numpy.ndarray
         Idealized arc curve (IAC)
     """
-    np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
-    I = np.random.randint(0, width, size=width, dtype=np.int64)
+    I = rng.integers(0, width, size=width, dtype=np.int64)
     if bidirectional is False:  # Idealized 1-dimensional matrix profile index
         I[:-1] = width
         for i in range(width - 1):
-            I[i] = np.random.randint(i + 1, width, dtype=np.int64)
+            I[i] = rng.integers(i + 1, width, dtype=np.int64)
 
     target_AC = _nnmark(I)
 

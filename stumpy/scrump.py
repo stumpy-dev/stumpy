@@ -116,7 +116,7 @@ def _preprocess_prescrump(
         else:  # AB-join
             s = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
 
-    indices = np.random.permutation(range(0, l, s)).astype(np.int64)
+    indices = np.random.default_rng().permutation(range(0, l, s)).astype(np.int64)
 
     return (
         T_A,
@@ -997,7 +997,7 @@ class scrump:
             core._merge_topk_PI(self._P, P, self._I, I)
 
         if self._ignore_trivial:
-            self._diags = np.random.permutation(
+            self._diags = np.random.default_rng().permutation(
                 range(self._excl_zone + 1, self._n_A - self._m + 1)
             ).astype(np.int64)
             if self._diags.shape[0] == 0:  # pragma: no cover
@@ -1007,7 +1007,7 @@ class scrump:
                     f"Please try a value of `m <= {max_m}`"
                 )
         else:
-            self._diags = np.random.permutation(
+            self._diags = np.random.default_rng().permutation(
                 range(-(self._n_A - self._m + 1) + 1, self._n_B - self._m + 1)
             ).astype(np.int64)
 
