@@ -126,7 +126,7 @@ def _pocketfft_sliding_dot_product(Q, T):
     return c2r(False, np.multiply(fft_2d[0], fft_2d[1]), n=next_fast_n)[m - 1 : n]
 
 
-def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
+def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
     """
     A closure to compute the sliding dot product using FFTW via pyfftw
 
@@ -136,9 +136,9 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
     Parameters
     ----------
-    max_n : int, default 2**20
-        Maximum length to preallocate arrays for. This will be the size of the
-        real-valued array. A complex-valued array of size 1 + (max_n // 2)
+    init_len : int, default 2**20
+        Initial length to preallocate arrays for. This will be the size of the
+        real-valued array. A complex-valued array of size 1 + (init_len // 2)
         will also be preallocated. If inputs exceed this size, arrays will be
         reallocated to accommodate larger sizes.
 
@@ -153,8 +153,8 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
         A callable that computes the sliding dot product between Q and T using FFTW
         via pyfftw, and caches FFTW objects if not already cached. The callable
         automatically resizes the preallocated arrays if the inputs exceed
-        the current maximum size. In addition, the callable has a method
-        `set_max_n` to set the preallocated arrays to a new maximum length.
+        the current initial length. In addition, the callable has a method
+        `set_init_len` to set the preallocated arrays to a new initial length.
 
     Notes
     -----
@@ -180,8 +180,8 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
     complex_dtype = REAL_TO_COMPLEX_MAP[real_dtype]
 
     # Preallocate arrays
-    real_arr = pyfftw.empty_aligned(max_n, dtype=real_dtype)
-    complex_arr = pyfftw.empty_aligned(1 + (max_n // 2), dtype=complex_dtype)
+    real_arr = pyfftw.empty_aligned(init_len, dtype=real_dtype)
+    complex_arr = pyfftw.empty_aligned(1 + (init_len // 2), dtype=complex_dtype)
 
     # Store FFTW objects, keyed by (next_fast_n, n_threads, planning_flag)
     rfft_objects = {}
@@ -300,30 +300,30 @@ def _make_pyfftw_sliding_dot_product(max_n=2**20, real_dtype="float64"):
 
         return irfft_obj.output_array[m - 1 : n]  # valid portion
 
-    def set_max_n(max_n):  # pragma: no cover
+    def set_init_len(init_len):  # pragma: no cover
         """
-        Set the preallocated arrays to a new maximum length
+        Set the preallocated arrays to a new initial length.
 
         Parameters
         ----------
-        max_n : int
-            New maximum length for the preallocated arrays.
+        init_len : int
+            New initial length for the preallocated arrays.
 
         Returns
         -------
         None
         """
         nonlocal real_arr, complex_arr
-        real_arr = pyfftw.empty_aligned(max_n, dtype=real_arr.dtype)
-        complex_arr = pyfftw.empty_aligned(1 + (max_n // 2), dtype=complex_arr.dtype)
+        real_arr = pyfftw.empty_aligned(init_len, dtype=real_arr.dtype)
+        complex_arr = pyfftw.empty_aligned(1 + (init_len // 2), dtype=complex_arr.dtype)
 
-    sliding_dot_product.set_max_n = set_max_n
+    sliding_dot_product.set_init_len = set_init_len
     return sliding_dot_product
 
 
 if PYFFTW_IS_AVAILABLE:  # pragma: no cover
     _pyfftw_sliding_dot_product = _make_pyfftw_sliding_dot_product(
-        max_n=2**20, real_dtype="float64"
+        init_len=2**20, real_dtype="float64"
     )
 
 

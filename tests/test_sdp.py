@@ -156,21 +156,21 @@ def test_sdp_power2():
     return
 
 
-def test_pyfftw_sdp_max_n():
+def test_pyfftw_sdp_init_len():
     if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
         pytest.skip("Skipping Test pyFFTW Not Installed")
 
-    # When `len(T)` larger than original `max_n`,
+    # When `len(T)` larger than original `init_len`,
     # the callable object returned by `_make_pyfftw_sliding_dot_product`
     # should still work correctly. This test checks that functionality.
 
-    max_n = 2**10
+    init_len = 2**10
     _pyfftw_sliding_dot_product = sdp._make_pyfftw_sliding_dot_product(
-        max_n=max_n, real_dtype="float64"
+        init_len=init_len, real_dtype="float64"
     )
 
-    # len(T) > max_n to trigger internal array resizing
-    T = np.random.rand(max_n + 1)
+    # len(T) > init_len to trigger internal array resizing
+    T = np.random.rand(init_len + 1)
     Q = np.random.rand(2**2)
 
     comp = _pyfftw_sliding_dot_product(Q, T)
@@ -188,10 +188,12 @@ def test_pyfftw_sdp_longdoube():
     # This test checks that the callable object
     # returned by `_make_pyfftw_sliding_dot_product`
     # can support `real_dtype="longdouble"`
-    max_n = 2**10
-    sdp_func = sdp._make_pyfftw_sliding_dot_product(max_n, real_dtype="longdouble")
+    init_len = 2**10
+    sdp_func = sdp._make_pyfftw_sliding_dot_product(
+        init_len=init_len, real_dtype="longdouble"
+    )
 
-    T = np.random.rand(max_n)
+    T = np.random.rand(init_len)
     Q = np.random.rand(2**8)
 
     comp = sdp_func(Q, T)
@@ -227,10 +229,12 @@ def test_pyfftw_sdp_multithreaded_longdouble():
     # This test checks that the callable object
     # returned by `_make_pyfftw_sliding_dot_product`
     # can support  multithreading and `real_dtype="longdouble"`
-    max_n = 2**10
-    sdp_func = sdp._make_pyfftw_sliding_dot_product(max_n, real_dtype="longdouble")
+    init_len = 2**10
+    sdp_func = sdp._make_pyfftw_sliding_dot_product(
+        init_len=init_len, real_dtype="longdouble"
+    )
 
-    T = np.random.rand(max_n)
+    T = np.random.rand(init_len)
     Q = np.random.rand(2**8)
 
     comp = sdp_func(Q, T, n_threads=2)
