@@ -4,6 +4,8 @@ import numpy as np
 import numpy.testing as npt
 from numba import cuda
 
+from stumpy import rng
+
 try:
     from numba.errors import NumbaPerformanceWarning
 except ModuleNotFoundError:
@@ -29,14 +31,10 @@ if not cuda.is_available():  # pragma: no cover
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
-@pytest.mark.parametrize(
-    "seed", np.random.choice(np.arange(10000), size=2, replace=False)
-)
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
-def test_random_gpu_ostinato(seed):
+def test_random_gpu_ostinato():
     m = 50
-    np.random.seed(seed)
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
     comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m)
@@ -47,34 +45,29 @@ def test_random_gpu_ostinato(seed):
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
-@pytest.mark.parametrize("seed", [79, 109])
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
-def test_deterministic_gpu_ostinato(seed):
+def test_deterministic_gpu_ostinato():
     m = 50
-    np.random.seed(seed)
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    with rng.fix_state():
+        Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
-    ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m)
+        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
+        comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m)
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_almost_equal(ref_radius, comp_radius)
+        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
-@pytest.mark.parametrize(
-    "seed", np.random.choice(np.arange(10000), size=25, replace=False)
-)
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
-def test_random_gpu_ostinato_with_isconstant(seed):
+def test_random_gpu_ostinato_with_isconstant():
     isconstant_custom_func = functools.partial(
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
     )
 
     m = 50
-    np.random.seed(seed)
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
     Ts_subseq_isconstant = [isconstant_custom_func for _ in range(len(Ts))]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
@@ -90,36 +83,35 @@ def test_random_gpu_ostinato_with_isconstant(seed):
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
-@pytest.mark.parametrize("seed", [79, 109, 112, 133, 151, 161, 251, 275, 309, 355])
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
-def test_deterministic_gpu_ostinato_with_isconstant(seed):
+def test_deterministic_gpu_ostinato_with_isconstant():
     isconstant_custom_func = functools.partial(
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
     )
 
-    m = 50
-    np.random.seed(seed)
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    with rng.fix_state():
+        m = 50
+        Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
-    l = 64 - m + 1
-    subseq_isconsant = np.full(l, 0, dtype=bool)
-    subseq_isconsant[np.random.randint(0, l)] = True
-    Ts_subseq_isconstant = [
-        subseq_isconsant,
-        None,
-        isconstant_custom_func,
-    ]
+        l = 64 - m + 1
+        subseq_isconsant = np.full(l, 0, dtype=bool)
+        subseq_isconsant[rng.RNG.integers(0, l)] = True
+        Ts_subseq_isconstant = [
+            subseq_isconsant,
+            None,
+            isconstant_custom_func,
+        ]
 
-    ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
-        Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
-    )
-    comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(
-        Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
-    )
+        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
+            Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
+        )
+        comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(
+            Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
+        )
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_almost_equal(ref_radius, comp_radius)
+        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -129,7 +121,7 @@ def test_input_not_overwritten():
     # by replacing nan value with 0 in each time series.
     # This test ensures that the original input is not overwritten
     m = 50
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
     for T in Ts:
         T[0] = np.nan
 
@@ -147,7 +139,7 @@ def test_input_not_overwritten():
 def test_extract_several_consensus():
     # This test is to further ensure that the function `gpu_ostinato`
     # does not tamper with the original data.
-    Ts = [np.random.rand(n) for n in [64, 128]]
+    Ts = [rng.RNG.random(n) for n in [64, 128]]
     Ts_ref = [T.copy() for T in Ts]
     Ts_comp = [T.copy() for T in Ts]
 

@@ -3,7 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import config
+from stumpy import config, rng
 from stumpy.aamp_mmotifs import aamp_mmotifs
 
 test_data = [
@@ -51,32 +51,30 @@ test_data = [
 
 
 def test_aamp_mmotifs_default_parameters():
-    motif_distances_ref = np.array(
-        [[0.0, 0.06315749, 0.25275899, 0.34087884, 0.3452315]]
-    )
-    motif_indices_ref = np.array([[19, 77, 63, 52, 71]])
-    motif_subspaces_ref = [np.array([2])]
+    motif_distances_ref = np.array([[0.0, 0.10660435, 0.27927693]])
+    motif_indices_ref = np.array([[19, 41, 34]])
+    motif_subspaces_ref = [np.array([1])]
     motif_mdls_ref = [
-        np.array([411.60964047, 423.69925001, 449.11032383, 476.95855027, 506.62406252])
+        np.array([411.60964047, 433.21928095, 429.77443751, 457.74925683, 477.80793557])
     ]
 
-    np.random.seed(0)
-    T = np.random.rand(500).reshape(5, 100)
+    with rng.fix_state():
+        T = rng.RNG.random(size=(5, 100))
 
-    m = 5
-    excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
-    P, I = naive.maamp(T, m, excl_zone)
-    (
-        motif_distances_cmp,
-        motif_indices_cmp,
-        motif_subspaces_cmp,
-        motif_mdls_cmp,
-    ) = aamp_mmotifs(T, P, I)
+        m = 5
+        excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
+        P, I = naive.maamp(T, m, excl_zone)
+        (
+            motif_distances_cmp,
+            motif_indices_cmp,
+            motif_subspaces_cmp,
+            motif_mdls_cmp,
+        ) = aamp_mmotifs(T, P, I)
 
-    npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-    npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-    npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-    npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+        npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
+        npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
+        npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
+        npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
 
 
 @pytest.mark.parametrize("T", test_data)

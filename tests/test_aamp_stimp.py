@@ -5,11 +5,12 @@ import pytest
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
+from stumpy import rng
 from stumpy.aamp_stimp import aamp_stimp, aamp_stimped
 
 T = [
     np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
-    np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+    rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
 ]
 
 n = [9, 10, 16]
@@ -37,9 +38,7 @@ def test_aamp_stimp_1_percent(T):
     min_m = 3
     n = T.shape[0] - min_m + 1
 
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
+    state = rng.get_state()
     pan = aamp_stimp(
         T,
         min_m=min_m,
@@ -54,7 +53,7 @@ def test_aamp_stimp_1_percent(T):
 
     ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    np.random.seed(seed)
+    rng.set_state(state)
     for idx, m in enumerate(pan.M_[:n]):
         zone = int(np.ceil(m / 4))
         s = zone
@@ -97,9 +96,7 @@ def test_aamp_stimp_max_m(T):
     max_m = 5
     n = T.shape[0] - min_m + 1
 
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
+    state = rng.get_state()
     pan = aamp_stimp(
         T,
         min_m=min_m,
@@ -114,7 +111,7 @@ def test_aamp_stimp_max_m(T):
 
     ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    np.random.seed(seed)
+    rng.set_state(state)
     for idx, m in enumerate(pan.M_[:n]):
         zone = int(np.ceil(m / 4))
         s = zone

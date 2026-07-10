@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 import numpy as np
 
 bit_gen = np.random.PCG64()
@@ -85,7 +87,28 @@ def _fix_state():
     _set_state(FIXED_STATE)
 
 
+@contextmanager
+def fix_state(*args):
+    """
+    A context manager for setting the RNG state to a fixed, hardcoded, safe state
+
+    This is exceptionally rare and you probably want to use `state = get_state()`
+    and `set_state(state)` instead.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+    _fix_state()
+    try:
+        yield
+    finally:
+        _reset_state()
+
+
 get_state = _get_state
 set_state = _set_state
-fix_state = _fix_state
-unfix_state = _reset_state

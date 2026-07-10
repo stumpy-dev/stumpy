@@ -3717,7 +3717,8 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
     import numpy as np
     import warnings
 
-    T = np.random.rand(10_000)
+    rng = np.random.default_rng()
+    T = rng.random(10_000)
     m = 50
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Arrays T_A, T_B are equal")
@@ -4493,7 +4494,8 @@ def check_self_join(ignore_trivial):
     import numpy as np
     import warnings
 
-    T = np.random.rand(10_000)
+    rng = np.random.default_rng()
+    T = rng.random(10_000)
     m = 50
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="`ignore_trivial` cannot be `False`")

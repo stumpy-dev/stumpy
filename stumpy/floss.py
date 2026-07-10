@@ -84,13 +84,13 @@ def _iac(
     IAC : numpy.ndarray
         Idealized arc curve (IAC)
     """
-    np.random.seed(seed)
+    local_rng = np.random.default_rng(seed)
 
-    I = np.random.randint(0, width, size=width, dtype=np.int64)
+    I = local_rng.integers(0, width, size=width, dtype=np.int64)
     if bidirectional is False:  # Idealized 1-dimensional matrix profile index
         I[:-1] = width
         for i in range(width - 1):
-            I[i] = np.random.randint(i + 1, width, dtype=np.int64)
+            I[i] = local_rng.integers(i + 1, width, dtype=np.int64)
 
     target_AC = _nnmark(I)
 
@@ -99,7 +99,7 @@ def _iac(
         hist_dist = scipy.stats.rv_histogram(
             (target_AC, np.append(np.arange(width), width))
         )
-        data = hist_dist.rvs(size=n_samples)
+        data = hist_dist.rvs(size=n_samples, random_state=local_rng)
         a, b, c, d = scipy.stats.beta.fit(data, floc=0, fscale=width)
 
         params[i, 0] = a

@@ -7,11 +7,12 @@ import pytest
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
+from stumpy import rng
 from stumpy.stimp import stimp, stimped
 
 T = [
     np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
-    np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+    rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64),
 ]
 
 
@@ -37,9 +38,7 @@ def test_stimp_1_percent(T):
     min_m = 3
     n = T.shape[0] - min_m + 1
 
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
+    state = rng.get_state()
     pan = stimp(
         T,
         min_m=min_m,
@@ -55,7 +54,7 @@ def test_stimp_1_percent(T):
 
     ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    np.random.seed(seed)
+    rng.set_state(state)
     for idx, m in enumerate(pan.M_[:n]):
         zone = int(np.ceil(m / 4))
         s = zone
@@ -92,9 +91,7 @@ def test_stimp_max_m(T):
     max_m = 5
     n = T.shape[0] - min_m + 1
 
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
+    state = rng.get_state()
     pan = stimp(
         T,
         min_m=min_m,
@@ -110,7 +107,7 @@ def test_stimp_max_m(T):
 
     ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    np.random.seed(seed)
+    rng.set_state(state)
     for idx, m in enumerate(pan.M_[:n]):
         zone = int(np.ceil(m / 4))
         s = zone
@@ -269,7 +266,7 @@ def test_stimped(T, dask_cluster):
 
 
 def test_stimp_1_percent_with_isconstant():
-    T = np.random.uniform(-1, 1, [64])
+    T = rng.RNG.uniform(-1, 1, size=64)
     isconstant_func = functools.partial(
         naive.isconstant_func_stddev_threshold, stddev_threshold=0.5
     )
@@ -279,9 +276,7 @@ def test_stimp_1_percent_with_isconstant():
     min_m = 3
     n = T.shape[0] - min_m + 1
 
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
+    state = rng.get_state()
     pan = stimp(
         T,
         min_m=min_m,
@@ -298,7 +293,7 @@ def test_stimp_1_percent_with_isconstant():
 
     ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    np.random.seed(seed)
+    rng.set_state(state)
     for idx, m in enumerate(pan.M_[:n]):
         zone = int(np.ceil(m / 4))
         s = zone
@@ -347,7 +342,7 @@ def test_stimp_1_percent_with_isconstant():
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
 def test_stimped_with_isconstant(dask_cluster):
-    T = np.random.uniform(-1, 1, [64])
+    T = rng.RNG.uniform(-1, 1, size=64)
     isconstant_func = functools.partial(
         naive.isconstant_func_stddev_threshold, stddev_threshold=0.5
     )

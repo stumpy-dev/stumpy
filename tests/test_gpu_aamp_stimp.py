@@ -4,6 +4,8 @@ import numpy as np
 import numpy.testing as npt
 from numba import cuda
 
+from stumpy import rng
+
 if cuda.is_available():
     from stumpy.gpu_aamp_stimp import gpu_aamp_stimp
 else:  # pragma: no cover
@@ -27,7 +29,7 @@ if not cuda.is_available():  # pragma: no cover
 
 T = [
     np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
-    np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+    rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64),
 ]
 
 

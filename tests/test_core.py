@@ -1891,66 +1891,66 @@ def test_update_incremental_PI_egressTrue_MemoryCheck():
     # a new data point is appended. However, the updated matrix profile index for the
     # middle subsequence `s` should still refer to  the first subsequence in
     # the historical data.
-    rng.fix_state()
-    T = rng.RNG.random(64)
-    m = 3
-    excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
+    with rng.fix_state():
+        T = rng.RNG.random(64)
+        m = 3
+        excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
 
-    s = rng.RNG.random(m)
-    T[:m] = s
-    T[30 : 30 + m] = s
-    T[-m:] = s
+        s = rng.RNG.random(m)
+        T[:m] = s
+        T[30 : 30 + m] = s
+        T[-m:] = s
 
-    t = rng.RNG.random()  # new data point
-    T_with_t = np.append(T, t)
+        t = rng.RNG.random()  # new data point
+        T_with_t = np.append(T, t)
 
-    # In egress=True mode, a new data point, t, is being appended
-    # to the historical data, T, while the oldest data point is
-    # being removed. Therefore, the first  subsequence in T
-    # and the last subsequence does not get a chance to meet each
-    # other. Therefore, their pairwise distances should be excluded
-    # from the distance matrix.
-    D = naive.distance_matrix(T_with_t, T_with_t, m)
-    D[-1, 0] = np.inf
-    D[0, -1] = np.inf
+        # In egress=True mode, a new data point, t, is being appended
+        # to the historical data, T, while the oldest data point is
+        # being removed. Therefore, the first  subsequence in T
+        # and the last subsequence does not get a chance to meet each
+        # other. Therefore, their pairwise distances should be excluded
+        # from the distance matrix.
+        D = naive.distance_matrix(T_with_t, T_with_t, m)
+        D[-1, 0] = np.inf
+        D[0, -1] = np.inf
 
-    l = len(T_with_t) - m + 1
-    for i in range(l):
-        core.apply_exclusion_zone(D[i], i, excl_zone, np.inf)
-
-    T_new = np.append(T[1:], t)
-    dist_profile = naive.distance_profile(T_new[-m:], T_new, m)
-    core.apply_exclusion_zone(dist_profile, len(dist_profile) - 1, excl_zone, np.inf)
-
-    for k in range(1, 4):
-        # ref
-        P = np.empty((l, k), dtype=np.float64)
-        I = np.empty((l, k), dtype=np.int64)
+        l = len(T_with_t) - m + 1
         for i in range(l):
-            IDX = np.argsort(D[i], kind="mergesort")[:k]
-            I[i] = IDX
-            P[i] = D[i, IDX]
+            core.apply_exclusion_zone(D[i], i, excl_zone, np.inf)
 
-        P_ref = P[1:].copy()
-        I_ref = I[1:].copy()
-
-        # comp
-        mp = naive.stump(T, m, row_wise=True, k=k)
-        P_comp = mp[:, :k].astype(np.float64)
-        I_comp = mp[:, k : 2 * k].astype(np.int64)
-
-        P_comp[:-1] = P_comp[1:]
-        P_comp[-1] = np.inf
-        I_comp[:-1] = I_comp[1:]
-        I_comp[-1] = -1
-        core._update_incremental_PI(
-            dist_profile, P_comp, I_comp, excl_zone, n_appended=1
+        T_new = np.append(T[1:], t)
+        dist_profile = naive.distance_profile(T_new[-m:], T_new, m)
+        core.apply_exclusion_zone(
+            dist_profile, len(dist_profile) - 1, excl_zone, np.inf
         )
 
-        npt.assert_almost_equal(P_ref, P_comp)
-        npt.assert_almost_equal(I_ref, I_comp)
+        for k in range(1, 4):
+            # ref
+            P = np.empty((l, k), dtype=np.float64)
+            I = np.empty((l, k), dtype=np.int64)
+            for i in range(l):
+                IDX = np.argsort(D[i], kind="mergesort")[:k]
+                I[i] = IDX
+                P[i] = D[i, IDX]
 
-    rng.unfix_state()
+            P_ref = P[1:].copy()
+            I_ref = I[1:].copy()
+
+            # comp
+            mp = naive.stump(T, m, row_wise=True, k=k)
+            P_comp = mp[:, :k].astype(np.float64)
+            I_comp = mp[:, k : 2 * k].astype(np.int64)
+
+            P_comp[:-1] = P_comp[1:]
+            P_comp[-1] = np.inf
+            I_comp[:-1] = I_comp[1:]
+            I_comp[-1] = -1
+            core._update_incremental_PI(
+                dist_profile, P_comp, I_comp, excl_zone, n_appended=1
+            )
+
+            npt.assert_almost_equal(P_ref, P_comp)
+            npt.assert_almost_equal(I_ref, I_comp)
 
 
 def test_check_self_join():

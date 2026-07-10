@@ -4,7 +4,7 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import config, core
+from stumpy import config, core, rng
 from stumpy.aampi import aampi
 
 substitution_locations = [(slice(0, 0), 0, -1, slice(1, 3), [0, 3])]
@@ -20,14 +20,13 @@ def test_aampi_self_join():
     m = 3
 
     for p in [1.0, 2.0, 3.0]:
-        seed = np.random.randint(100000)
-        np.random.seed(seed)
+        state = rng.get_state()
 
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
         stream = aampi(T, m, egress=False, p=p)
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
             stream.update(t)
 
         comp_P = stream.P_
@@ -56,13 +55,13 @@ def test_aampi_self_join():
         npt.assert_almost_equal(ref_left_P, comp_left_P)
         npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-        np.random.seed(seed)
+        rng.set_state(state)
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
         T = pd.Series(T)
         stream = aampi(T, m, egress=False, p=p)
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
             stream.update(t)
 
         comp_P = stream.P_
@@ -83,11 +82,10 @@ def test_aampi_self_join_egress():
     m = 3
 
     for p in [1.0, 2.0, 3.0]:
-        seed = np.random.randint(100000)
-        np.random.seed(seed)
+        state = rng.get_state()
 
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
 
         ref_mp = naive.aampi_egress(T, m, p=p)
         ref_P = ref_mp.P_.copy()
@@ -113,7 +111,7 @@ def test_aampi_self_join_egress():
         npt.assert_almost_equal(ref_left_I, comp_left_I)
 
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
 
             ref_mp.update(t)
             stream.update(t)
@@ -138,8 +136,8 @@ def test_aampi_self_join_egress():
             npt.assert_almost_equal(ref_left_P, comp_left_P)
             npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-        np.random.seed(seed)
-        T = np.random.rand(n)
+        rng.set_state(state)
+        T = rng.RNG.random(n)
         T = pd.Series(T)
 
         ref_mp = naive.aampi_egress(T, m, p=p)
@@ -158,7 +156,7 @@ def test_aampi_self_join_egress():
         npt.assert_almost_equal(ref_I, comp_I)
 
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
 
             ref_mp.update(t)
             stream.update(t)
@@ -189,20 +187,17 @@ def test_aampi_self_join_egress():
 def test_aampi_init_nan_inf_self_join(substitute, substitution_locations):
     m = 3
 
-    seed = np.random.randint(100000)
-    # seed = 58638
-
     for substitution_location in substitution_locations:
-        np.random.seed(seed)
+        state = rng.get_state()
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
 
         if substitution_location == -1:
             substitution_location = T.shape[0] - 1
         T[substitution_location] = substitute
         stream = aampi(T, m, egress=False)
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
             stream.update(t)
 
         comp_P = stream.P_
@@ -218,9 +213,9 @@ def test_aampi_init_nan_inf_self_join(substitute, substitution_locations):
         npt.assert_almost_equal(ref_P, comp_P)
         npt.assert_almost_equal(ref_I, comp_I)
 
-        np.random.seed(seed)
+        rng.set_state(state)
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
 
         if substitution_location == -1:  # pragma: no cover
             substitution_location = T.shape[0] - 1
@@ -228,7 +223,7 @@ def test_aampi_init_nan_inf_self_join(substitute, substitution_locations):
         T = pd.Series(T)
         stream = aampi(T, m, egress=False)
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
             stream.update(t)
 
         comp_P = stream.P_
@@ -245,13 +240,10 @@ def test_aampi_init_nan_inf_self_join(substitute, substitution_locations):
 def test_aampi_init_nan_inf_self_join_egress(substitute, substitution_locations):
     m = 3
 
-    seed = np.random.randint(100000)
-    # seed = 58638
-
     for substitution_location in substitution_locations:
-        np.random.seed(seed)
+        state = rng.get_state()
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
 
         if substitution_location == -1:
             substitution_location = T.shape[0] - 1
@@ -281,7 +273,7 @@ def test_aampi_init_nan_inf_self_join_egress(substitute, substitution_locations)
         npt.assert_almost_equal(ref_left_I, comp_left_I)
 
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
 
             ref_mp.update(t)
             stream.update(t)
@@ -306,9 +298,9 @@ def test_aampi_init_nan_inf_self_join_egress(substitute, substitution_locations)
             npt.assert_almost_equal(ref_left_P, comp_left_P)
             npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-        np.random.seed(seed)
+        rng.set_state(state)
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
         T = pd.Series(T)
 
         ref_mp = naive.aampi_egress(T, m)
@@ -330,7 +322,7 @@ def test_aampi_init_nan_inf_self_join_egress(substitute, substitution_locations)
         naive.replace_inf(comp_left_P)
 
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
 
             ref_mp.update(t)
             stream.update(t)
@@ -361,12 +353,10 @@ def test_aampi_init_nan_inf_self_join_egress(substitute, substitution_locations)
 def test_aampi_stream_nan_inf_self_join(substitute, substitution_locations):
     m = 3
 
-    seed = np.random.randint(100000)
-
     for substitution_location in substitution_locations:
-        np.random.seed(seed)
+        state = rng.get_state()
         n = 30
-        T = np.random.rand(64)
+        T = rng.RNG.random(64)
 
         stream = aampi(T[:n], m, egress=False)
         if substitution_location == -1:
@@ -389,8 +379,8 @@ def test_aampi_stream_nan_inf_self_join(substitute, substitution_locations):
         npt.assert_almost_equal(ref_P, comp_P)
         npt.assert_almost_equal(ref_I, comp_I)
 
-        np.random.seed(seed)
-        T = np.random.rand(64)
+        rng.set_state(state)
+        T = rng.RNG.random(64)
 
         stream = aampi(pd.Series(T[:n]), m, egress=False)
         if substitution_location == -1:  # pragma: no cover
@@ -413,12 +403,10 @@ def test_aampi_stream_nan_inf_self_join(substitute, substitution_locations):
 def test_aampi_stream_nan_inf_self_join_egress(substitute, substitution_locations):
     m = 3
 
-    seed = np.random.randint(100000)
-
     for substitution_location in substitution_locations:
-        np.random.seed(seed)
+        state = rng.get_state()
         n = 30
-        T = np.random.rand(64)
+        T = rng.RNG.random(64)
 
         ref_mp = naive.aampi_egress(T[:n], m)
         ref_P = ref_mp.P_.copy()
@@ -470,8 +458,8 @@ def test_aampi_stream_nan_inf_self_join_egress(substitute, substitution_location
             npt.assert_almost_equal(ref_left_P, comp_left_P)
             npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-        np.random.seed(seed)
-        T = np.random.rand(64)
+        rng.set_state(state)
+        T = rng.RNG.random(64)
 
         ref_mp = naive.aampi_egress(T[:n], m)
         ref_P = ref_mp.P_.copy()
@@ -526,13 +514,12 @@ def test_aampi_stream_nan_inf_self_join_egress(substitute, substitution_location
 def test_aampi_constant_subsequence_self_join():
     m = 3
 
-    seed = np.random.randint(100000)
-    np.random.seed(seed)
+    state = rng.get_state()
 
     T = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(10, dtype=np.float64)))
     stream = aampi(T, m, egress=False)
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         stream.update(t)
 
     comp_P = stream.P_
@@ -548,12 +535,12 @@ def test_aampi_constant_subsequence_self_join():
     npt.assert_almost_equal(ref_P, comp_P)
     # npt.assert_almost_equal(ref_I, comp_I)
 
-    np.random.seed(seed)
+    rng.set_state(state)
     T = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(10, dtype=np.float64)))
     T = pd.Series(T)
     stream = aampi(T, m, egress=False)
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         stream.update(t)
 
     comp_P = stream.P_
@@ -568,8 +555,7 @@ def test_aampi_constant_subsequence_self_join():
 def test_aampi_constant_subsequence_self_join_egress():
     m = 3
 
-    seed = np.random.randint(100000)
-    np.random.seed(seed)
+    state = rng.get_state()
 
     T = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(10, dtype=np.float64)))
 
@@ -597,7 +583,7 @@ def test_aampi_constant_subsequence_self_join_egress():
     # npt.assert_almost_equal(ref_left_I, comp_left_I)
 
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         ref_mp.update(t)
         stream.update(t)
 
@@ -621,7 +607,7 @@ def test_aampi_constant_subsequence_self_join_egress():
         npt.assert_almost_equal(ref_left_P, comp_left_P)
         # npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-    np.random.seed(seed)
+    rng.set_state(state)
     T = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(10, dtype=np.float64)))
     T = pd.Series(T)
 
@@ -649,7 +635,7 @@ def test_aampi_constant_subsequence_self_join_egress():
     # npt.assert_almost_equal(ref_left_I, comp_left_I)
 
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         ref_mp.update(t)
         stream.update(t)
 
@@ -677,9 +663,7 @@ def test_aampi_constant_subsequence_self_join_egress():
 def test_aampi_update_constant_subsequence_self_join():
     m = 3
 
-    seed = np.random.randint(100000)
-    np.random.seed(seed)
-    T_full = np.random.rand(64)  # generate random data
+    T_full = rng.RNG.random(64)  # generate random data
     T_full[40:55] = 3  # add constant level interval
 
     T_stream = T_full[:10].copy()
@@ -715,10 +699,7 @@ def test_aampi_update_constant_subsequence_self_join():
 def test_aampi_update_constant_subsequence_self_join_egress():
     m = 3
 
-    seed = np.random.randint(100000)
-    np.random.seed(seed)
-
-    T_full = np.random.rand(64)  # generate random data
+    T_full = rng.RNG.random(64)  # generate random data
     T_full[40:55] = 3  # add constant level interval
     T_stream = T_full[:10].copy()
 
@@ -778,16 +759,15 @@ def test_aampi_update_constant_subsequence_self_join_egress():
 
 def test_aampi_identical_subsequence_self_join():
     m = 3
-    seed = np.random.randint(100000)
-    np.random.seed(seed)
+    state = rng.get_state()
 
-    identical = np.random.rand(8)
-    T = np.random.rand(20)
+    identical = rng.RNG.random(8)
+    T = rng.RNG.random(20)
     T[1 : 1 + identical.shape[0]] = identical
     T[11 : 11 + identical.shape[0]] = identical
     stream = aampi(T, m, egress=False)
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         stream.update(t)
 
     comp_P = stream.P_
@@ -803,15 +783,15 @@ def test_aampi_identical_subsequence_self_join():
     npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
     # npt.assert_almost_equal(ref_I, comp_I)
 
-    np.random.seed(seed)
-    identical = np.random.rand(8)
-    T = np.random.rand(20)
+    rng.set_state(state)
+    identical = rng.RNG.random(8)
+    T = rng.RNG.random(20)
     T[1 : 1 + identical.shape[0]] = identical
     T[11 : 11 + identical.shape[0]] = identical
     T = pd.Series(T)
     stream = aampi(T, m, egress=False)
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         stream.update(t)
 
     comp_P = stream.P_
@@ -826,11 +806,10 @@ def test_aampi_identical_subsequence_self_join():
 def test_aampi_identical_subsequence_self_join_egress():
     m = 3
 
-    seed = np.random.randint(100000)
-    np.random.seed(seed)
+    state = rng.get_state()
 
-    identical = np.random.rand(8)
-    T = np.random.rand(20)
+    identical = rng.RNG.random(8)
+    T = rng.RNG.random(20)
     T[1 : 1 + identical.shape[0]] = identical
     T[11 : 11 + identical.shape[0]] = identical
 
@@ -860,7 +839,7 @@ def test_aampi_identical_subsequence_self_join_egress():
     # npt.assert_almost_equal(ref_left_I, comp_left_I)
 
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         ref_mp.update(t)
         stream.update(t)
 
@@ -886,9 +865,9 @@ def test_aampi_identical_subsequence_self_join_egress():
         )
         # npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-    np.random.seed(seed)
-    identical = np.random.rand(8)
-    T = np.random.rand(20)
+    rng.set_state(state)
+    identical = rng.RNG.random(8)
+    T = rng.RNG.random(20)
     T[1 : 1 + identical.shape[0]] = identical
     T[11 : 11 + identical.shape[0]] = identical
     T = pd.Series(T)
@@ -919,7 +898,7 @@ def test_aampi_identical_subsequence_self_join_egress():
     # npt.assert_almost_equal(ref_left_I, comp_left_I)
 
     for i in range(34):
-        t = np.random.rand()
+        t = rng.RNG.random()
         ref_mp.update(t)
         stream.update(t)
 
@@ -947,7 +926,7 @@ def test_aampi_identical_subsequence_self_join_egress():
 
 
 def test_aampi_profile_index_match():
-    T_full = np.random.rand(64)
+    T_full = rng.RNG.random(64)
     m = 3
     T_full_subseq = core.rolling_window(T_full, m)
     warm_start = 8
@@ -984,14 +963,13 @@ def test_aampi_self_join_KNN():
     m = 3
     for k in range(2, 4):
         for p in [1.0, 2.0, 3.0]:
-            seed = np.random.randint(100000)
-            np.random.seed(seed)
+            state = rng.get_state()
 
             n = 30
-            T = np.random.rand(n)
+            T = rng.RNG.random(n)
             stream = aampi(T, m, egress=False, p=p, k=k)
             for i in range(34):
-                t = np.random.rand()
+                t = rng.RNG.random()
                 stream.update(t)
 
             comp_P = stream.P_
@@ -1021,13 +999,13 @@ def test_aampi_self_join_KNN():
             npt.assert_almost_equal(ref_left_P, comp_left_P)
             npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-            np.random.seed(seed)
+            rng.set_state(state)
             n = 30
-            T = np.random.rand(n)
+            T = rng.RNG.random(n)
             T = pd.Series(T)
             stream = aampi(T, m, egress=False, p=p, k=k)
             for i in range(34):
-                t = np.random.rand()
+                t = rng.RNG.random()
                 stream.update(t)
 
             comp_P = stream.P_
@@ -1048,11 +1026,10 @@ def test_aampi_self_join_egress_KNN():
     m = 3
     for k in range(2, 4):
         for p in [1.0, 2.0, 3.0]:
-            seed = np.random.randint(100000)
-            np.random.seed(seed)
+            state = rng.get_state()
 
             n = 30
-            T = np.random.rand(n)
+            T = rng.RNG.random(n)
 
             ref_mp = naive.aampi_egress(T, m, p=p, k=k)
             ref_P = ref_mp.P_.copy()
@@ -1078,7 +1055,7 @@ def test_aampi_self_join_egress_KNN():
             npt.assert_almost_equal(ref_left_I, comp_left_I)
 
             for i in range(34):
-                t = np.random.rand()
+                t = rng.RNG.random()
 
                 ref_mp.update(t)
                 stream.update(t)
@@ -1103,8 +1080,8 @@ def test_aampi_self_join_egress_KNN():
                 npt.assert_almost_equal(ref_left_P, comp_left_P)
                 npt.assert_almost_equal(ref_left_I, comp_left_I)
 
-            np.random.seed(seed)
-            T = np.random.rand(n)
+            rng.set_state(state)
+            T = rng.RNG.random(n)
             T = pd.Series(T)
 
             ref_mp = naive.aampi_egress(T, m, p=p, k=k)
@@ -1123,7 +1100,7 @@ def test_aampi_self_join_egress_KNN():
             npt.assert_almost_equal(ref_I, comp_I)
 
             for i in range(34):
-                t = np.random.rand()
+                t = rng.RNG.random()
 
                 ref_mp.update(t)
                 stream.update(t)
@@ -1153,11 +1130,8 @@ def test_aampi_self_join_egress_passing_mp():
     m = 3
 
     for p in [1.0, 2.0, 3.0]:
-        seed = np.random.randint(100000)
-        np.random.seed(seed)
-
         n = 30
-        T = np.random.rand(n)
+        T = rng.RNG.random(n)
         mp = naive.aamp(T, m, p=p)
 
         ref_mp = naive.aampi_egress(T, m, p=p, mp=mp)
@@ -1184,7 +1158,7 @@ def test_aampi_self_join_egress_passing_mp():
         npt.assert_almost_equal(ref_left_I, comp_left_I)
 
         for i in range(34):
-            t = np.random.rand()
+            t = rng.RNG.random()
 
             ref_mp.update(t)
             stream.update(t)
