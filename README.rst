@@ -82,7 +82,7 @@ Typical usage (1-dimensional time series data) with `STUMP <https://stumpy.readt
     import numpy as np
     
     if __name__ == "__main__":
-        your_time_series = np.random.rand(10000)
+        your_time_series = np.random.default_rng().random(10000)
         window_size = 50  # Approximately, how many data points might be found in a pattern 
     
         matrix_profile = stumpy.stump(your_time_series, m=window_size)
@@ -97,7 +97,7 @@ Distributed usage for 1-dimensional time series data with Dask Distributed via `
 
     if __name__ == "__main__":
         with Client() as dask_client:
-            your_time_series = np.random.rand(10000)
+            your_time_series = np.random.default_rng().random(10000)
             window_size = 50  # Approximately, how many data points might be found in a pattern 
     
             matrix_profile = stumpy.stumped(dask_client, your_time_series, m=window_size)
@@ -111,7 +111,7 @@ GPU usage for 1-dimensional time series data with `GPU-STUMP <https://stumpy.rea
     from numba import cuda
 
     if __name__ == "__main__":
-        your_time_series = np.random.rand(10000)
+        your_time_series = np.random.default_rng().random(10000)
         window_size = 50  # Approximately, how many data points might be found in a pattern
         all_gpu_devices = [device.id for device in cuda.list_devices()]  # Get a list of all available GPU devices
 
@@ -125,7 +125,7 @@ Multi-dimensional time series data with `MSTUMP <https://stumpy.readthedocs.io/e
     import numpy as np
 
     if __name__ == "__main__":
-        your_time_series = np.random.rand(3, 1000)  # Each row represents data from a different dimension while each column represents data from the same dimension
+        your_time_series = np.random.default_rng().random((3, 1000))  # Each row represents data from a different dimension while each column represents data from the same dimension
         window_size = 50  # Approximately, how many data points might be found in a pattern
 
         matrix_profile, matrix_profile_indices = stumpy.mstump(your_time_series, m=window_size)
@@ -140,7 +140,7 @@ Distributed multi-dimensional time series data analysis with Dask Distributed `M
 
     if __name__ == "__main__":
         with Client() as dask_client:
-            your_time_series = np.random.rand(3, 1000)   # Each row represents data from a different dimension while each column represents data from the same dimension
+            your_time_series = np.random.default_rng().random((3, 1000))   # Each row represents data from a different dimension while each column represents data from the same dimension
             window_size = 50  # Approximately, how many data points might be found in a pattern
 
             matrix_profile, matrix_profile_indices = stumpy.mstumped(dask_client, your_time_series, m=window_size)
@@ -153,7 +153,7 @@ Time Series Chains with `Anchored Time Series Chains (ATSC) <https://stumpy.read
     import numpy as np
     
     if __name__ == "__main__":
-        your_time_series = np.random.rand(10000)
+        your_time_series = np.random.default_rng().random(10000)
         window_size = 50  # Approximately, how many data points might be found in a pattern 
         
         matrix_profile = stumpy.stump(your_time_series, m=window_size)
@@ -174,7 +174,7 @@ Semantic Segmentation with `Fast Low-cost Unipotent Semantic Segmentation (FLUSS
     import numpy as np
 
     if __name__ == "__main__":
-        your_time_series = np.random.rand(10000)
+        your_time_series = np.random.default_rng().random(10000)
         window_size = 50  # Approximately, how many data points might be found in a pattern
 
         matrix_profile = stumpy.stump(your_time_series, m=window_size)
@@ -236,7 +236,7 @@ In order to fully understand and appreciate the underlying algorithms and applic
 Performance
 -----------
 
-We tested the performance of computing the exact matrix profile using the Numba JIT compiled version of the code on randomly generated time series data with various lengths (i.e., ``np.random.rand(n)``) along with different `CPU and GPU hardware resources <hardware_>`_. 
+We tested the performance of computing the exact matrix profile using the Numba JIT compiled version of the code on randomly generated time series data with various lengths (i.e., ``np.random.default_rng().random(n)``) along with different `CPU and GPU hardware resources <hardware_>`_. 
 
 .. image:: https://raw.githubusercontent.com/stumpy-dev/stumpy/main/docs/images/performance.png
     :alt: STUMPY Performance Plot
