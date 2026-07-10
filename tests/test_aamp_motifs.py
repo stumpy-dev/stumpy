@@ -239,3 +239,22 @@ def test_aamp_match_T_subseq_isfinite(Q, T):
         )
 
         npt.assert_almost_equal(left, right)
+
+
+def test_aamp_match_query_idx():
+    T = np.random.uniform(-1000, 1000, [64])
+    m = 8
+    query_idx = 20
+    Q = T[query_idx : query_idx + m]
+
+    # `mass_absolute` zeroes the self-match distance when told where `Q` lives.
+    D = core.mass_absolute(Q, T, query_idx=query_idx)
+    npt.assert_almost_equal(D[query_idx], 0.0)
+
+    # A `Q` that is not the subsequence at `query_idx` must still return the
+    # self-match first, and must warn, exactly as `stumpy.match` does.
+    with pytest.warns(UserWarning):
+        out = aamp_match(Q + 0.5, T, query_idx=query_idx, max_distance=1.0)
+
+    assert out[0, 1] == query_idx
+    npt.assert_almost_equal(out[0, 0], 0.0)

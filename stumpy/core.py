@@ -1372,7 +1372,7 @@ def mass_absolute(Q, T, T_subseq_isfinite=None, p=2.0, query_idx=None):
 
     check_window_size(m, max_size=Q.shape[0])
 
-    if query_idx is not None:  # pragma: no cover
+    if query_idx is not None:
         query_idx = int(query_idx)
         T_isfinite_idx = np.isfinite(T[query_idx : query_idx + m])
         if not np.all(Q_isfinite == T_isfinite_idx) or not np.allclose(
@@ -1407,7 +1407,7 @@ def mass_absolute(Q, T, T_subseq_isfinite=None, p=2.0, query_idx=None):
         if T_subseq_isfinite is None:
             T, T_subseq_isfinite = preprocess_non_normalized(T, m)
         distance_profile[:] = _mass_absolute(Q, T, p)
-        if query_idx is not None:  # pragma: no cover
+        if query_idx is not None:
             distance_profile[query_idx] = 0.0
 
         distance_profile[~T_subseq_isfinite] = np.inf
