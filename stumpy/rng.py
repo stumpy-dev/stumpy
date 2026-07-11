@@ -4,7 +4,7 @@ import numpy as np
 
 # Note that an initial SEED = 0 is disallowed
 # in order to account for unit testing
-SEED = np.random.randint(1, 4_294_967_295)
+SEED = np.random.randint(1, 4_294_967_295, dtype=np.uint32)
 RNG = np.random.RandomState(seed=SEED)
 
 
