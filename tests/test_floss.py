@@ -475,7 +475,7 @@ def test_floss_with_isconstant():
         ref_Q_isconstant = isconstant_custom_func(ref_Q, m)[0]
         ref_T_subseq_isconstant = isconstant_custom_func(ref_T, m)
         D = naive.distance_profile(ref_Q, ref_T, m)
-        for j in range(len(D)):
+        for j in range(len(D)):  # pragma: no cover
             if ref_Q_isconstant and ref_T_subseq_isconstant[j]:
                 D[j] = 0
             elif ref_Q_isconstant or ref_T_subseq_isconstant[j]:
