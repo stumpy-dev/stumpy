@@ -5,7 +5,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import core
+from stumpy import core, rng
 from stumpy.stamp import _mass_PI, stamp
 
 test_data = [
@@ -14,8 +14,8 @@ test_data = [
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [8]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
     ),
 ]
 
@@ -151,7 +151,7 @@ def test_stamp_nan_zero_mean_self_join():
 
 def test_stamp_mass_PI_with_isconstant_case1():
     # case1: The query `Q` is not constant
-    T_B = np.random.uniform(-1, 1, [64])
+    T_B = rng.RNG.uniform(-1, 1, [64])
     isconstant_custom_func = functools.partial(
         naive.isconstant_func_stddev_threshold, stddev_threshold=0.5
     )
@@ -162,7 +162,7 @@ def test_stamp_mass_PI_with_isconstant_case1():
     T_B_subseq_isconstant = naive.rolling_isconstant(T_B, m, isconstant_custom_func)
     M_T, Σ_T = core.compute_mean_std(T_B, m)
 
-    trivial_idx = np.random.choice(np.flatnonzero(~T_B_subseq_isconstant))
+    trivial_idx = rng.RNG.choice(np.flatnonzero(~T_B_subseq_isconstant))
     Q = T_B[trivial_idx : trivial_idx + m]
 
     ref_P, ref_I, ref_left_I, ref_right_I = naive.mass_PI(
@@ -220,7 +220,7 @@ def test_stamp_mass_PI_with_isconstant_case1():
 
 def test_stamp_mass_PI_with_isconstant_case2():
     # case2: The query `Q` is constant
-    T_B = np.random.uniform(-1, 1, [64])
+    T_B = rng.RNG.uniform(-1, 1, [64])
     isconstant_custom_func = functools.partial(
         naive.isconstant_func_stddev_threshold, stddev_threshold=0.5
     )
@@ -231,7 +231,7 @@ def test_stamp_mass_PI_with_isconstant_case2():
     T_B_subseq_isconstant = naive.rolling_isconstant(T_B, m, isconstant_custom_func)
     M_T, Σ_T = core.compute_mean_std(T_B, m)
 
-    trivial_idx = np.random.choice(np.flatnonzero(T_B_subseq_isconstant))
+    trivial_idx = rng.RNG.choice(np.flatnonzero(T_B_subseq_isconstant))
     Q = T_B[trivial_idx : trivial_idx + m]
 
     ref_P, ref_I, ref_left_I, ref_right_I = naive.mass_PI(

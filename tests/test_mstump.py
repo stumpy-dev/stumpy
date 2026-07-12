@@ -7,7 +7,7 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from stumpy import config, core
+from stumpy import config, core, rng
 from stumpy.mstump import (
     _get_first_mstump_profile,
     _get_multi_QT,
@@ -29,7 +29,7 @@ def naive_rolling_window_dot_product(Q, T):
 
 test_data = [
     (np.array([[584, -11, 23, 79, 1001, 0, -19]], dtype=np.float64), 3),
-    (np.random.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
+    (rng.RNG.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
 ]
 
 substitution_locations = [(slice(0, 0), 0, -1, slice(1, 3), [0, 3])]
@@ -37,35 +37,35 @@ substitution_values = [np.nan, np.inf]
 
 
 def test_multi_mass_seeded():
-    np.random.seed(5)
-    T = np.random.uniform(-1000, 1000, [3, 10]).astype(np.float64)
-    m = 5
+    with rng.fix_seed(5):
+        T = rng.RNG.uniform(-1000, 1000, [3, 10]).astype(np.float64)
+        m = 5
 
-    trivial_idx = 2
+        trivial_idx = 2
 
-    Q = T[:, trivial_idx : trivial_idx + m]
+        Q = T[:, trivial_idx : trivial_idx + m]
 
-    ref = naive.multi_mass(Q, T, m)
+        ref = naive.multi_mass(Q, T, m)
 
-    T_subseq_isconstant = core.rolling_isconstant(T, m)
-    M_T, Σ_T = core.compute_mean_std(T, m)
+        T_subseq_isconstant = core.rolling_isconstant(T, m)
+        M_T, Σ_T = core.compute_mean_std(T, m)
 
-    Q_subseq_isconstant = np.expand_dims(T_subseq_isconstant[:, trivial_idx], 1)
+        Q_subseq_isconstant = np.expand_dims(T_subseq_isconstant[:, trivial_idx], 1)
 
-    comp = _multi_mass(
-        Q,
-        T,
-        m,
-        M_T,
-        Σ_T,
-        M_T[:, trivial_idx],
-        Σ_T[:, trivial_idx],
-        T_subseq_isconstant=T_subseq_isconstant,
-        Q_subseq_isconstant=Q_subseq_isconstant,
-        query_idx=trivial_idx,
-    )
+        comp = _multi_mass(
+            Q,
+            T,
+            m,
+            M_T,
+            Σ_T,
+            M_T[:, trivial_idx],
+            Σ_T[:, trivial_idx],
+            T_subseq_isconstant=T_subseq_isconstant,
+            Q_subseq_isconstant=Q_subseq_isconstant,
+            query_idx=trivial_idx,
+        )
 
-    npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+        npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -222,7 +222,7 @@ def test_mdl(T, m):
 
 
 def test_naive_mstump():
-    T = np.random.uniform(-1000, 1000, [1, 1000]).astype(np.float64)
+    T = rng.RNG.uniform(-1000, 1000, [1, 1000]).astype(np.float64)
     m = 20
 
     zone = int(np.ceil(m / 4))
@@ -339,7 +339,7 @@ def test_mstump_wrapper_include(T, m):
 
 def test_constant_subsequence_self_join():
     T_A = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
-    T = np.array([T_A, T_A, np.random.rand(T_A.shape[0])])
+    T = np.array([T_A, T_A, rng.RNG.rand(T_A.shape[0])])
     m = 3
 
     excl_zone = int(np.ceil(m / 4))
@@ -351,11 +351,11 @@ def test_constant_subsequence_self_join():
 
 
 def test_identical_subsequence_self_join():
-    identical = np.random.rand(8)
-    T_A = np.random.rand(20)
+    identical = rng.RNG.rand(8)
+    T_A = rng.RNG.rand(20)
     T_A[1 : 1 + identical.shape[0]] = identical
     T_A[11 : 11 + identical.shape[0]] = identical
-    T = np.array([T_A, T_A, np.random.rand(T_A.shape[0])])
+    T = np.array([T_A, T_A, rng.RNG.rand(T_A.shape[0])])
     m = 3
 
     excl_zone = int(np.ceil(m / 4))
@@ -414,13 +414,13 @@ def test_multi_mass_with_isconstant():
     m = 8
 
     # case 1: Q is not multi-subseq of T
-    T = np.random.uniform(-1000, 1000, size=[d, n])
-    T_subseq_isconstant = np.random.choice(
+    T = rng.RNG.uniform(-1000, 1000, size=[d, n])
+    T_subseq_isconstant = rng.RNG.choice(
         [True, False], size=(d, n - m + 1), replace=True
     )
 
-    Q = np.random.uniform(-1000, 1000, size=[d, m])
-    Q_subseq_isconstant = np.random.choice([True, False], size=(d, 1), replace=True)
+    Q = rng.RNG.uniform(-1000, 1000, size=[d, m])
+    Q_subseq_isconstant = rng.RNG.choice([True, False], size=(d, 1), replace=True)
 
     ref = naive.multi_mass(
         Q,
@@ -451,12 +451,12 @@ def test_multi_mass_with_isconstant():
     npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
 
     # case 2: Q is a multi-subseq of T
-    T = np.random.uniform(-1000, 1000, size=[d, n])
-    T_subseq_isconstant = np.random.choice(
+    T = rng.RNG.uniform(-1000, 1000, size=[d, n])
+    T_subseq_isconstant = rng.RNG.choice(
         [True, False], size=(d, n - m + 1), replace=True
     )
 
-    query_idx = np.random.randint(0, n - m + 1)
+    query_idx = rng.RNG.randint(0, n - m + 1)
     Q = T[:, query_idx : query_idx + m]
     Q_subseq_isconstant = np.expand_dims(T_subseq_isconstant[:, query_idx], 1)
 
@@ -496,8 +496,8 @@ def test_multi_distance_profile_with_isconstant_case1():
     n = 64
     m = 8
 
-    T = np.random.uniform(-1000, 1000, size=[d, n])
-    T_subseq_isconstant = np.random.choice(
+    T = rng.RNG.uniform(-1000, 1000, size=[d, n])
+    T_subseq_isconstant = rng.RNG.choice(
         [True, False], size=(d, n - m + 1), replace=True
     )
 
@@ -519,12 +519,12 @@ def test_multi_distance_profile_with_isconstant_case2():
     n = 64
     m = 8
 
-    T = np.random.uniform(-1000, 1000, size=[d, n])
+    T = rng.RNG.uniform(-1000, 1000, size=[d, n])
     T_subseq_isconstant = functools.partial(
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
     )
 
-    query_idx = np.random.randint(0, n - m + 1)
+    query_idx = rng.RNG.randint(0, n - m + 1)
 
     ref_D = naive.multi_distance_profile(
         query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
@@ -543,16 +543,16 @@ def test_multi_distance_profile_with_isconstant_case3():
     n = 64
     m = 8
 
-    T = np.random.uniform(-1000, 1000, size=[d, n])
+    T = rng.RNG.uniform(-1000, 1000, size=[d, n])
     T_subseq_isconstant = [
         None,
-        np.random.choice([True, False], n - m + 1, replace=True),
+        rng.RNG.choice([True, False], n - m + 1, replace=True),
         functools.partial(
             naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
         ),
     ]
 
-    query_idx = np.random.randint(0, n - m + 1)
+    query_idx = rng.RNG.randint(0, n - m + 1)
 
     ref_D = naive.multi_distance_profile(
         query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
@@ -570,7 +570,7 @@ def test_mstump_with_isconstant_case1():
     n = 64
     m = 8
 
-    T = np.random.uniform(-1000, 1000, size=[d, n])
+    T = rng.RNG.uniform(-1000, 1000, size=[d, n])
     T_subseq_isconstant = functools.partial(
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
     )
@@ -592,10 +592,10 @@ def test_mstump_with_isconstant_case2():
     n = 64
     m = 8
 
-    T = np.random.uniform(-1000, 1000, size=[d, n])
+    T = rng.RNG.uniform(-1000, 1000, size=[d, n])
     T_subseq_isconstant = [
         None,
-        np.random.choice([True, False], n - m + 1, replace=True),
+        rng.RNG.choice([True, False], n - m + 1, replace=True),
         functools.partial(
             naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
         ),

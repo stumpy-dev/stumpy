@@ -6,7 +6,7 @@ import pytest
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
-from stumpy import config
+from stumpy import config, rng
 from stumpy.maamped import maamped
 
 
@@ -27,7 +27,7 @@ def dask_cluster():
 
 test_data = [
     (np.array([[584, -11, 23, 79, 1001, 0, -19]], dtype=np.float64), 3),
-    (np.random.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
+    (rng.RNG.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
 ]
 
 substitution_locations = [slice(0, 0), 0, -1, slice(1, 3), [0, 3]]
@@ -119,7 +119,7 @@ def test_maamped_constant_subsequence_self_join(dask_cluster):
         T_A = np.concatenate(
             (np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64))
         )
-        T = np.array([T_A, T_A, np.random.rand(T_A.shape[0])])
+        T = np.array([T_A, T_A, rng.RNG.rand(T_A.shape[0])])
         m = 3
 
         excl_zone = int(np.ceil(m / 4))
@@ -133,11 +133,11 @@ def test_maamped_constant_subsequence_self_join(dask_cluster):
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
 def test_maamped_identical_subsequence_self_join(dask_cluster):
     with Client(dask_cluster) as dask_client:
-        identical = np.random.rand(8)
-        T_A = np.random.rand(20)
+        identical = rng.RNG.rand(8)
+        T_A = rng.RNG.rand(20)
         T_A[1 : 1 + identical.shape[0]] = identical
         T_A[11 : 11 + identical.shape[0]] = identical
-        T = np.array([T_A, T_A, np.random.rand(T_A.shape[0])])
+        T = np.array([T_A, T_A, rng.RNG.rand(T_A.shape[0])])
         m = 3
 
         excl_zone = int(np.ceil(m / 4))

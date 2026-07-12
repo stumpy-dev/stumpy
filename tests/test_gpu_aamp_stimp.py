@@ -19,6 +19,8 @@ except ModuleNotFoundError:
 import naive
 import pytest
 
+from stumpy import rng
+
 TEST_THREADS_PER_BLOCK = 10
 
 if not cuda.is_available():  # pragma: no cover
@@ -27,7 +29,7 @@ if not cuda.is_available():  # pragma: no cover
 
 T = [
     np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
-    np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+    rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
 ]
 
 

@@ -3,11 +3,10 @@ import warnings
 from operator import eq, lt
 
 import naive
-import numpy as np
 import pytest
 from numpy import testing as npt
 
-from stumpy import sdp
+from stumpy import rng, sdp
 
 # README
 # Real FFT algorithm performs more efficiently when the length
@@ -113,8 +112,8 @@ def test_sdp(n_T, remainder, comparator):
     n_Q_values = sorted(n_Q for n_Q in set(n_Q_values) if n_Q <= n_T)
 
     for n_Q in n_Q_values:
-        Q = np.random.rand(n_Q)
-        T = np.random.rand(n_T)
+        Q = rng.RNG.rand(n_Q)
+        T = rng.RNG.rand(n_T)
         ref = naive.rolling_window_dot_product(Q, T)
         for func_name in get_sdp_function_names():
             func = getattr(sdp, func_name)
@@ -139,8 +138,8 @@ def test_sdp_power2():
                 n_Q = 2**q
                 for p in range(q, pmax + 1):
                     n_T = 2**p
-                    Q = np.random.rand(n_Q)
-                    T = np.random.rand(n_T)
+                    Q = rng.RNG.rand(n_Q)
+                    T = rng.RNG.rand(n_T)
 
                     ref = naive.rolling_window_dot_product(Q, T)
                     comp = func(Q, T)

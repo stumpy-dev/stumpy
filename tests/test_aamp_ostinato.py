@@ -56,7 +56,7 @@ def test_deterministic_ostinato(seed):
 
 
 @pytest.mark.parametrize(
-    "seed", np.random.choice(np.arange(10000), size=25, replace=False)
+    "seed", rng.RNG.choice(np.arange(10000), size=25, replace=False)
 )
 def test_random_ostinatoed(seed, dask_cluster):
     with Client(dask_cluster) as dask_client:

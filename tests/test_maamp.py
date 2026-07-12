@@ -4,7 +4,7 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import config, core
+from stumpy import config, core, rng
 from stumpy.maamp import (
     _get_first_maamp_profile,
     _multi_mass_absolute,
@@ -16,7 +16,7 @@ from stumpy.maamp import (
 
 test_data = [
     (np.array([[584, -11, 23, 79, 1001, 0, -19]], dtype=np.float64), 3),
-    (np.random.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
+    (rng.RNG.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
 ]
 
 substitution_locations = [(slice(0, 0), 0, -1, slice(1, 3), [0, 3])]
@@ -24,22 +24,22 @@ substitution_values = [np.nan, np.inf]
 
 
 def test_multi_mass_absolute_seeded():
-    np.random.seed(5)
-    T = np.random.uniform(-1000, 1000, [3, 10]).astype(np.float64)
-    m = 5
+    with rng.fix_seed(5):
+        T = rng.RNG.uniform(-1000, 1000, [3, 10]).astype(np.float64)
+        m = 5
 
-    trivial_idx = 2
+        trivial_idx = 2
 
-    Q = T[:, trivial_idx : trivial_idx + m]
+        Q = T[:, trivial_idx : trivial_idx + m]
 
-    ref = naive.multi_mass_absolute(Q, T, m)
+        ref = naive.multi_mass_absolute(Q, T, m)
 
-    T, T_subseq_isfinite = core.preprocess_non_normalized(T, m)
-    comp = _multi_mass_absolute(
-        Q, T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite
-    )
+        T, T_subseq_isfinite = core.preprocess_non_normalized(T, m)
+        comp = _multi_mass_absolute(
+            Q, T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite
+        )
 
-    npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+        npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -160,7 +160,7 @@ def test_maamp_mdl(T, m):
 
 
 def test_naive_maamp():
-    T = np.random.uniform(-1000, 1000, [1, 1000]).astype(np.float64)
+    T = rng.RNG.uniform(-1000, 1000, [1, 1000]).astype(np.float64)
     m = 20
 
     zone = int(np.ceil(m / 4))
@@ -272,7 +272,7 @@ def test_maamp_wrapper_include(T, m):
 
 def test_constant_subsequence_self_join():
     T_A = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
-    T = np.array([T_A, T_A, np.random.rand(T_A.shape[0])])
+    T = np.array([T_A, T_A, rng.RNG.rand(T_A.shape[0])])
     m = 3
 
     excl_zone = int(np.ceil(m / 4))
@@ -284,11 +284,11 @@ def test_constant_subsequence_self_join():
 
 
 def test_identical_subsequence_self_join():
-    identical = np.random.rand(8)
-    T_A = np.random.rand(20)
+    identical = rng.RNG.rand(8)
+    T_A = rng.RNG.rand(20)
     T_A[1 : 1 + identical.shape[0]] = identical
     T_A[11 : 11 + identical.shape[0]] = identical
-    T = np.array([T_A, T_A, np.random.rand(T_A.shape[0])])
+    T = np.array([T_A, T_A, rng.RNG.rand(T_A.shape[0])])
     m = 3
 
     excl_zone = int(np.ceil(m / 4))
