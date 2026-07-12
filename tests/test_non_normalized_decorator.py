@@ -132,11 +132,9 @@ def test_scrump(T, m):
         T = T.copy()
         T = T[0]
 
-    seed = rng.RNG.randint(100_000)
-
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         ref = scraamp(T, m)
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         comp = scrump(T, m, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
@@ -151,11 +149,9 @@ def test_scrump_plus_plus(T, m):
     if T.ndim > 1:
         T = T.copy()
         T = T[0]
-    seed = rng.RNG.randint(100_000)
-
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         ref = scraamp(T, m, pre_scraamp=True)
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         comp = scrump(T, m, pre_scrump=True, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
@@ -171,11 +167,9 @@ def test_scrump_plus_plus_full(T, m):
         T = T.copy()
         T = T[0]
 
-    seed = rng.RNG.randint(100_000)
-
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         ref = scraamp(T, m, percentage=0.1, pre_scraamp=True)
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         comp = scrump(T, m, percentage=0.1, pre_scrump=True, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
@@ -421,14 +415,12 @@ def test_stimp(T, m):
         T = T.copy()
         T = T[0]
     n = 3
-    seed = rng.RNG.randint(100_000)
-
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         ref = aamp_stimp(T, m)
         for i in range(n):
             ref.update()
 
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         cmp = stimp(T, m, normalize=False)
         for i in range(n):
             cmp.update()
@@ -453,14 +445,13 @@ def test_stimped(T, m, dask_cluster):
         T = T.copy()
         T = T[0]
     n = 3
-    seed = rng.RNG.randint(100_000)
     with Client(dask_cluster) as dask_client:
-        with rng.fix_seed(seed):
+        with rng.fix_state():
             ref = aamp_stimped(dask_client, T, m)
             for i in range(n):
                 ref.update()
 
-        with rng.fix_seed(seed):
+        with rng.fix_state():
             cmp = stimped(dask_client, T, m, normalize=False)
             for i in range(n):
                 cmp.update()
@@ -488,14 +479,12 @@ def test_gpu_stimp(T, m):
         T = T.copy()
         T = T[0]
     n = 3
-    seed = rng.RNG.randint(100_000)
-
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         ref = gpu_aamp_stimp(T, m)
         for i in range(n):
             ref.update()
 
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         cmp = gpu_stimp(T, m, normalize=False)
         for i in range(n):
             cmp.update()

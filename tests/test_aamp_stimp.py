@@ -38,8 +38,7 @@ def test_aamp_stimp_1_percent(T):
     min_m = 3
     n = T.shape[0] - min_m + 1
 
-    seed = rng.RNG.randint(100_000)
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         pan = aamp_stimp(
             T,
             min_m=min_m,
@@ -54,7 +53,7 @@ def test_aamp_stimp_1_percent(T):
 
         ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         for idx, m in enumerate(pan.M_[:n]):
             zone = int(np.ceil(m / 4))
             s = zone
@@ -97,8 +96,7 @@ def test_aamp_stimp_max_m(T):
     max_m = 5
     n = T.shape[0] - min_m + 1
 
-    seed = rng.RNG.randint(100_000)
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         pan = aamp_stimp(
             T,
             min_m=min_m,
@@ -113,7 +111,7 @@ def test_aamp_stimp_max_m(T):
 
         ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    with rng.fix_seed(seed):
+    with rng.fix_state():
         for idx, m in enumerate(pan.M_[:n]):
             zone = int(np.ceil(m / 4))
             s = zone

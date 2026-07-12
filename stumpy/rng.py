@@ -33,6 +33,11 @@ def fix_seed(seed):
     A context manager for setting the RNG seed to a fixed, hardcoded, safe seed
     and then returning the RNG back to its previous state prior to the seed change
 
+    This is typically used when you want to generate a specific random sequence once.
+    To repeat the same random sequence, use `fix_state` instead. If you are picking
+    a random seed directly before calling `fix_seed` then you probably want to use
+    `fix_state` instead!
+
     Parameters
     ----------
     seed : int
@@ -48,3 +53,27 @@ def fix_seed(seed):
         yield
     finally:
         RNG.set_state(state)
+
+
+@contextmanager
+def fix_state():
+    """
+    A context manager for setting the RNG state to a fixed, hardcoded, safe state
+    and then returning the RNG back to its previous state prior to the state change
+
+    This is typically used when you want to repeat the same random sequence more than
+    once.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+    curr_state = RNG.get_state()
+    try:
+        yield
+    finally:
+        RNG.set_state(curr_state)

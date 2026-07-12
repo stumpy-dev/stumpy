@@ -3,10 +3,10 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import config
+from stumpy import config, rng
 from stumpy.aampdist_snippets import aampdist_snippets
 
-test_data = [np.random.uniform(-1000, 1000, [64]).astype(np.float64)]
+test_data = [rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64)]
 s = [6, 7, 8]
 percentage = [0.7, 0.8, 0.9]
 m = [8, 9, 10]
