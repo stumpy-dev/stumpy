@@ -98,6 +98,7 @@ def _iac(
             hist_dist = scipy.stats.rv_histogram(
                 (target_AC, np.append(np.arange(width), width))
             )
+            hist_dist.random_state = rng.RNG
             data = hist_dist.rvs(size=n_samples)
             a, b, c, d = scipy.stats.beta.fit(data, floc=0, fscale=width)
 

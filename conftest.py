@@ -13,6 +13,6 @@ def pytest_configure(config):
     Called after command line options have been parsed
     and all plugins and initial conftest files been loaded.
     """
-    # rng.set_seed(seed)
+    # rng.set_seed(seed)  # Replace this with your failed unit test seed
 
     print(f"conftest.py: rng.set_seed({rng.SEED})")
