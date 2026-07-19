@@ -290,14 +290,13 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
 
         # Step 2
         # Compute RFFT of Q (reversed, scaled, and zero-padded)
-        # Note that scaling by `1.0 / next_fast_n` needs to be applied
-        # at some point in the process to ensure that the final result is correct.
-        # This scaling can be applied to "zero_padded T" or its RFFT, or to
-        # "zero_padded reversed Q" or its RFFT. Or, it can be applied to
-        # the multiplication of the two RFFTs, or to the final result after the IRFFT!
-        # Here, we choose to apply the scaling to "reversed zero_padded Q" before its
-        # RFFT to reduce the number of floating point operations for such scaling
-        # process.
+        # Note that, by convention, the FFT transform is not normalized,
+        # and the inverse FFT transform is normalized by `1/next_fast_n`
+        # And that is actually needed to make sure the computed
+        # circular convolution is correct.
+        # To reduce the number of floating point operations, we can apply
+        # the scaling to (reversed) Q before taking its RFFT. This is possible
+        # thanks to the linearity of the FFT transform, i.e. FFT(ax) = aFFT(x).
         np.multiply(Q[::-1], 1.0 / next_fast_n, out=rfft_obj.input_array[:m])
         rfft_obj.input_array[m:] = 0.0
         rfft_obj.execute()
@@ -305,6 +304,11 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
 
         # Step 3
         # Convert back to time domain by taking the inverse RFFT
+        # The (thin wrapper) "execute" method does not normalize the output.
+        # Note that the output of the inverse RFFT should be normalized
+        # by `1/next_fast_n` to make sure the computed circular convolution
+        # is correct. However, we have already applied the scaling to Q in
+        # "Step 2" above, so we do not need to apply it again here.
         np.multiply(rfft_T, rfft_Q, out=irfft_obj.input_array)
         irfft_obj.execute()
 
