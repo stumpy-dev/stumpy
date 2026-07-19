@@ -140,9 +140,9 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
     init_len : int, default 2**20
         Initial length to preallocate arrays for. This will be the size of the
         real-valued array. A complex-valued array of size 1 + (init_len // 2)
-        will also be preallocated. If the length of input arrays exceed
-        ``init_len``, the preallocated arrays will be resized to accommodate
-        larger sizes.
+        will also be preallocated. If the length of input arrays exceeds
+        ``init_len``, then the preallocated arrays will automatically be
+        resized to accommodate larger sizes.
 
     real_dtype : str, default "float64"
         The real data type to use for the preallocated arrays. Must be either
@@ -155,7 +155,7 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
         A callable object that computes the sliding dot product between ``Q``
         and ``T`` using FFTW via pyfftw, and caches FFTW objects if not already
         cached. The callable object automatically resizes the preallocated arrays
-        if the length of input arrays exceed the current initial length.
+        if the length of input arrays exceeds the current initial length.
         In addition, the callable object has the method `set_init_len` to set
         the length of the preallocated arrays to a new initial length.
 
@@ -276,7 +276,7 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
             irfft_obj.update_arrays(complex_view, real_view)
 
         # Compute the (circular) convolution between T and Q[::-1],
-        # each zero-padded to the length `next_fast_n`, by performing
+        # each zero-padded to the length of `next_fast_n`, by performing
         # the following three steps:
 
         # Step 1
@@ -290,8 +290,14 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
 
         # Step 2
         # Compute RFFT of Q (reversed, scaled, and zero-padded)
-        # Scaling is required because the thin wrapper execute
-        # that will be called below does not perform normalization
+        # Note that scaling by `1.0 / next_fast_n` needs to be applied
+        # at some point in the process to ensure that the final result is correct.
+        # This scaling can be applied to "zero_padded T" or its RFFT, or to
+        # "zero_padded reversed Q" or its RFFT. Or, it can be applied to
+        # the multiplication of the two RFFTs, or to the final result after the IRFFT!
+        # Here, we choose to apply the scaling to "reversed zero_padded Q" before its
+        # RFFT to reduce the number of floating point operations for such scaling
+        # process.
         np.multiply(Q[::-1], 1.0 / next_fast_n, out=rfft_obj.input_array[:m])
         rfft_obj.input_array[m:] = 0.0
         rfft_obj.execute()
@@ -304,9 +310,9 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
 
         return irfft_obj.output_array[m - 1 : n]  # valid portion
 
-    def set_init_len(init_len):  # pragma: no cover
+    def update_init_len(init_len):  # pragma: no cover
         """
-        Set the preallocated arrays to a new initial length.
+        Update the size of the preallocated arrays to a new initial length
 
         Parameters
         ----------
@@ -321,7 +327,7 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
         real_arr = pyfftw.empty_aligned(init_len, dtype=real_arr.dtype)
         complex_arr = pyfftw.empty_aligned(1 + (init_len // 2), dtype=complex_arr.dtype)
 
-    sliding_dot_product.set_init_len = set_init_len
+    sliding_dot_product.update_init_len = update_init_len
     return sliding_dot_product
 
 
