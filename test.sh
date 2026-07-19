@@ -347,6 +347,10 @@ convert_notebooks()
 #   Main  #
 ###########
 
+# Set STUMPY_SEED for reproducible test failures
+export STUMPY_SEED=${STUMPY_SEED:-$RANDOM}
+echo "STUMPY_SEED=$STUMPY_SEED"
+
 if [[ $test_mode == "show" ]]; then
     echo "Show development/test environment"
     show
