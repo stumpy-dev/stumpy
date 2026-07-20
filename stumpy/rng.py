@@ -1,10 +1,14 @@
+import os
 from contextlib import contextmanager
 
 import numpy as np
 
 # Note that an initial SEED = 0 is disallowed
 # in order to account for unit testing
-SEED = np.random.randint(1, 4_294_967_296, dtype=np.uint32)
+if os.getenv("STUMPY_SEED") is not None:  # pragma: no cover
+    SEED = int(os.getenv("STUMPY_SEED"))
+else:
+    SEED = np.random.randint(1, 4_294_967_296, dtype=np.uint32)
 RNG = np.random.RandomState(seed=SEED)
 
 
