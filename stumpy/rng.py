@@ -4,7 +4,7 @@ import numpy as np
 
 # Note that an initial SEED = 0 is disallowed
 # in order to account for unit testing
-SEED = np.random.randint(1, 4_294_967_295, dtype=np.uint32)
+SEED = np.random.randint(1, 4_294_967_296, dtype=np.uint32)
 RNG = np.random.RandomState(seed=SEED)
 
 
@@ -47,12 +47,12 @@ def fix_seed(seed):
     -------
     None
     """
-    state = RNG.get_state()
+    curr_state = RNG.get_state()
     RNG.seed(seed)
     try:
         yield
     finally:
-        RNG.set_state(state)
+        RNG.set_state(curr_state)
 
 
 @contextmanager

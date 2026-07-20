@@ -20,6 +20,7 @@ def test_fix_seed():
     with rng.fix_seed(0):
         state = rng.RNG.get_state()
         seed = state[1][0]
+        assert seed == 0
         assert seed != init_seed
 
     state = rng.RNG.get_state()
