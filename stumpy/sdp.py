@@ -275,40 +275,59 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
             rfft_obj.update_arrays(real_view, complex_view)
             irfft_obj.update_arrays(complex_view, real_view)
 
-        # Compute the (circular) convolution between T and Q[::-1],
-        # each zero-padded to the length of `next_fast_n`, by performing
-        # the following three steps:
+        # Compute the circular convolution between T and Q[::-1], where both
+        # arrays are zero-padded to length `next_fast_n`.
+        #
+        # Let T' and Q' denote the zero-padded versions of T and Q[::-1],
+        # respectively, and let C denote their circular convolution:
+        #
+        # C = IFFT(FFT(T') * FFT(Q'))
+        #
+        # Since T' and Q' are real-valued, we can use the real-valued Fourier
+        # transforms instead:
+        #
+        # C = IRFFT(RFFT(T') * RFFT(Q'))
+        #
+        # By convention, the forward Fourier transform is unnormalized, while
+        # the inverse Fourier transform applies a factor of `1 / next_fast_n`.
+        # However, the `execute` method used below is a thin wrapper around the
+        # FFT implementation and performs no normalization. Therefore, the
+        # convolution must instead be computed as:
+        #
+        # C = (1 / next_fast_n) * IRFFT(RFFT(T') * RFFT(Q'))
+        #
+        # By linearity of the Fourier transform, this scaling factor can be
+        # applied either before or after the transform:
+        #
+        # C = IRFFT(RFFT(T') * ((1 / next_fast_n) * RFFT(Q')))
+        #   = IRFFT(RFFT(T') * RFFT((1 / next_fast_n) * Q'))
+        #
+        # Applying the scaling to Q before computing its RFFT reduces
+        # the number of multiplications since `len(Q)` is often
+        # much smaller than `next_fast_n`.
+        #
+        # The convolution is therefore computed in three steps:
+        # 1. Compute the (unnormalized) RFFT of the zero-padded T.
+        # 2. Compute the (unnormalized) RFFT of the reversed, scaled, and
+        #    zero-padded Q.
+        # 3. Multiply the RFFT outputs and compute the (unnormalized) inverse RFFT.
 
         # Step 1
-        # Compute RFFT of T (zero-padded)
-        # Must make a copy of output to avoid losing it when the output array
-        # is overwritten when computing the RFFT of Q in the "Step 2" below
+        # Compute (unnormalized) RFFT of T (zero-padded)
         rfft_obj.input_array[:n] = T
         rfft_obj.input_array[n:] = 0.0
         rfft_obj.execute()
-        rfft_T = rfft_obj.output_array.copy()
+        rfft_T = rfft_obj.output_array.copy()  # To avoid losing it in step 2
 
         # Step 2
-        # Compute RFFT of Q (reversed, scaled, and zero-padded)
-        # Note that, by convention, the FFT transform is not normalized,
-        # and the inverse FFT transform is normalized by `1/next_fast_n`
-        # And that is actually needed to make sure the computed
-        # circular convolution is correct.
-        # To reduce the number of floating point operations, we can apply
-        # the scaling to (reversed) Q before taking its RFFT. This is possible
-        # thanks to the linearity of the FFT transform, i.e. FFT(ax) = aFFT(x).
+        # Compute (unnormalized) RFFT of Q (reversed, scaled, and zero-padded)
         np.multiply(Q[::-1], 1.0 / next_fast_n, out=rfft_obj.input_array[:m])
         rfft_obj.input_array[m:] = 0.0
         rfft_obj.execute()
         rfft_Q = rfft_obj.output_array
 
         # Step 3
-        # Convert back to time domain by taking the inverse RFFT
-        # The (thin wrapper) "execute" method does not normalize the output.
-        # Note that the output of the inverse RFFT should be normalized
-        # by `1/next_fast_n` to make sure the computed circular convolution
-        # is correct. However, we have already applied the scaling to Q in
-        # "Step 2" above, so we do not need to apply it again here.
+        # Convert back to time domain by taking the (unnormalized) inverse RFFT
         np.multiply(rfft_T, rfft_Q, out=irfft_obj.input_array)
         irfft_obj.execute()
 
