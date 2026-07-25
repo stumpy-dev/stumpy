@@ -13,7 +13,8 @@ if cuda.is_available():
     from stumpy.gpu_stump import gpu_stump
 else:  # pragma: no cover
     from stumpy.core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
-from stumpy.snippets import snippets
+
+from stumpy.snippets import _get_all_profiles, snippets
 
 try:
     from numba.errors import NumbaPerformanceWarning
@@ -130,6 +131,13 @@ def test_snippets(seed, m, k, s):
             naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
         )
 
+        D = _get_all_profiles(
+            T,
+            m,
+            s=s,
+            mpdist_T_subseq_isconstant=isconstant_custom_func,
+        )
+
         (
             ref_snippets,
             ref_indices,
@@ -143,6 +151,7 @@ def test_snippets(seed, m, k, s):
             k,
             s=s,
             mpdist_T_subseq_isconstant=isconstant_custom_func,
+            D=D,
         )
         (
             cmp_snippets,

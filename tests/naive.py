@@ -1591,16 +1591,18 @@ def mpdist_snippets(
     mpdist_percentage=0.05,
     mpdist_k=None,
     mpdist_T_subseq_isconstant=None,
+    D=None,
 ):
-    D = get_all_mpdist_profiles(
-        T,
-        m,
-        percentage,
-        s,
-        mpdist_percentage,
-        mpdist_k,
-        mpdist_T_subseq_isconstant=mpdist_T_subseq_isconstant,
-    )
+    if D is None:
+        D = get_all_mpdist_profiles(
+            T,
+            m,
+            percentage,
+            s,
+            mpdist_percentage,
+            mpdist_k,
+            mpdist_T_subseq_isconstant=mpdist_T_subseq_isconstant,
+        )
 
     snippets = np.empty((k, m))
     snippets_indices = np.empty(k, dtype=np.int64)
@@ -1718,8 +1720,12 @@ def aampdist_snippets(
     mpdist_percentage=0.05,
     mpdist_k=None,
     p=2.0,
+    D=None,
 ):
-    D = get_all_aampdist_profiles(T, m, percentage, s, mpdist_percentage, mpdist_k, p=p)
+    if D is None:
+        D = get_all_aampdist_profiles(
+            T, m, percentage, s, mpdist_percentage, mpdist_k, p=p
+        )
 
     pad_width = (0, int(m * np.ceil(T.shape[0] / m) - T.shape[0]))
     T_padded = np.pad(T, pad_width, mode="constant", constant_values=np.nan)
