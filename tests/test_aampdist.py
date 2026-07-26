@@ -5,6 +5,7 @@ import pytest
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
+from stumpy import rng
 from stumpy.aampdist import _aampdist_vect, aampdist, aampdisted
 
 
@@ -29,8 +30,8 @@ test_data = [
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, size=8).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64),
     ),
 ]
 

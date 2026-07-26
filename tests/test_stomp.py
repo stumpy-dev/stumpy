@@ -3,6 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
+from stumpy import rng
 from stumpy.stomp import _stomp
 
 test_data = [
@@ -11,8 +12,8 @@ test_data = [
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [8]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
     ),
 ]
 

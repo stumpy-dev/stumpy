@@ -7,7 +7,7 @@ import copy
 import numpy as np
 import scipy.stats
 
-from . import config, core
+from . import config, core, rng
 
 
 def _nnmark(I):
@@ -84,34 +84,36 @@ def _iac(
     IAC : numpy.ndarray
         Idealized arc curve (IAC)
     """
-    np.random.seed(seed)
+    with rng.fix_seed(seed):
+        I = rng.RNG.randint(0, width, size=width, dtype=np.int64)
+        if bidirectional is False:  # Idealized 1-dimensional matrix profile index
+            I[:-1] = width
+            for i in range(width - 1):
+                I[i] = rng.RNG.randint(i + 1, width, dtype=np.int64)
 
-    I = np.random.randint(0, width, size=width, dtype=np.int64)
-    if bidirectional is False:  # Idealized 1-dimensional matrix profile index
-        I[:-1] = width
-        for i in range(width - 1):
-            I[i] = np.random.randint(i + 1, width, dtype=np.int64)
+        target_AC = _nnmark(I)
 
-    target_AC = _nnmark(I)
+        params = np.empty((n_iter, 2), dtype=np.float64)
+        for i in range(n_iter):
+            hist_dist = scipy.stats.rv_histogram(
+                (target_AC, np.append(np.arange(width), width))
+            )
+            hist_dist.random_state = rng.RNG
+            data = hist_dist.rvs(size=n_samples)
+            a, b, c, d = scipy.stats.beta.fit(data, floc=0, fscale=width)
 
-    params = np.empty((n_iter, 2), dtype=np.float64)
-    for i in range(n_iter):
-        hist_dist = scipy.stats.rv_histogram(
-            (target_AC, np.append(np.arange(width), width))
+            params[i, 0] = a
+            params[i, 1] = b
+
+        a_mean = np.round(np.mean(params[:, 0]), 2)
+        b_mean = np.round(np.mean(params[:, 1]), 2)
+
+        IAC = scipy.stats.beta.pdf(np.arange(width), a_mean, b_mean, loc=0, scale=width)
+        slope, _, _, _ = np.linalg.lstsq(
+            np.expand_dims(IAC, axis=1), target_AC, rcond=None
         )
-        data = hist_dist.rvs(size=n_samples)
-        a, b, c, d = scipy.stats.beta.fit(data, floc=0, fscale=width)
 
-        params[i, 0] = a
-        params[i, 1] = b
-
-    a_mean = np.round(np.mean(params[:, 0]), 2)
-    b_mean = np.round(np.mean(params[:, 1]), 2)
-
-    IAC = scipy.stats.beta.pdf(np.arange(width), a_mean, b_mean, loc=0, scale=width)
-    slope, _, _, _ = np.linalg.lstsq(np.expand_dims(IAC, axis=1), target_AC, rcond=None)
-
-    IAC *= slope
+        IAC *= slope
 
     return IAC
 

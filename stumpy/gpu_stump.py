@@ -864,4 +864,11 @@ def gpu_stump(
 
     core._check_P(out[:, 0])
 
+    for _id in device_ids:
+        with cuda.gpus[_id]:
+            if (
+                cuda.current_context().__class__.__name__ != "FakeCUDAContext"
+            ):  # pragma: no cover
+                cuda.current_context().deallocations.clear()
+
     return mparray(out, m, k, config.STUMPY_EXCL_ZONE_DENOM)

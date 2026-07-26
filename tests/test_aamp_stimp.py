@@ -5,11 +5,12 @@ import pytest
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
+from stumpy import rng
 from stumpy.aamp_stimp import aamp_stimp, aamp_stimped
 
 T = [
     np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
-    np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+    rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64),
 ]
 
 n = [9, 10, 16]
@@ -37,34 +38,32 @@ def test_aamp_stimp_1_percent(T):
     min_m = 3
     n = T.shape[0] - min_m + 1
 
-    seed = np.random.randint(100000)
+    with rng.fix_state():
+        pan = aamp_stimp(
+            T,
+            min_m=min_m,
+            max_m=None,
+            step=1,
+            percentage=percentage,
+            pre_scraamp=True,
+        )
 
-    np.random.seed(seed)
-    pan = aamp_stimp(
-        T,
-        min_m=min_m,
-        max_m=None,
-        step=1,
-        percentage=percentage,
-        pre_scraamp=True,
-    )
+        for i in range(n):
+            pan.update()
 
-    for i in range(n):
-        pan.update()
+        ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
+    with rng.fix_state():
+        for idx, m in enumerate(pan.M_[:n]):
+            zone = int(np.ceil(m / 4))
+            s = zone
+            tmp_P, tmp_I = naive.prescraamp(T, m, T, s=s, exclusion_zone=zone)
+            ref_P, ref_I, _, _ = naive.scraamp(T, m, T, percentage, zone, True, s)
+            naive.merge_topk_PI(ref_P, tmp_P, ref_I, tmp_I)
+            ref_PAN[pan._bfs_indices[idx], : ref_P.shape[0]] = ref_P
 
-    np.random.seed(seed)
-    for idx, m in enumerate(pan.M_[:n]):
-        zone = int(np.ceil(m / 4))
-        s = zone
-        tmp_P, tmp_I = naive.prescraamp(T, m, T, s=s, exclusion_zone=zone)
-        ref_P, ref_I, _, _ = naive.scraamp(T, m, T, percentage, zone, True, s)
-        naive.merge_topk_PI(ref_P, tmp_P, ref_I, tmp_I)
-        ref_PAN[pan._bfs_indices[idx], : ref_P.shape[0]] = ref_P
-
-    # Compare raw pan
-    cmp_PAN = pan._PAN
+        # Compare raw pan
+        cmp_PAN = pan._PAN
 
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
@@ -97,34 +96,32 @@ def test_aamp_stimp_max_m(T):
     max_m = 5
     n = T.shape[0] - min_m + 1
 
-    seed = np.random.randint(100000)
+    with rng.fix_state():
+        pan = aamp_stimp(
+            T,
+            min_m=min_m,
+            max_m=max_m,
+            step=1,
+            percentage=percentage,
+            pre_scraamp=True,
+        )
 
-    np.random.seed(seed)
-    pan = aamp_stimp(
-        T,
-        min_m=min_m,
-        max_m=max_m,
-        step=1,
-        percentage=percentage,
-        pre_scraamp=True,
-    )
+        for i in range(n):
+            pan.update()
 
-    for i in range(n):
-        pan.update()
+        ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
 
-    ref_PAN = np.full((pan.M_.shape[0], T.shape[0]), fill_value=np.inf)
+    with rng.fix_state():
+        for idx, m in enumerate(pan.M_[:n]):
+            zone = int(np.ceil(m / 4))
+            s = zone
+            tmp_P, tmp_I = naive.prescraamp(T, m, T, s=s, exclusion_zone=zone)
+            ref_P, ref_I, _, _ = naive.scraamp(T, m, T, percentage, zone, True, s)
+            naive.merge_topk_PI(ref_P, tmp_P, ref_I, tmp_I)
+            ref_PAN[pan._bfs_indices[idx], : ref_P.shape[0]] = ref_P
 
-    np.random.seed(seed)
-    for idx, m in enumerate(pan.M_[:n]):
-        zone = int(np.ceil(m / 4))
-        s = zone
-        tmp_P, tmp_I = naive.prescraamp(T, m, T, s=s, exclusion_zone=zone)
-        ref_P, ref_I, _, _ = naive.scraamp(T, m, T, percentage, zone, True, s)
-        naive.merge_topk_PI(ref_P, tmp_P, ref_I, tmp_I)
-        ref_PAN[pan._bfs_indices[idx], : ref_P.shape[0]] = ref_P
-
-    # Compare raw pan
-    cmp_PAN = pan._PAN
+        # Compare raw pan
+        cmp_PAN = pan._PAN
 
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)

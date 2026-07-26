@@ -719,4 +719,11 @@ def gpu_aamp(T_A, m, T_B=None, ignore_trivial=True, device_id=0, p=2.0, k=1):
 
     core._check_P(out[:, 0])
 
+    for _id in device_ids:
+        with cuda.gpus[_id]:
+            if (
+                cuda.current_context().__class__.__name__ != "FakeCUDAContext"
+            ):  # pragma: no cover
+                cuda.current_context().deallocations.clear()
+
     return mparray(out, m, k, config.STUMPY_EXCL_ZONE_DENOM)

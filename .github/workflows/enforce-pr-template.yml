@@ -1,0 +1,25 @@
+name: Enforce PR Template
+
+on:
+  pull_request_target:
+    types: [opened, edited]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  validate-pr-body:
+    runs-on: ubuntu-latest
+    # Triggers only if the PR body DOES NOT contain the exact string
+    if: |
+      !contains(github.event.pull_request.body, '# Pull Request Checklist')
+    steps:
+      - name: Close Invalid Pull Requests
+        run: |
+          gh pr close "$PR_NUMBER" --comment "$COMMENT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMENT: >
+            ❌ This pull request has been automatically closed because the mandatory PR template was removed or not filled out. Please reopen or recreate this PR with the required information.

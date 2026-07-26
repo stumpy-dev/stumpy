@@ -5,7 +5,7 @@ import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 from numba import cuda
 
-from stumpy import core
+from stumpy import core, rng
 from stumpy.aamp import aamp
 from stumpy.aamp_mmotifs import aamp_mmotifs
 from stumpy.aamp_motifs import aamp_match, aamp_motifs
@@ -80,19 +80,19 @@ def dask_cluster():
 
 test_data = [
     (np.array([[584, -11, 23, 79, 1001, 0, -19]], dtype=np.float64), 3),
-    (np.random.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
+    (rng.RNG.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
 ]
 
 
 def test_mass():
-    Q = np.random.rand(10)
-    T = np.random.rand(20)
+    Q = rng.RNG.random(10)
+    T = rng.RNG.random(20)
     ref = core.mass_absolute(Q, T)
     comp = core.mass(Q, T, normalize=False)
     npt.assert_almost_equal(ref, comp)
 
-    Q = np.random.rand(10)
-    T = np.random.rand(20)
+    Q = rng.RNG.random(10)
+    T = rng.RNG.random(20)
     T, T_subseq_isfinite = core.preprocess_non_normalized(T, 10)
     T_squared = np.sum(core.rolling_window(T * T, Q.shape[0]), axis=-1)
     ref = core.mass_absolute(Q, T)
@@ -132,12 +132,10 @@ def test_scrump(T, m):
         T = T.copy()
         T = T[0]
 
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
-    ref = scraamp(T, m)
-    np.random.seed(seed)
-    comp = scrump(T, m, normalize=False)
+    with rng.fix_state():
+        ref = scraamp(T, m)
+    with rng.fix_state():
+        comp = scrump(T, m, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
     for i in range(10):
@@ -151,12 +149,10 @@ def test_scrump_plus_plus(T, m):
     if T.ndim > 1:
         T = T.copy()
         T = T[0]
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
-    ref = scraamp(T, m, pre_scraamp=True)
-    np.random.seed(seed)
-    comp = scrump(T, m, pre_scrump=True, normalize=False)
+    with rng.fix_state():
+        ref = scraamp(T, m, pre_scraamp=True)
+    with rng.fix_state():
+        comp = scrump(T, m, pre_scrump=True, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
     for i in range(10):
@@ -171,12 +167,10 @@ def test_scrump_plus_plus_full(T, m):
         T = T.copy()
         T = T[0]
 
-    seed = np.random.randint(100000)
-
-    np.random.seed(seed)
-    ref = scraamp(T, m, percentage=0.1, pre_scraamp=True)
-    np.random.seed(seed)
-    comp = scrump(T, m, percentage=0.1, pre_scrump=True, normalize=False)
+    with rng.fix_state():
+        ref = scraamp(T, m, percentage=0.1, pre_scraamp=True)
+    with rng.fix_state():
+        comp = scrump(T, m, percentage=0.1, pre_scrump=True, normalize=False)
     npt.assert_almost_equal(ref.P_, comp.P_)
 
     for i in range(10):
@@ -222,7 +216,7 @@ def test_stumpi(T, m):
     ref_stream = aampi(T, m)
     comp_stream = stumpi(T, m, normalize=False)
     for i in range(10):
-        t = np.random.rand()
+        t = rng.RNG.random()
         ref_stream.update(t)
         comp_stream.update(t)
         npt.assert_almost_equal(ref_stream.P_, comp_stream.P_)
@@ -230,7 +224,7 @@ def test_stumpi(T, m):
 
 def test_ostinato():
     m = 50
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = aamp_ostinato(Ts, m)
     comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m, normalize=False)
@@ -243,7 +237,7 @@ def test_ostinato():
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
 def test_ostinatoed(dask_cluster):
     m = 50
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
     with Client(dask_cluster) as dask_client:
         ref_radius, ref_Ts_idx, ref_subseq_idx = aamp_ostinatoed(dask_client, Ts, m)
@@ -262,7 +256,7 @@ def test_gpu_ostinato():
         pytest.skip("Skipping Tests No GPUs Available")
 
     m = 50
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = gpu_aamp_ostinato(Ts, m)
     comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m, normalize=False)
@@ -273,8 +267,8 @@ def test_gpu_ostinato():
 
 
 def test_mpdist():
-    T_A = np.random.uniform(-1000, 1000, [8]).astype(np.float64)
-    T_B = np.random.uniform(-1000, 1000, [64]).astype(np.float64)
+    T_A = rng.RNG.uniform(-1000, 1000, size=8).astype(np.float64)
+    T_B = rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64)
     m = 5
 
     ref = aampdist(T_A, T_B, m)
@@ -284,8 +278,8 @@ def test_mpdist():
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
 def test_mpdisted(dask_cluster):
-    T_A = np.random.uniform(-1000, 1000, [8]).astype(np.float64)
-    T_B = np.random.uniform(-1000, 1000, [64]).astype(np.float64)
+    T_A = rng.RNG.uniform(-1000, 1000, size=8).astype(np.float64)
+    T_B = rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64)
     m = 5
 
     with Client(dask_cluster) as dask_client:
@@ -299,8 +293,8 @@ def test_gpu_mpdist():
     if not cuda.is_available():  # pragma: no cover
         pytest.skip("Skipping Tests No GPUs Available")
 
-    T_A = np.random.uniform(-1000, 1000, [8]).astype(np.float64)
-    T_B = np.random.uniform(-1000, 1000, [64]).astype(np.float64)
+    T_A = rng.RNG.uniform(-1000, 1000, size=8).astype(np.float64)
+    T_B = rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64)
     m = 5
 
     ref = gpu_aampdist(T_A, T_B, m)
@@ -392,7 +386,7 @@ def test_mmotifs(T, m):
 
 @pytest.mark.filterwarnings("ignore:All-NaN slice encountered")
 def test_snippets():
-    T = np.random.rand(64)
+    T = rng.RNG.random(64)
     m = 10
     k = 2
 
@@ -421,21 +415,19 @@ def test_stimp(T, m):
         T = T.copy()
         T = T[0]
     n = 3
-    seed = np.random.randint(100000)
+    with rng.fix_state():
+        ref = aamp_stimp(T, m)
+        for i in range(n):
+            ref.update()
 
-    np.random.seed(seed)
-    ref = aamp_stimp(T, m)
-    for i in range(n):
-        ref.update()
+    with rng.fix_state():
+        cmp = stimp(T, m, normalize=False)
+        for i in range(n):
+            cmp.update()
 
-    np.random.seed(seed)
-    cmp = stimp(T, m, normalize=False)
-    for i in range(n):
-        cmp.update()
-
-    # Compare raw pan
-    ref_PAN = ref._PAN
-    cmp_PAN = cmp._PAN
+        # Compare raw pan
+        ref_PAN = ref._PAN
+        cmp_PAN = cmp._PAN
 
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
@@ -453,21 +445,20 @@ def test_stimped(T, m, dask_cluster):
         T = T.copy()
         T = T[0]
     n = 3
-    seed = np.random.randint(100000)
     with Client(dask_cluster) as dask_client:
-        np.random.seed(seed)
-        ref = aamp_stimped(dask_client, T, m)
-        for i in range(n):
-            ref.update()
+        with rng.fix_state():
+            ref = aamp_stimped(dask_client, T, m)
+            for i in range(n):
+                ref.update()
 
-        np.random.seed(seed)
-        cmp = stimped(dask_client, T, m, normalize=False)
-        for i in range(n):
-            cmp.update()
+        with rng.fix_state():
+            cmp = stimped(dask_client, T, m, normalize=False)
+            for i in range(n):
+                cmp.update()
 
-        # Compare raw pan
-        ref_PAN = ref._PAN
-        cmp_PAN = cmp._PAN
+            # Compare raw pan
+            ref_PAN = ref._PAN
+            cmp_PAN = cmp._PAN
 
         naive.replace_inf(ref_PAN)
         naive.replace_inf(cmp_PAN)
@@ -488,21 +479,19 @@ def test_gpu_stimp(T, m):
         T = T.copy()
         T = T[0]
     n = 3
-    seed = np.random.randint(100000)
+    with rng.fix_state():
+        ref = gpu_aamp_stimp(T, m)
+        for i in range(n):
+            ref.update()
 
-    np.random.seed(seed)
-    ref = gpu_aamp_stimp(T, m)
-    for i in range(n):
-        ref.update()
+    with rng.fix_state():
+        cmp = gpu_stimp(T, m, normalize=False)
+        for i in range(n):
+            cmp.update()
 
-    np.random.seed(seed)
-    cmp = gpu_stimp(T, m, normalize=False)
-    for i in range(n):
-        cmp.update()
-
-    # Compare raw pan
-    ref_PAN = ref._PAN
-    cmp_PAN = cmp._PAN
+        # Compare raw pan
+        ref_PAN = ref._PAN
+        cmp_PAN = cmp._PAN
 
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)

@@ -101,7 +101,7 @@ def _mpdist_vect(
 
     if k is None:
         percentage = np.clip(percentage, 0.0, 1.0)
-        k = min(math.ceil(percentage * (2 * Q.shape[0])), 2 * j - 1)
+        k = math.ceil(percentage * (2 * Q.shape[0]))
 
     k = min(int(k), P_ABBA.shape[0] - 1)
 

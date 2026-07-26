@@ -1,7 +1,6 @@
 import numba
-import numpy as np
 
-from stumpy import cache
+from stumpy import cache, rng
 from stumpy.stump import stump
 
 
@@ -11,7 +10,7 @@ def test_cache_get_njit_funcs():
 
 
 def test_cache_save_after_clear():
-    T = np.random.rand(10)
+    T = rng.RNG.rand(10)
     m = 3
 
     cache_dir = "stumpy/__pycache__"

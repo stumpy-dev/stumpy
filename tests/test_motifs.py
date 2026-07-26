@@ -5,7 +5,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import core
+from stumpy import core, rng
 from stumpy.motifs import match, motifs
 
 
@@ -155,7 +155,7 @@ test_data = [
         np.array([0.0, 1.0, 2.0]),
         np.array([0.1, 1.0, 2.0, 3.0, -1.0, 0.1, 1.0, 2.0, -0.5]),
     ),
-    (np.random.uniform(-1000, 1000, [8]), np.random.uniform(-1000, 1000, [64])),
+    (rng.RNG.uniform(-1000, 1000, [8]), rng.RNG.uniform(-1000, 1000, [64])),
 ]
 
 
@@ -184,61 +184,57 @@ def test_motifs_one_motif():
 def test_motifs_two_motifs():
     # Fix seed, because in some case motifs can be off by an index resulting in test
     # fails, which is caused since one of the motifs is not repeated perfectly in T.
-    np.random.seed(1234)
+    with rng.fix_seed(1234):
+        # The time series is random noise with two motifs for m=10:
+        # * (almost) identical step functions at indices 10, 110 and 210
+        # * identical linear slopes at indices 70 and 170
+        T = rng.RNG.normal(size=300)
+        m = 20
 
-    # The time series is random noise with two motifs for m=10:
-    # * (almost) identical step functions at indices 10, 110 and 210
-    # * identical linear slopes at indices 70 and 170
-    T = np.random.normal(size=300)
-    m = 20
+        T[10:30] = 1
+        T[12:28] = 2
 
-    T[10:30] = 1
-    T[12:28] = 2
+        T[110:130] = 3
+        T[112:128] = 6
+        T[120] = 6.6
 
-    T[110:130] = 3
-    T[112:128] = 6
-    T[120] = 6.6
+        T[210:230] = 1
+        T[212:228] = 2
+        T[220] = 1.9
+        # naive.distance(naive.z_norm(T[10:30]), naive.z_norm(T[110:130])) = 0.47
+        # naive.distance(naive.z_norm(T[10:30]), naive.z_norm(T[210:230])) = 0.24
+        # naive.distance(naive.z_norm(T[110:130]), naive.z_norm(T[210:230])) = 0.72
+        # Hence T[10:30] is the motif representative for this motif
 
-    T[210:230] = 1
-    T[212:228] = 2
-    T[220] = 1.9
-    # naive.distance(naive.z_norm(T[10:30]), naive.z_norm(T[110:130])) = 0.47
-    # naive.distance(naive.z_norm(T[10:30]), naive.z_norm(T[210:230])) = 0.24
-    # naive.distance(naive.z_norm(T[110:130]), naive.z_norm(T[210:230])) = 0.72
-    # Hence T[10:30] is the motif representative for this motif
+        T[70:90] = np.arange(m) * 0.1
+        T[170:190] = np.arange(m) * 0.1
+        # naive.distance(naive.z_norm(T[70:90]), naive.z_norm(T[170:190])) = 0.0
 
-    T[70:90] = np.arange(m) * 0.1
-    T[170:190] = np.arange(m) * 0.1
-    # naive.distance(naive.z_norm(T[70:90]), naive.z_norm(T[170:190])) = 0.0
+        max_motifs = 2
 
-    max_motifs = 2
+        mp = naive.stump(T, m)
 
-    mp = naive.stump(T, m)
+        # left_indices = [[70, 170, -1], [10, 210, 110]]
+        left_profile_values = [
+            [0.0, 0.0, np.nan],
+            [
+                0.0,
+                naive.distance(core.z_norm(T[10:30]), core.z_norm(T[210:230])),
+                naive.distance(core.z_norm(T[10:30]), core.z_norm(T[110:130])),
+            ],
+        ]
 
-    # left_indices = [[70, 170, -1], [10, 210, 110]]
-    left_profile_values = [
-        [0.0, 0.0, np.nan],
-        [
-            0.0,
-            naive.distance(core.z_norm(T[10:30]), core.z_norm(T[210:230])),
-            naive.distance(core.z_norm(T[10:30]), core.z_norm(T[110:130])),
-        ],
-    ]
+        right_distance_values, right_indices = motifs(
+            T,
+            mp[:, 0],
+            max_motifs=max_motifs,
+            max_distance=0.5,
+            cutoff=np.inf,
+        )
 
-    right_distance_values, right_indices = motifs(
-        T,
-        mp[:, 0],
-        max_motifs=max_motifs,
-        max_distance=0.5,
-        cutoff=np.inf,
-    )
-
-    # We ignore indices because of sorting ambiguities for equal distances.
-    # As long as the distances are correct, the indices will be too.
-    npt.assert_almost_equal(left_profile_values, right_distance_values)
-
-    # Reset seed
-    np.random.seed(None)
+        # We ignore indices because of sorting ambiguities for equal distances.
+        # As long as the distances are correct, the indices will be too.
+        npt.assert_almost_equal(left_profile_values, right_distance_values)
 
 
 def test_motifs_max_matches():
@@ -530,8 +526,8 @@ def test_match_mean_stddev_isconstant(Q, T):
 
 
 def test_multi_match():
-    T = np.random.uniform(-1000, 1000, size=(2, 64))
-    Q = np.random.uniform(-1000, 1000, size=(2, 64))
+    T = rng.RNG.uniform(-1000, 1000, size=(2, 64))
+    Q = rng.RNG.uniform(-1000, 1000, size=(2, 64))
 
     m = Q.shape[-1]
     excl_zone = int(np.ceil(m / 4))
@@ -555,8 +551,8 @@ def test_multi_match():
 
 
 def test_multi_match_isconstant():
-    T = np.random.rand(2, 64)
-    Q = np.random.rand(2, 8)
+    T = rng.RNG.rand(2, 64)
+    Q = rng.RNG.rand(2, 8)
 
     m = Q.shape[-1]
     excl_zone = int(np.ceil(m / 4))
@@ -595,7 +591,7 @@ def test_multi_match_isconstant():
 
 
 def test_motifs():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     m = 3
 
     max_motifs = 3
@@ -628,7 +624,7 @@ def test_motifs_with_isconstant():
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
     )
 
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     m = 3
 
     max_motifs = 3
@@ -660,7 +656,7 @@ def test_motifs_with_isconstant():
 
 
 def test_motifs_with_max_matches_none():
-    T = np.random.rand(16)
+    T = rng.RNG.rand(16)
     m = 3
 
     max_motifs = 1

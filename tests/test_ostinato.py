@@ -7,7 +7,7 @@ import pytest
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
-from stumpy import core
+from stumpy import core, rng
 from stumpy.ostinato import ostinato, ostinatoed
 
 
@@ -27,69 +27,69 @@ def dask_cluster():
 
 
 @pytest.mark.parametrize(
-    "seed", np.random.choice(np.arange(10000), size=25, replace=False)
+    "seed", rng.RNG.choice(np.arange(10000), size=25, replace=False)
 )
 def test_random_ostinato(seed):
     m = 50
-    np.random.seed(seed)
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    with rng.fix_seed(seed):
+        Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
-    ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m)
+        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
+        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m)
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_almost_equal(ref_radius, comp_radius)
+        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.parametrize("seed", [79, 109, 112, 133, 151, 161, 251, 275, 309, 355])
 def test_deterministic_ostinato(seed):
     m = 50
-    np.random.seed(seed)
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
-
-    ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m)
-
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
-
-
-@pytest.mark.parametrize(
-    "seed", np.random.choice(np.arange(10000), size=25, replace=False)
-)
-def test_random_ostinatoed(seed, dask_cluster):
-    with Client(dask_cluster) as dask_client:
-        m = 50
-        np.random.seed(seed)
-        Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    with rng.fix_seed(seed):
+        Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(dask_client, Ts, m)
+        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m)
 
         npt.assert_almost_equal(ref_radius, comp_radius)
         npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
         npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+
+
+@pytest.mark.parametrize(
+    "seed", rng.RNG.choice(np.arange(10000), size=25, replace=False)
+)
+def test_random_ostinatoed(seed, dask_cluster):
+    with Client(dask_cluster) as dask_client:
+        m = 50
+        with rng.fix_seed(seed):
+            Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
+
+            ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
+            comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(dask_client, Ts, m)
+
+            npt.assert_almost_equal(ref_radius, comp_radius)
+            npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+            npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.parametrize("seed", [79, 109, 112, 133, 151, 161, 251, 275, 309, 355])
 def test_deterministic_ostinatoed(seed, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 50
-        np.random.seed(seed)
-        Ts = [np.random.rand(n) for n in [64, 128, 256]]
+        with rng.fix_seed(seed):
+            Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
-        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(dask_client, Ts, m)
+            ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
+            comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(dask_client, Ts, m)
 
-        npt.assert_almost_equal(ref_radius, comp_radius)
-        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+            npt.assert_almost_equal(ref_radius, comp_radius)
+            npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+            npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.parametrize(
-    "seed", np.random.choice(np.arange(10000), size=25, replace=False)
+    "seed", rng.RNG.choice(np.arange(10000), size=25, replace=False)
 )
 def test_random_ostinato_with_isconstant(seed):
     isconstant_custom_func = functools.partial(
@@ -97,20 +97,20 @@ def test_random_ostinato_with_isconstant(seed):
     )
 
     m = 50
-    np.random.seed(seed)
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
-    Ts_subseq_isconstant = [isconstant_custom_func for _ in range(len(Ts))]
+    with rng.fix_seed(seed):
+        Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
+        Ts_subseq_isconstant = [isconstant_custom_func for _ in range(len(Ts))]
 
-    ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
-        Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
-    )
-    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(
-        Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
-    )
+        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
+            Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
+        )
+        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(
+            Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
+        )
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_almost_equal(ref_radius, comp_radius)
+        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.parametrize("seed", [79, 109, 112, 133, 151, 161, 251, 275, 309, 355])
@@ -121,28 +121,28 @@ def test_deterministic_ostinatoed_with_isconstant(seed, dask_cluster):
 
     with Client(dask_cluster) as dask_client:
         m = 50
-        np.random.seed(seed)
-        Ts = [np.random.rand(n) for n in [64, 128, 256]]
+        with rng.fix_seed(seed):
+            Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
-        l = 64 - m + 1
-        subseq_isconsant = np.full(l, 0, dtype=bool)
-        subseq_isconsant[np.random.randint(0, l)] = True
-        Ts_subseq_isconstant = [
-            subseq_isconsant,
-            None,
-            isconstant_custom_func,
-        ]
+            l = 64 - m + 1
+            subseq_isconsant = np.full(l, 0, dtype=bool)
+            subseq_isconsant[rng.RNG.randint(0, l)] = True
+            Ts_subseq_isconstant = [
+                subseq_isconsant,
+                None,
+                isconstant_custom_func,
+            ]
 
-        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
-            Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
-        )
-        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(
-            dask_client, Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
-        )
+            ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
+                Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
+            )
+            comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(
+                dask_client, Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
+            )
 
-        npt.assert_almost_equal(ref_radius, comp_radius)
-        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+            npt.assert_almost_equal(ref_radius, comp_radius)
+            npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+            npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 def test_input_not_overwritten_ostinato():
@@ -150,7 +150,7 @@ def test_input_not_overwritten_ostinato():
     # by replacing nan value with 0 in each time series.
     # This test ensures that the original input is not overwritten
     m = 50
-    Ts = [np.random.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
     for T in Ts:
         T[0] = np.nan
 
@@ -166,7 +166,7 @@ def test_input_not_overwritten_ostinato():
 def test_extract_several_consensus_ostinato():
     # This test is to further ensure that the function `ostinato`
     # does not tamper with the original data.
-    Ts = [np.random.rand(n) for n in [256, 512, 1024]]
+    Ts = [rng.RNG.rand(n) for n in [256, 512, 1024]]
     Ts_ref = [T.copy() for T in Ts]
     Ts_comp = [T.copy() for T in Ts]
 
@@ -200,7 +200,7 @@ def test_input_not_overwritten_ostinatoed(dask_cluster):
     # This test ensures that the original input is not overwritten
     with Client(dask_cluster) as dask_client:
         m = 50
-        Ts = [np.random.rand(n) for n in [64, 128, 256]]
+        Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
         for T in Ts:
             T[0] = np.nan
 
@@ -218,7 +218,7 @@ def test_input_not_overwritten_ostinatoed(dask_cluster):
 def test_extract_several_consensus_ostinatoed(dask_cluster):
     # This test is to further ensure that the function `ostinatoed`
     # does not tamper with the original data.
-    Ts = [np.random.rand(n) for n in [256, 512, 1024]]
+    Ts = [rng.RNG.rand(n) for n in [256, 512, 1024]]
     Ts_ref = [T.copy() for T in Ts]
     Ts_comp = [T.copy() for T in Ts]
 

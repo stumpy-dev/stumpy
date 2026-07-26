@@ -5,7 +5,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import core
+from stumpy import core, rng
 from stumpy.aamp import aamp
 from stumpy.floss import _cac, _iac, _nnmark, _rea, floss, fluss
 from stumpy.stump import stump
@@ -94,7 +94,7 @@ def naive_rea(cac, n_regimes, L, excl_factor):
     return np.array(loc_regimes, dtype=np.int64)
 
 
-test_data = [np.random.randint(0, 50, size=50, dtype=np.int64)]
+test_data = [rng.RNG.randint(0, 50, size=50, dtype=np.int64)]
 
 substitution_locations = [(slice(0, 0), 0, -1, slice(1, 3), [0, 3])]
 substitution_values = [np.nan, np.inf]
@@ -154,7 +154,7 @@ def test_fluss(I):
 
 
 def test_floss():
-    data = np.random.uniform(-1000, 1000, [64])
+    data = rng.RNG.uniform(-1000, 1000, [64])
     m = 5
     n = 30
     old_data = data[:n]
@@ -215,7 +215,7 @@ def test_floss():
 
 
 def test_aamp_floss():
-    data = np.random.uniform(-1000, 1000, [64])
+    data = rng.RNG.uniform(-1000, 1000, [64])
     m = 5
     n = 30
     old_data = data[:n]
@@ -287,7 +287,7 @@ def test_aamp_floss():
 @pytest.mark.parametrize("substitute", substitution_values)
 @pytest.mark.parametrize("substitution_locations", substitution_locations)
 def test_floss_inf_nan(substitute, substitution_locations):
-    T = np.random.uniform(-1000, 1000, [64])
+    T = rng.RNG.uniform(-1000, 1000, [64])
     m = 5
     n = 30
     data = T.copy()
@@ -359,7 +359,7 @@ def test_floss_inf_nan(substitute, substitution_locations):
 @pytest.mark.parametrize("substitute", substitution_values)
 @pytest.mark.parametrize("substitution_locations", substitution_locations)
 def test_aamp_floss_inf_nan(substitute, substitution_locations):
-    T = np.random.uniform(-1000, 1000, [64])
+    T = rng.RNG.uniform(-1000, 1000, [64])
     m = 5
     n = 30
     data = T.copy()
@@ -431,7 +431,7 @@ def test_aamp_floss_inf_nan(substitute, substitution_locations):
 
 
 def test_floss_with_isconstant():
-    data = np.random.uniform(-1, 1, [64])
+    data = rng.RNG.uniform(-1, 1, [64])
     m = 5
     n = 30
     old_data = data[:n]
@@ -475,7 +475,7 @@ def test_floss_with_isconstant():
         ref_Q_isconstant = isconstant_custom_func(ref_Q, m)[0]
         ref_T_subseq_isconstant = isconstant_custom_func(ref_T, m)
         D = naive.distance_profile(ref_Q, ref_T, m)
-        for j in range(len(D)):
+        for j in range(len(D)):  # pragma: no cover
             if ref_Q_isconstant and ref_T_subseq_isconstant[j]:
                 D[j] = 0
             elif ref_Q_isconstant or ref_T_subseq_isconstant[j]:

@@ -7,6 +7,7 @@ import pytest
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
+from stumpy import rng
 from stumpy.mpdist import _mpdist_vect, mpdist, mpdisted
 
 
@@ -31,8 +32,8 @@ test_data = [
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [8]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
     ),
 ]
 
@@ -111,10 +112,10 @@ def test_mpdist(T_A, T_B):
 @pytest.mark.parametrize("T_A, T_B", test_data)
 def test_mpdist_with_isconstant(T_A, T_B):
     m = 3
-    T_A_subseq_isconstant = np.random.choice(
+    T_A_subseq_isconstant = rng.RNG.choice(
         [True, False], size=len(T_A) - m + 1, replace=True
     )
-    T_B_subseq_isconstant = np.random.choice(
+    T_B_subseq_isconstant = rng.RNG.choice(
         [True, False], size=len(T_B) - m + 1, replace=True
     )
     ref_mpdist = naive.mpdist(
@@ -177,10 +178,10 @@ def test_mpdisted(T_A, T_B, dask_cluster):
 def test_mpdisted_with_isconstant(T_A, T_B, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 3
-        T_A_subseq_isconstant = np.random.choice(
+        T_A_subseq_isconstant = rng.RNG.choice(
             [True, False], size=len(T_A) - m + 1, replace=True
         )
-        T_B_subseq_isconstant = np.random.choice(
+        T_B_subseq_isconstant = rng.RNG.choice(
             [True, False], size=len(T_B) - m + 1, replace=True
         )
         ref_mpdist = naive.mpdist(

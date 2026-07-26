@@ -398,7 +398,9 @@ def aamp_match(
 
     D = np.empty((d, n - m + 1))
     for i in range(d):
-        D[i, :] = core.mass_absolute(Q[i], T[i], T_subseq_isfinite[i], p=p)
+        D[i, :] = core.mass_absolute(
+            Q[i], T[i], T_subseq_isfinite[i], p=p, query_idx=query_idx
+        )
     D = np.mean(D, axis=0)
 
     return core._find_matches(

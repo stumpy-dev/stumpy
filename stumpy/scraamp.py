@@ -6,7 +6,7 @@ import numba
 import numpy as np
 from numba import njit, prange
 
-from . import config, core
+from . import config, core, rng
 from .aamp import _aamp
 
 
@@ -78,7 +78,7 @@ def _preprocess_prescraamp(T_A, m, T_B=None, s=None):
         else:  # AB-join
             s = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
 
-    indices = np.random.permutation(range(0, l, s)).astype(np.int64)
+    indices = rng.RNG.permutation(range(0, l, s)).astype(np.int64)
 
     return (T_A, T_B, T_A_subseq_isfinite, T_B_subseq_isfinite, indices, s, excl_zone)
 
@@ -718,7 +718,7 @@ class scraamp:
             core._merge_topk_PI(self._P, P, self._I, I)
 
         if self._ignore_trivial:
-            self._diags = np.random.permutation(
+            self._diags = rng.RNG.permutation(
                 range(self._excl_zone + 1, self._n_A - self._m + 1)
             ).astype(np.int64)
             if self._diags.shape[0] == 0:  # pragma: no cover
@@ -728,7 +728,7 @@ class scraamp:
                     f"Please try a value of `m <= {max_m}`"
                 )
         else:
-            self._diags = np.random.permutation(
+            self._diags = rng.RNG.permutation(
                 range(-(self._n_A - self._m + 1) + 1, self._n_B - self._m + 1)
             ).astype(np.int64)
 

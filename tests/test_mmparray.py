@@ -3,12 +3,13 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
+from stumpy import rng
 from stumpy.maamp import maamp
 from stumpy.mstump import mstump
 
 test_data = [
     (np.array([[584, -11, 23, 79, 1001, 0, -19]], dtype=np.float64), 3),
-    (np.random.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
+    (rng.RNG.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
 ]
 
 

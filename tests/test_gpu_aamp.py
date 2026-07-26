@@ -5,7 +5,7 @@ import numpy.testing as npt
 import pandas as pd
 from numba import cuda
 
-from stumpy import config
+from stumpy import config, rng
 
 if cuda.is_available():
     from stumpy.gpu_aamp import gpu_aamp
@@ -33,8 +33,8 @@ test_data = [
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [8]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
     ),
 ]
 
@@ -188,7 +188,7 @@ def test_gpu_aamp_constant_subsequence_self_join():
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
 def test_gpu_aamp_one_constant_subsequence_A_B_join():
-    T_A = np.random.rand(20)
+    T_A = rng.RNG.rand(20)
     T_B = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
     m = 3
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
@@ -244,8 +244,8 @@ def test_gpu_aamp_two_constant_subsequences_A_B_join():
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
 def test_gpu_aamp_identical_subsequence_self_join():
-    identical = np.random.rand(8)
-    T_A = np.random.rand(20)
+    identical = rng.RNG.rand(8)
+    T_A = rng.RNG.rand(20)
     T_A[1 : 1 + identical.shape[0]] = identical
     T_A[11 : 11 + identical.shape[0]] = identical
     m = 3
@@ -268,9 +268,9 @@ def test_gpu_aamp_identical_subsequence_self_join():
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
 def test_gpu_aamp_identical_subsequence_A_B_join():
-    identical = np.random.rand(8)
-    T_A = np.random.rand(20)
-    T_B = np.random.rand(20)
+    identical = rng.RNG.rand(8)
+    T_A = rng.RNG.rand(20)
+    T_B = rng.RNG.rand(20)
     T_A[1 : 1 + identical.shape[0]] = identical
     T_B[11 : 11 + identical.shape[0]] = identical
     m = 3

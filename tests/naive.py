@@ -4,7 +4,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.stats import norm
 
-from stumpy import config, core
+from stumpy import config, core, rng
 
 
 def is_ptp_zero_1d(a, w):  # `a` is 1-D
@@ -1818,7 +1818,7 @@ def prescrump(
     P = np.full((l, k), np.inf, dtype=np.float64)
     I = np.full((l, k), -1, dtype=np.int64)
 
-    for i in np.random.permutation(range(0, l, s)):
+    for i in rng.RNG.permutation(range(0, l, s)):
         distance_profile = dist_matrix[i]
         if exclusion_zone is not None:
             apply_exclusion_zone(distance_profile, i, exclusion_zone, np.inf)
@@ -1914,11 +1914,11 @@ def scrump(
                     pass
 
     if exclusion_zone is not None:
-        diags = np.random.permutation(range(exclusion_zone + 1, n_A - m + 1)).astype(
+        diags = rng.RNG.permutation(range(exclusion_zone + 1, n_A - m + 1)).astype(
             np.int64
         )
     else:
-        diags = np.random.permutation(range(-(n_A - m + 1) + 1, n_B - m + 1)).astype(
+        diags = rng.RNG.permutation(range(-(n_A - m + 1) + 1, n_B - m + 1)).astype(
             np.int64
         )
 
@@ -1981,7 +1981,7 @@ def prescraamp(T_A, m, T_B, s, exclusion_zone=None, p=2.0, k=1):
     P = np.full((l, k), np.inf, dtype=np.float64)
     I = np.full((l, k), -1, dtype=np.int64)
 
-    for i in np.random.permutation(range(0, l, s)):
+    for i in rng.RNG.permutation(range(0, l, s)):
         distance_profile = distance_matrix[i]
         if exclusion_zone is not None:
             apply_exclusion_zone(distance_profile, i, exclusion_zone, np.inf)
@@ -2054,11 +2054,11 @@ def scraamp(T_A, m, T_B, percentage, exclusion_zone, pre_scraamp, s, p=2.0, k=1)
     l = n_A - m + 1
 
     if exclusion_zone is not None:
-        diags = np.random.permutation(range(exclusion_zone + 1, n_A - m + 1)).astype(
+        diags = rng.RNG.permutation(range(exclusion_zone + 1, n_A - m + 1)).astype(
             np.int64
         )
     else:
-        diags = np.random.permutation(range(-(n_A - m + 1) + 1, n_B - m + 1)).astype(
+        diags = rng.RNG.permutation(range(-(n_A - m + 1) + 1, n_B - m + 1)).astype(
             np.int64
         )
 
