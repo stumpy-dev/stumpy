@@ -295,6 +295,7 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
         # convolution must instead be computed as:
         #
         # C = (1 / next_fast_n) * IRFFT(RFFT(T') * RFFT(Q'))
+        # where RFFT and IRFFT are unnormalized.
         #
         # By linearity of the Fourier transform, this scaling factor can be
         # applied either before or after the transform:
@@ -302,8 +303,8 @@ def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
         # C = IRFFT(RFFT(T') * ((1 / next_fast_n) * RFFT(Q')))
         #   = IRFFT(RFFT(T') * RFFT((1 / next_fast_n) * Q'))
         #
-        # Applying the scaling to Q before computing its RFFT reduces
-        # the number of multiplications since `len(Q)` is often
+        # Applying the scaling to original Q before padding it with zeros
+        # can reduce the number of multiplications since `len(Q)` is often
         # much smaller than `next_fast_n`.
         #
         # The convolution is therefore computed in three steps:
