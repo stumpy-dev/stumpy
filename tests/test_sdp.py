@@ -3,6 +3,7 @@ import warnings
 from operator import eq, lt
 
 import naive
+import numpy as np
 import pytest
 from numpy import testing as npt
 
