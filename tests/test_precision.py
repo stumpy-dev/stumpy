@@ -119,7 +119,8 @@ def test_calculate_squared_distance():
 
 
 @pytest.mark.parametrize(
-    "seed, m, k, s", [(2135137202, 10, 3, 3), (2636, 9, 3, 3), (332, 10, 3, 3)]
+    "seed, m, k, s",
+    [(2135137202, 10, 3, 3), (2636, 9, 3, 3), (332, 10, 3, 3), (1615, 10, 3, 3)],
 )
 def test_snippets(seed, m, k, s):
     with rng.fix_seed(seed):
@@ -197,7 +198,7 @@ def test_distance_symmetry_property_in_gpu():
 
         # This test raises an error if arithmetic operation in ...
         # ... `gpu_stump._compute_and_update_PI_kernel` does not
-        # generates the same result if values of variable for mean and std
+        # generate the same result if values of variable for mean and std
         # are swapped.
 
         T_A = T[i : i + m]
