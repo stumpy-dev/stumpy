@@ -122,8 +122,6 @@ def test_calculate_squared_distance():
     "seed, m, k, s", [(2135137202, 10, 3, 3), (2636, 9, 3, 3), (332, 10, 3, 3)]
 )
 def test_snippets(seed, m, k, s):
-    # This test function raises an error if there is a considerable loss of precision
-    # that violates the symmetry property of a distance measure.
     with rng.fix_seed(seed):
         T = rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64)
 

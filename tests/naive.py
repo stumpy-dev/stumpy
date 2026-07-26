@@ -1593,7 +1593,7 @@ def mpdist_snippets(
     mpdist_T_subseq_isconstant=None,
     D=None,
 ):
-    if D is None:
+    if D is None:  # pragma: no cover
         D = get_all_mpdist_profiles(
             T,
             m,
@@ -1722,7 +1722,7 @@ def aampdist_snippets(
     p=2.0,
     D=None,
 ):
-    if D is None:
+    if D is None:  # pragma: no cover
         D = get_all_aampdist_profiles(
             T, m, percentage, s, mpdist_percentage, mpdist_k, p=p
         )

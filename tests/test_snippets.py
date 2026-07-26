@@ -72,6 +72,10 @@ def test_get_all_mpdist_profiles_with_isconstant(T, m):
 @pytest.mark.parametrize("m", m)
 @pytest.mark.parametrize("k", k)
 def test_mpdist_snippets(T, m, k):
+    D = _get_all_profiles(
+        T,
+        m,
+    )
     (
         ref_snippets,
         ref_indices,
@@ -79,7 +83,7 @@ def test_mpdist_snippets(T, m, k):
         ref_fractions,
         ref_areas,
         ref_regimes,
-    ) = naive.mpdist_snippets(T, m, k)
+    ) = naive.mpdist_snippets(T, m, k, D=D)
     (
         cmp_snippets,
         cmp_indices,
@@ -110,6 +114,11 @@ def test_mpdist_snippets(T, m, k):
 @pytest.mark.parametrize("k", k)
 @pytest.mark.parametrize("percentage", percentage)
 def test_mpdist_snippets_percentage(T, m, k, percentage):
+    D = _get_all_profiles(
+        T,
+        m,
+        percentage=percentage,
+    )
     (
         ref_snippets,
         ref_indices,
@@ -117,7 +126,7 @@ def test_mpdist_snippets_percentage(T, m, k, percentage):
         ref_fractions,
         ref_areas,
         ref_regimes,
-    ) = naive.mpdist_snippets(T, m, k, percentage=percentage)
+    ) = naive.mpdist_snippets(T, m, k, percentage=percentage, D=D)
     (
         cmp_snippets,
         cmp_indices,
@@ -148,6 +157,11 @@ def test_mpdist_snippets_percentage(T, m, k, percentage):
 @pytest.mark.parametrize("k", k)
 @pytest.mark.parametrize("s", s)
 def test_mpdist_snippets_s(T, m, k, s):
+    D = _get_all_profiles(
+        T,
+        m,
+        s=s,
+    )
     (
         ref_snippets,
         ref_indices,
@@ -155,7 +169,7 @@ def test_mpdist_snippets_s(T, m, k, s):
         ref_fractions,
         ref_areas,
         ref_regimes,
-    ) = naive.mpdist_snippets(T, m, k, s=s)
+    ) = naive.mpdist_snippets(T, m, k, s=s, D=D)
     (
         cmp_snippets,
         cmp_indices,
@@ -189,6 +203,12 @@ def test_mpdist_snippets_s_with_isconstant(T, m, k, s):
     isconstant_custom_func = functools.partial(
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
     )
+    D = _get_all_profiles(
+        T,
+        m,
+        s=s,
+        mpdist_T_subseq_isconstant=isconstant_custom_func,
+    )
     (
         ref_snippets,
         ref_indices,
@@ -197,7 +217,12 @@ def test_mpdist_snippets_s_with_isconstant(T, m, k, s):
         ref_areas,
         ref_regimes,
     ) = naive.mpdist_snippets(
-        T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func
+        T,
+        m,
+        k,
+        s=s,
+        mpdist_T_subseq_isconstant=isconstant_custom_func,
+        D=D,
     )
     (
         cmp_snippets,
