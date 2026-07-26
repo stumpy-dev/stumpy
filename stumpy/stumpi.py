@@ -4,8 +4,9 @@
 
 import numpy as np
 
-from . import config, core, stump
+from . import config, core
 from .aampi import aampi
+from .stump import stump
 
 
 @core.non_normalized(
@@ -177,9 +178,13 @@ class stumpi:
             `functools.partial`. Any subsequence with at least one np.nan/np.inf will
             automatically have its corresponding value set to False in this boolean
             array.
+
+        Returns
+        -------
+        None
         """
         self._T = core._preprocess(T)
-        core.check_window_size(m, max_size=self._T.shape[-1])
+        core.check_window_size(m, max_size=self._T.shape[0])
         self._m = m
         self._k = k
 
@@ -273,6 +278,10 @@ class stumpi:
         t : float
             A single new data point to be appended to `T`
 
+        Returns
+        -------
+        None
+
         Notes
         -----
         `DOI: 10.1007/s10618-017-0519-9 \
@@ -296,6 +305,10 @@ class stumpi:
         ----------
         t : float
             A single new data point to be appended to `T`
+
+        Returns
+        -------
+        None
         """
         self._n = self._T.shape[0]
         l = self._n - self._m + 1 - 1  # Subtract 1 due to egress
@@ -354,26 +367,9 @@ class stumpi:
         if np.any(~self._T_isfinite[-self._m :]):
             D[:] = np.inf
 
-        core.apply_exclusion_zone(D, D.shape[0] - 1, self._excl_zone, np.inf)
-
-        update_idx = np.argwhere(D < self._P[:, -1]).flatten()
-        for i in update_idx:
-            idx = np.searchsorted(self._P[i], D[i], side="right")
-            core._shift_insert_at_index(self._P[i], idx, D[i])
-            core._shift_insert_at_index(
-                self._I[i], idx, D.shape[0] + self._n_appended - 1
-            )
-            # D.shape[0] is base-1
-
-        # Calculate the (top-k) matrix profile values/indices for the last subsequence
-        # by using its corresponding distance profile `D`
-        self._P[-1] = np.inf
-        self._I[-1] = -1
-        for i, d in enumerate(D):
-            if d < self._P[-1, -1]:
-                idx = np.searchsorted(self._P[-1], d, side="right")
-                core._shift_insert_at_index(self._P[-1], idx, d)
-                core._shift_insert_at_index(self._I[-1], idx, i + self._n_appended)
+        core._update_incremental_PI(
+            D, self._P, self._I, self._excl_zone, n_appended=self._n_appended
+        )
 
         # All neighbors of the last subsequence are on its left. So, its (top-1)
         # matrix profile value/index and its left matrix profile value/index must
@@ -392,6 +388,10 @@ class stumpi:
         ----------
         t : float
             A single new data point to be appended to `T`
+
+        Returns
+        -------
+        None
         """
         n = self._T.shape[0]
         l = n - self._m + 1
@@ -440,30 +440,18 @@ class stumpi:
         if np.any(~self._T_isfinite[-self._m :]):
             D[:] = np.inf
 
-        core.apply_exclusion_zone(D, D.shape[0] - 1, self._excl_zone, np.inf)
-
-        update_idx = np.argwhere(D[:l] < self._P[:l, -1]).flatten()
-        for i in update_idx:
-            idx = np.searchsorted(self._P[i], D[i], side="right")
-            core._shift_insert_at_index(self._P[i], idx, D[i])
-            core._shift_insert_at_index(self._I[i], idx, l)
-
-        # Calculating top-k matrix profile and (top-1) left matrix profile (and their
-        # corresponding indices) for new subsequence whose distance profile is `D`
         P_new = np.full(self._k, np.inf, dtype=np.float64)
         I_new = np.full(self._k, -1, dtype=np.int64)
-        for i, d in enumerate(D):
-            if d < P_new[-1]:  # maximum value in sorted array P_new
-                idx = np.searchsorted(P_new, d, side="right")
-                core._shift_insert_at_index(P_new, idx, d)
-                core._shift_insert_at_index(I_new, idx, i)
-
-        left_I_new = I_new[0]
-        left_P_new = P_new[0]
-
-        self._T = T_new
         self._P = np.append(self._P, P_new.reshape(1, -1), axis=0)
         self._I = np.append(self._I, I_new.reshape(1, -1), axis=0)
+
+        core._update_incremental_PI(D, self._P, self._I, self._excl_zone, n_appended=0)
+
+        left_I_new = self._I[-1, 0]
+        left_P_new = self._P[-1, 0]
+
+        self._T = T_new
+
         self._left_P = np.append(self._left_P, left_P_new)
         self._left_I = np.append(self._left_I, left_I_new)
         self._QT = QT_new
@@ -485,7 +473,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-k) matrix profile
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
@@ -506,7 +495,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-k) matrix profile indices
         """
         if self._k == 1:
             return self._I.flatten().astype(np.int64)
@@ -524,7 +514,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-1) left matrix profile
         """
         return self._left_P.astype(np.float64)
 
@@ -539,7 +530,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (top-1) left matrix profile indices
         """
         return self._left_I.astype(np.int64)
 
@@ -554,6 +546,8 @@ class stumpi:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The time series or sequence for which the matrix profile and matrix
+            profile indices are computed
         """
         return self._T

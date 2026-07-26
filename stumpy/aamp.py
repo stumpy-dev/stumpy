@@ -13,7 +13,7 @@ from .mparray import mparray
 @njit(
     # "(f8[:], f8[:], i8, b1[:], b1[:], f8, i8[:], i8, i8, i8, f8[:, :, :],"
     # "f8[:, :], f8[:, :], i8[:, :, :], i8[:, :], i8[:, :], b1)",
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _compute_diagonal(
     T_A,
@@ -186,7 +186,7 @@ def _compute_diagonal(
 @njit(
     # "(f8[:], f8[:], i8, b1[:], b1[:], i8[:], b1, i8)",
     parallel=True,
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _aamp(
     T_A,
@@ -396,6 +396,7 @@ def aamp(T_A, m, T_B=None, ignore_trivial=True, p=2.0, k=1):
     """
     if T_B is None:
         T_B = T_A.copy()
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
 
     T_A, T_A_subseq_isfinite = core.preprocess_non_normalized(T_A, m)
@@ -407,17 +408,17 @@ def aamp(T_A, m, T_B=None, ignore_trivial=True, p=2.0, k=1):
     if T_B.ndim != 1:  # pragma: no cover
         raise ValueError(f"T_B is {T_B.ndim}-dimensional and must be 1-dimensional. ")
 
-    core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
-    ignore_trivial = core.check_ignore_trivial(T_A, T_B, ignore_trivial)
-
     n_A = T_A.shape[0]
     n_B = T_B.shape[0]
     l = n_A - m + 1
 
+    ignore_trivial = core.check_ignore_trivial(T_A, T_B, ignore_trivial)
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
-    if ignore_trivial:
+    if ignore_trivial:  # self-join
+        core.check_window_size(m, max_size=min(n_A, n_B), n=n_A)
         diags = np.arange(excl_zone + 1, n_A - m + 1, dtype=np.int64)
-    else:
+    else:  # AB-join
+        core.check_window_size(m, max_size=min(n_A, n_B))
         diags = np.arange(-(n_A - m + 1) + 1, n_B - m + 1, dtype=np.int64)
 
     P, PL, PR, I, IL, IR = _aamp(

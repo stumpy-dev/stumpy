@@ -3,15 +3,12 @@
 # 1. Update version number in pyproject.toml
 # 2. Update CHANGELOG
 # 3. Update README with new features/functions/tutorials
-# 4. Determine minimum versions and dependencies with ./min.py
-# 5. Bump minimum versions and dependencies
-#    a) pyproject.toml
-#    b) requirements.txt
-#    c) environment.yml
-#    d) .github/worflows/github-actions.yml
-#    e) recipes/meta.yaml in conda-feedstock
-#    f) README.rst
-# 6. Commit all above changes as the latest version number and push
+# 4. Determine minimum versions and dependencies:
+#    a) Run: `./versions.py -mode min`
+#    b) Fix/bump all minimum versions and dependencies identified
+#    c) Fix/bump the maximum "Programming Language" version in `pyproject.toml`
+# 5. Commit all above changes as the latest version number (e.g. v1.15.0)
+# 6. Push the commit to `main`
 #
 # For conda-forge
 # 1. Fork the stumpy-feedstock: https://github.com/conda-forge/stumpy-feedstock
@@ -21,7 +18,7 @@
 #    a) Update version number on line 2
 #    b) Update the sha256 on line 10 according to what is found on PyPI
 #       in the "Download files" section of the left navigation pane for
-#       the tar.gz file: https://pypi.org/project/stumpy/#files
+#       the tar.gz file (click "view details"): https://pypi.org/project/stumpy/#files
 #    c) Reset the build number (to zero) on line 14 since this is a new version
 # 4. Commit the changes and push upstream for a PR
 # 5. Check the checkboxes in the PR
@@ -30,18 +27,12 @@
 # For readthedocs
 # 1. Update the docs/api.rst to include new features/functions
 #
-# For socializing
-# 1. Post on Twitter
-# 2. Post on LinkedIn
-# 3. Post on Reddit
-# 4. Post new tutorials on Medium
-#
 # To check that the distribution is valid, execute:
 # twine check dist/* 
 #
 # Github Release
-# 1. Navigate to the Github release page: https://github.com/TDAmeritrade/stumpy/releases
-# 2. Click "Draft a new release": https://github.com/TDAmeritrade/stumpy/releases/new
+# 1. Navigate to the Github release page: https://github.com/stumpy-dev/stumpy/releases
+# 2. Click "Draft a new release": https://github.com/stumpy-dev/stumpy/releases/new
 # 3. In the "Tag version" box, add the version number i.e., "v1.0.0"
 # 4. In the Release title" box, add the version number i.e., "v1.0.0"
 # 5. In the "Describe this release" box, add the description i.e., "Version 1.1.0 Release"
@@ -64,15 +55,20 @@
 #  Functions  #
 ###############
 
+local_test()
+{
+    twine check dist/*
+}
+
 upload_test_pypi()
 {
     # Upload to Test PyPi
     if ! [ -f $HOME/.pypirc ]; then
         # .pypirc file does not exist, prompt for API token
-        twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+        twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/* || echo 'Twine Test Upload Failed: Try temporarily incrementing the minor version number if you are getting a "400 File already exists"'
     else
         # Get API token from .pypirc file
-        twine upload --verbose -r testpypi dist/*
+        twine upload --verbose -r testpypi dist/* || echo 'Twine Test Upload Failed: Try temporarily incrementing the minor version number if you are getting a "400 File already exists"'
     fi
 }
 
@@ -115,6 +111,7 @@ upload_pypi()
 
 rm -rf dist
 python3 -m build --sdist --wheel
-upload_test_pypi
+local_test
+# upload_test_pypi
 # upload_pypi
 rm -rf build dist stumpy.egg-info

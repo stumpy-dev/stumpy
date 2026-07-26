@@ -6,7 +6,7 @@ import numba
 import numpy as np
 from numba import njit, prange
 
-from . import config, core
+from . import config, core, rng, sdp
 from .scraamp import prescraamp, scraamp
 from .stump import _stump
 
@@ -116,7 +116,7 @@ def _preprocess_prescrump(
         else:  # AB-join
             s = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
 
-    indices = np.random.permutation(range(0, l, s)).astype(np.int64)
+    indices = rng.RNG.permutation(range(0, l, s)).astype(np.int64)
 
     return (
         T_A,
@@ -133,7 +133,7 @@ def _preprocess_prescrump(
     )
 
 
-@njit(fastmath=True)
+@njit(fastmath=config.STUMPY_FASTMATH_FLAGS)
 def _compute_PI(
     T_A,
     T_B,
@@ -235,7 +235,7 @@ def _compute_PI(
     QT = np.empty(w, dtype=np.float64)
     for i in indices[start:stop]:
         Q = T_A[i : i + m]
-        QT[:] = core._sliding_dot_product(Q, T_B)
+        QT[:] = sdp._njit_sliding_dot_product(Q, T_B)
         squared_distance_profile[:] = core._calculate_squared_distance_profile(
             m,
             QT,
@@ -384,7 +384,7 @@ def _compute_PI(
     # "(f8[:], f8[:], i8, f8[:], f8[:], f8[:], f8[:], f8[:], i8, i8, f8[:], f8[:],"
     # "i8[:], optional(i8))",
     parallel=True,
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _prescrump(
     T_A,
@@ -810,8 +810,11 @@ class scrump:
             subsequence in T_A, its nearest neighbor in T_B will be recorded.
 
         ignore_trivial : bool, default True
-            Set to `True` if this is a self-join. Otherwise, for AB-join, set this to
-            `False`. Default is `True`.
+            Set to ``True`` if this is a self-join (i.e., for a single time series
+            ``T_A`` without ``T_B``). This ensures that an exclusion zone is applied
+            to each subsequence in ``T_A`` and all trivial/self-matches are ignored.
+            Otherwise, for an AB-join (i.e., between two times series, ``T_A`` and
+            ``T_B``), set this to ``False``.
 
         percentage : float, default 0.01
             Approximate percentage completed. The value is between 0.0 and 1.0.
@@ -862,11 +865,16 @@ class scrump:
             by currying the user-defined function using `functools.partial`. Any
             subsequence with at least one np.nan/np.inf will automatically have its
             corresponding value set to False in this boolean array.
+
+        Returns
+        -------
+        None
         """
         self._ignore_trivial = ignore_trivial
 
         if T_B is None:
             T_B = T_A
+            core.check_self_join(self._ignore_trivial)
             self._ignore_trivial = True
             T_B_subseq_isconstant = T_A_subseq_isconstant
 
@@ -905,10 +913,15 @@ class scrump:
                 "For multidimensional STUMP use `stumpy.mstump` or `stumpy.mstumped`"
             )
 
-        core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
         self._ignore_trivial = core.check_ignore_trivial(
             self._T_A, self._T_B, self._ignore_trivial
         )
+        if self._ignore_trivial:
+            core.check_window_size(
+                m, max_size=min(T_A.shape[0], T_B.shape[0]), n=T_A.shape[0]
+            )
+        else:
+            core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
 
         self._n_A = self._T_A.shape[0]
         self._n_B = self._T_B.shape[0]
@@ -984,7 +997,7 @@ class scrump:
             core._merge_topk_PI(self._P, P, self._I, I)
 
         if self._ignore_trivial:
-            self._diags = np.random.permutation(
+            self._diags = rng.RNG.permutation(
                 range(self._excl_zone + 1, self._n_A - self._m + 1)
             ).astype(np.int64)
             if self._diags.shape[0] == 0:  # pragma: no cover
@@ -994,7 +1007,7 @@ class scrump:
                     f"Please try a value of `m <= {max_m}`"
                 )
         else:
-            self._diags = np.random.permutation(
+            self._diags = rng.RNG.permutation(
                 range(-(self._n_A - self._m + 1) + 1, self._n_B - self._m + 1)
             ).astype(np.int64)
 
@@ -1075,7 +1088,8 @@ class scrump:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated (top-k) matrix profile
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
@@ -1096,7 +1110,8 @@ class scrump:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated (top-k) matrix profile indices
         """
         if self._k == 1:
             return self._I.flatten().astype(np.int64)
@@ -1114,7 +1129,8 @@ class scrump:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated left (top-1) matrix profile indices
         """
         return self._IL.astype(np.int64)
 
@@ -1129,6 +1145,7 @@ class scrump:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated right (top-1) matrix profile indices
         """
         return self._IR.astype(np.int64)

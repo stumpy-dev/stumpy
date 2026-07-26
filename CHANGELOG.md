@@ -1,3 +1,76 @@
+# 2026-02-07    [ 1.14.1 ]:
+---------------------------
+* bugfixes
+  - Fixed/replaced functions deprecated in `numpy >= 2.4`
+* features
+  - Added support for `numpy >= 2.4`
+  - Added support for `numba >= 0.64.0`
+* tasks
+  - Added function to `pypi.sh` to check build locally
+  - Added twine upload comment
+  - Updated `pyproject.toml` to comply with `python -m build`
+* documentation
+  - Fixed typo
+  - Updated docs
+
+
+# 2026-02-03    [ 1.14.0 ]:
+---------------------------
+* bugfixes
+  - Reduced package import time from 20s-30s to 1s-2s with lazy imports
+  - Fixed `pandas` (3.0) to `numpy` array read-only error
+  - Fixed incorrect identification of latest `scipy`/`numpy` compatible versions in `versions.py`
+  - Fixed `versions.py` to ignore release candidates
+  - Fixed length comparison bug
+  - Fixed bad error message in `T.ndim`
+  - Improved `fastmath` precision with consistent and transparent flags
+  - Fixed `max_matches=None` bug
+* features
+  - Added raw `P_` attribute to `stimp` class
+  - Added `polars` support
+  - Improved performance of `stumpi` and `aampi`
+  - Added named multi-dimensional matrix profiles
+* tasks
+  - Refactored coveragerc to expand inclusion of `fftw`, `pyfftw`
+  - Refactored `ray_python_version.py` into `versions.py`
+  - Added function to `versions.py` to get latest Python version compatible with `pkg_name`
+  - Replaced `__init__.py` (slow) importing of fastmath function with (fast) `ast` alternative
+  - Added `pixi` support to `pyproject.toml`
+  - Removed explicit minimum Python version unit testing from Github Actions workflow
+  - Added error handling for `range` mode in `versions.py`
+  - Added manual workflow dispatch to Github Actions workflows
+  - Updated Github Actions workflows to automatically detect required Python version(s)
+  - Added a "safe", "max", and "range" modes to `versions.py`
+  - Bumped minimum Python version to `3.10`
+  - Added `user-agent` to `pandas.read_html` in `versions.py`
+  - Migrated away from Codecov
+  - Removed FOSSA references
+  - Migrated to `stumpy-dev` Github organization
+  - Refactored how `fastmath` flags are defined in `njit` functions
+  - Updated `fastmath.py` to use proper default config values
+  - Added extra check for window size
+  - Added `numba` cache directory for `pytest`
+  - Bumped minimum package version dependencies
+  - Added venv support in `test.sh`
+  - Added elapsed time display in `test.sh`
+  - Reduced Github Actions workflow runtime
+  - Added .pypirc support for uploading to PyPI with twine
+* documentation
+  - Added missing `Returns` section in all docstrings for easier `Parameters` detection
+  - Improved `installation-from-source` instructions on RTD
+  - Updated installation instructions on RTD to support `pixi`/`uv`
+  - Increased RTD max navigation menu items
+  - Shortened RTD navigation menu item titles
+  - Improved `ignore_trivial` docstring and warnings
+  - Added automatic re-run for `check-links` failures
+  - Removed deprecated `pandas` code from tutorial(s)
+  - Updated documentation
+  - Fixed tutorial warnings
+  - Fixed typos
+  - Fixed black formatting
+  - Fixed docstrings
+
+
 # 2024-07-08    [ 1.13.0 ]:
 ---------------------------
 * bugfixes

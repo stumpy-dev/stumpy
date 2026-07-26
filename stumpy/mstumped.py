@@ -43,8 +43,8 @@ def _dask_mstumped(
 
     T_A : numpy.ndarray
         The time series or sequence for which to compute the multi-dimensional
-        matrix profile. Each row in `T_A` represents data from a different
-        dimension while each column in `T_A` represents data from the same
+        matrix profile. Each row in `T_A` represents data from the same
+        dimension while each column in `T_A` represents data from a different
         dimension.
 
     T_B : numpy.ndarray
@@ -216,8 +216,8 @@ def _ray_mstumped(
 
     T_A : numpy.ndarray
         The time series or sequence for which to compute the multi-dimensional
-        matrix profile. Each row in `T_A` represents data from a different
-        dimension while each column in `T_A` represents data from the same
+        matrix profile. Each row in `T_A` represents data from the same
+        dimension while each column in `T_A` represents data from a different
         dimension.
 
     T_B : numpy.ndarray
@@ -387,8 +387,8 @@ def mstumped(
 
     T : numpy.ndarray
         The time series or sequence for which to compute the multi-dimensional
-        matrix profile. Each row in ``T`` represents data from a different
-        dimension while each column in ``T`` represents data from the same
+        matrix profile. Each row in ``T`` represents data from the same
+        dimension while each column in ``T`` represents data from a different
         dimension.
 
     m : int
@@ -502,10 +502,12 @@ def mstumped(
     )
 
     if T_A.ndim <= 1:  # pragma: no cover
-        err = f"T is {T_A.ndim}-dimensional and must be at least 1-dimensional"
+        err = f"T is {T_A.ndim}-dimensional and must be at least 2-dimensional"
         raise ValueError(f"{err}")
 
-    core.check_window_size(m, max_size=min(T_A.shape[1], T_B.shape[1]))
+    # mstump currently only supports self-join. Therefore, the argument `n=T_A.shape[1]`
+    # must be passed to the function `core.check_window_size`.
+    core.check_window_size(m, max_size=min(T_A.shape[1], T_B.shape[1]), n=T_A.shape[1])
 
     if include is not None:
         include = core._preprocess_include(include)

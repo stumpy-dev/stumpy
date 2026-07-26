@@ -1,46 +1,102 @@
+import ast
+import importlib
 import os.path
+import pathlib
+import types
 from importlib.metadata import distribution
 from site import getsitepackages
 
 from numba import cuda
 
-from .aamp import aamp  # noqa: F401
-from .aamp_mmotifs import aamp_mmotifs  # noqa: F401
-from .aamp_motifs import aamp_match, aamp_motifs  # noqa: F401
-from .aamp_ostinato import aamp_ostinato, aamp_ostinatoed  # noqa: F401
-from .aamp_stimp import aamp_stimp, aamp_stimped  # noqa: F401
-from .aampdist import aampdist, aampdisted  # noqa: F401
-from .aampdist_snippets import aampdist_snippets  # noqa: F401
-from .aamped import aamped  # noqa: F401
-from .aampi import aampi  # noqa: F401
-from .chains import allc, atsc  # noqa: F401
-from .core import mass  # noqa: F401
-from .floss import floss, fluss  # noqa: F401
-from .maamp import maamp, maamp_mdl, maamp_subspace  # noqa: F401
-from .maamped import maamped  # noqa: F401
-from .mmotifs import mmotifs  # noqa: F401
-from .motifs import match, motifs  # noqa: F401
-from .mpdist import mpdist, mpdisted  # noqa: F401
-from .mstump import mdl, mstump, subspace  # noqa: F401
-from .mstumped import mstumped  # noqa: F401
-from .ostinato import ostinato, ostinatoed  # noqa: F401
-from .scraamp import prescraamp, scraamp  # noqa: F401
-from .scrump import prescrump, scrump  # noqa: F401
-from .snippets import snippets  # noqa: F401
-from .stimp import stimp, stimped  # noqa: F401
-from .stump import stump  # noqa: F401
-from .stumped import stumped  # noqa: F401
-from .stumpi import stumpi  # noqa: F401
+from . import cache, config
+
+# Define which functions belong to which module
+# Key: function name to expose at top level
+# Value: name of the module
+_lazy_imports = {
+    "aamp": "aamp",
+    "aamp_mmotifs": "aamp_mmotifs",
+    "aamp_match": "aamp_motifs",
+    "aamp_motifs": "aamp_motifs",
+    "aamp_ostinato": "aamp_ostinato",
+    "aamp_ostinatoed": "aamp_ostinato",
+    "aamp_stimp": "aamp_stimp",
+    "aamp_stimped": "aamp_stimp",
+    "aampdist": "aampdist",
+    "aampdisted": "aampdist",
+    "aampdist_snippets": "aampdist_snippets",
+    "aamped": "aamped",
+    "aampi": "aampi",
+    "allc": "chains",
+    "atsc": "chains",
+    "mass": "core",
+    "floss": "floss",
+    "fluss": "floss",
+    "maamp": "maamp",
+    "maamp_mdl": "maamp",
+    "maamp_subspace": "maamp",
+    "maamped": "maamped",
+    "mmotifs": "mmotifs",
+    "match": "motifs",
+    "motifs": "motifs",
+    "mpdist": "mpdist",
+    "mpdisted": "mpdist",
+    "mdl": "mstump",
+    "mstump": "mstump",
+    "subspace": "mstump",
+    "mstumped": "mstumped",
+    "ostinato": "ostinato",
+    "ostinatoed": "ostinato",
+    "prescraamp": "scraamp",
+    "scraamp": "scraamp",
+    "prescrump": "scrump",
+    "scrump": "scrump",
+    "snippets": "snippets",
+    "stimp": "stimp",
+    "stimped": "stimp",
+    "stump": "stump",
+    "stumped": "stumped",
+    "stumpi": "stumpi",
+}
+
+# Get the default fastmath flags for all njit functions
+# and update the _STUMPY_DEFAULTS dictionary
+
+
+def _get_fastmath_value(module_name, func_name):  # pragma: no cover
+    fname = module_name + ".py"
+    fname = pathlib.Path(__file__).parent / fname
+    with open(fname, "r", encoding="utf-8") as f:
+        src = f.read()
+        tree = ast.parse(src)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == func_name:
+                for dec in node.decorator_list:
+                    for kw in dec.keywords:
+                        if kw.arg == "fastmath":
+                            fastmath_flag = ast.get_source_segment(src, kw.value)
+                            return eval(fastmath_flag)
+
+
+njit_funcs = cache.get_njit_funcs()
+for module_name, func_name in njit_funcs:
+    key = module_name + "." + func_name  # e.g., core._mass
+    key = "STUMPY_FASTMATH_" + key.upper()  # e.g., STUMPY_FASTHMATH_CORE._MASS
+    config._STUMPY_DEFAULTS[key] = _get_fastmath_value(module_name, func_name)
 
 if cuda.is_available():
-    from .gpu_aamp import gpu_aamp  # noqa: F401
-    from .gpu_aamp_ostinato import gpu_aamp_ostinato  # noqa: F401
-    from .gpu_aamp_stimp import gpu_aamp_stimp  # noqa: F401
-    from .gpu_aampdist import gpu_aampdist  # noqa: F401
-    from .gpu_mpdist import gpu_mpdist  # noqa: F401
-    from .gpu_ostinato import gpu_ostinato  # noqa: F401
-    from .gpu_stimp import gpu_stimp  # noqa: F401
-    from .gpu_stump import gpu_stump  # noqa: F401
+    _lazy_imports.update(
+        {
+            "gpu_aamp": "gpu_aamp",
+            "gpu_aamp_ostinato": "gpu_aamp_ostinato",
+            "gpu_aamp_stimp": "gpu_aamp_stimp",
+            "gpu_aampdist": "gpu_aampdist",
+            "gpu_mpdist": "gpu_mpdist",
+            "gpu_ostinato": "gpu_ostinato",
+            "gpu_stimp": "gpu_stimp",
+            "gpu_stump": "gpu_stump",
+        }
+    )
 else:  # pragma: no cover
     from . import core
     from .core import _gpu_aamp_driver_not_found as gpu_aamp  # noqa: F401
@@ -56,9 +112,6 @@ else:  # pragma: no cover
 
     core._gpu_searchsorted_left = core._gpu_searchsorted_left_driver_not_found
     core._gpu_searchsorted_right = core._gpu_searchsorted_right_driver_not_found
-
-    import ast
-    import pathlib
 
     # Fix GPU-STUMP Docs
     gpu_stump.__doc__ = ""
@@ -182,7 +235,7 @@ else:  # pragma: no cover
         if cd.name == "gpu_aamp_stimp":
             gpu_aamp_stimp.__doc__ = ast.get_docstring(cd)
 
-try:
+try:  # pragma: no cover
     # _dist = get_distribution("stumpy")
     _dist = distribution("stumpy")
     # Normalize case for Windows systems
@@ -195,3 +248,69 @@ except ModuleNotFoundError:  # pragma: no cover
     __version__ = "Please install this project with setup.py"
 else:  # pragma: no cover
     __version__ = _dist.version
+
+
+# PEP 562: module-level __getattr__ for lazy imports
+def __getattr__(name):  # pragma: no cover
+    if name in _lazy_imports:
+        mod_name = _lazy_imports[name]
+        module = importlib.import_module(f"{__package__}.{mod_name}")
+        # Retrieve the attribute from the loaded module and cache it
+        attr = getattr(module, name)
+        globals()[name] = attr
+        return attr
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+# Ensure that if a module was imported during package import
+# (causing the package attribute to point to the module object), we
+# replace that entry with the actual attribute (e.g., function) so that
+# users get the expected callable at `stumpy.aamp` rather than the module.
+for _name, _sub in _lazy_imports.items():  # pragma: no cover
+    val = globals().get(_name)
+    if isinstance(val, types.ModuleType):
+        try:
+            replacement = getattr(val, _name)
+        except AttributeError:
+            # Nothing to do if the module doesn't define the attribute
+            continue
+        globals()[_name] = replacement
+
+
+# Eagerly import exports that would otherwise collide with
+# same-named modules. This keeps lazy imports for most names but
+# ensures that when a top-level exported name exactly matches its
+# module (e.g., `stump` -> `stump.py`), the exported attribute is
+# available immediately so REPL completers prefer the callable/class
+# instead of the module.
+for _name, _sub in _lazy_imports.items():  # pragma: no cover
+    try:
+        if _name == _sub:
+            filepath = pathlib.Path(__file__).parent / f"{_sub}.py"
+            if filepath.exists():
+                module = importlib.import_module(f"{__package__}.{_sub}")
+                try:
+                    globals()[_name] = getattr(module, _name)
+                except AttributeError:
+                    # If the module doesn't define the attribute, keep it lazy
+                    pass
+    except Exception:
+        # Be conservative: don't let eager-import attempts raise during package import
+        pass
+
+
+def __dir__():  # pragma: no cover
+    # Expose lazy names in dir() for discoverability
+    # Also include __all__ so tools that consult it will see the intended
+    # top-level exports (this helps some REPL completers prefer the
+    # callable/class exports over same-named modules).
+    all_names = list(globals().keys()) + list(_lazy_imports.keys())
+    all_names += list(globals().get("__all__", []))
+    return sorted(all_names)
+
+
+# Make the lazy-exported names explicit for tools that respect __all__.
+# This helps REPL tab-completion prefer functions/classes over modules
+# when names collide (e.g., `stumpy.stump` should point to the function
+# rather than the module during completion).
+__all__ = sorted(list(_lazy_imports.keys()))

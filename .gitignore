@@ -7,9 +7,9 @@
 .pytest_cache
 LOG*
 PID
-.coverage*
-coverage.xml
-stumpy.coverage.xml
+.coverage
+coverage.json
+coverage.stumpy.json
 dask-worker-space
 stumpy.egg-info
 build
@@ -22,3 +22,6 @@ docs/_build
 .directory
 test.py
 *.nbconvert.ipynb
+.pixi
+pixi.lock
+uv.lock

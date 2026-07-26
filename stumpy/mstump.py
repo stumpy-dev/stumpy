@@ -217,7 +217,7 @@ def subspace(
     array([0, 1])
     """
     T = core._preprocess(T)
-    core.check_window_size(m, max_size=T.shape[-1])
+    core.check_window_size(m, max_size=T.shape[1], n=T.shape[1])
     T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
     if discretize_func is None:
@@ -409,7 +409,7 @@ def mdl(
     (array([ 80.      , 111.509775]), [array([1]), array([0, 1])])
     """
     T = core._preprocess(T)
-    core.check_window_size(m, max_size=T.shape[-1])
+    core.check_window_size(m, max_size=T.shape[1], n=T.shape[1])
     T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
     if discretize_func is None:
@@ -624,7 +624,7 @@ def multi_distance_profile(
     )
 
     if T.ndim <= 1:  # pragma: no cover
-        err = f"T is {T.ndim}-dimensional and must be at least 1-dimensional"
+        err = f"T is {T.ndim}-dimensional and must be at least 2-dimensional"
         raise ValueError(f"{err}")
 
     core.check_window_size(m, max_size=T.shape[1])
@@ -811,7 +811,7 @@ def _get_multi_QT(start, T, m):
     # "(i8, i8, i8, f8[:, :], f8[:, :], i8, i8, f8[:, :], f8[:, :], f8[:, :],"
     # "f8[:, :], f8[:, :], f8[:, :], f8[:, :])",
     parallel=True,
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _compute_multi_D(
     d,
@@ -1126,8 +1126,8 @@ def mstump(
     ----------
     T : numpy.ndarray
         The time series or sequence for which to compute the multi-dimensional
-        matrix profile. Each row in ``T`` represents data from a different
-        dimension while each column in ``T`` represents data from the same
+        matrix profile. Each row in ``T`` represents data from the same
+        dimension while each column in ``T`` represents data from a different
         dimension.
 
     m : int
@@ -1228,7 +1228,9 @@ def mstump(
         err = f"T is {T_A.ndim}-dimensional and must be at least 1-dimensional"
         raise ValueError(f"{err}")
 
-    core.check_window_size(m, max_size=min(T_A.shape[1], T_B.shape[1]))
+    # mstump currently only supports self-join. Therefore, the argument `n=T_A.shape[1]`
+    # must be passed to the function `core.check_window_size`.
+    core.check_window_size(m, max_size=min(T_A.shape[1], T_B.shape[1]), n=T_A.shape[1])
 
     if include is not None:
         include = core._preprocess_include(include)

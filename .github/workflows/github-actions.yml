@@ -4,66 +4,39 @@ on:
     branches: main
   pull_request:
     branches: main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 14 * * *'  # 2pm UTC == 9am EST
 jobs:
-  minimum-version-testing:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8']
+  generate_python_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      python_versions: ${{ steps.set-matrix.outputs.python_versions }}
+      min_python_version: ${{ steps.set-matrix.outputs.min_python_version }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Set Up Python
-        uses: actions/setup-python@v5
+      - name: Checkout STUMPY
+        uses: actions/checkout@v4
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Display Python Version
-        run: python -c "import sys; print(sys.version)"
-        shell: bash
-      - name: Upgrade Pip
-        run: python -m pip install --upgrade pip
-        shell: bash
-      - name: Generate Minimum Requirements File
-        run: sed 's/>/=/g' requirements.txt | sed 's/$/\.*/g'  > requirements.min.txt
-        shell: bash
-      - name: Install Minimum Requirements
-        run: python -m pip install --upgrade -r requirements.min.txt
-        shell: bash
-      - name: Install STUMPY And Other Dependencies
-        run: python -m pip install --editable .[ci]
-        shell: bash
-      - name: Run Black
-        run: black --check --diff ./
-        shell: bash
-      - name: Run Flake8
-        run: flake8 ./
-        shell: bash
-      - name: Install and Link OpenMP
+          repository: stumpy-dev/stumpy
+      - name: Upgrade Pip, Install Minimum Requirements
         run: |
-             if [ "$RUNNER_OS" == "macOS" ]; then
-                  echo "Installing OpenMP"
-                  brew install libomp
-                  echo "Linking OpenMP"
-                  brew link --force libomp
-                  echo "Find OpenMP Linking Location"
-                  libfile=`brew list libomp --verbose | grep libomp.dylib`
-                  echo $libfile
-                  echo "Changing  @rpath for the omppool.cpython-x-darwin.so shared object to look in $libfile"
-                  ls "$(python -c 'import site; print(site.getsitepackages()[0])')"/numba/np/ufunc/omppool.*.so | xargs install_name_tool -change @rpath/libomp.dylib $libfile
-             fi
+          python -m pip install --upgrade pip pandas lxml packaging docutils
         shell: bash
-      - name: Show Full Numba Environment
-        run: python -m numba -s
-        shell: bash
-      - name: Run Unit Tests
-        run: ./test.sh unit
+      - name: Generate Python versions
+        id: set-matrix
+        run: |
+          MIN_PYTHON=$(python ./versions.py -mode min | grep python | awk '{print $2}')
+          MAX_PYTHON=$(python ./versions.py -mode max | grep python | awk '{print $2}')
+          echo "python_versions=$(python ./versions.py -mode range $MIN_PYTHON $MAX_PYTHON)" >> $GITHUB_OUTPUT
+          echo "min_python_version=\"$MIN_PYTHON\"" >> $GITHUB_OUTPUT
         shell: bash
   unit-testing:
+    needs: generate_python_matrix
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ${{ fromJSON(needs.generate_python_matrix.outputs.python_versions) }}
     steps:
       - uses: actions/checkout@v4
       - name: Set Up Python
@@ -106,11 +79,12 @@ jobs:
         run: ./test.sh unit
         shell: bash
   coverage-testing:
+    needs: generate_python_matrix
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ${{ fromJSON(needs.generate_python_matrix.outputs.python_versions) }}
     steps:
       - uses: actions/checkout@v4
       - name: Set Up Python
@@ -152,12 +126,3 @@ jobs:
       - name: Run Coverage Tests
         run: ./test.sh coverage
         shell: bash
-      - name: Generate Coverage Report
-        run: ./test.sh report coverage.stumpy.xml
-        shell: bash
-      - name: Upload Coverage Tests Results
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.stumpy.xml
-          verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}

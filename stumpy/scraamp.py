@@ -6,7 +6,7 @@ import numba
 import numpy as np
 from numba import njit, prange
 
-from . import config, core
+from . import config, core, rng
 from .aamp import _aamp
 
 
@@ -78,12 +78,12 @@ def _preprocess_prescraamp(T_A, m, T_B=None, s=None):
         else:  # AB-join
             s = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
 
-    indices = np.random.permutation(range(0, l, s)).astype(np.int64)
+    indices = rng.RNG.permutation(range(0, l, s)).astype(np.int64)
 
     return (T_A, T_B, T_A_subseq_isfinite, T_B_subseq_isfinite, indices, s, excl_zone)
 
 
-@njit(fastmath=True)
+@njit(fastmath=config.STUMPY_FASTMATH_FLAGS)
 def _compute_PI(
     T_A,
     T_B,
@@ -286,7 +286,7 @@ def _compute_PI(
     # "(f8[:], f8[:], i8, b1[:], b1[:], f8, i8, i8, f8[:], f8[:],"
     # "i8[:], optional(i8))",
     parallel=True,
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _prescraamp(
     T_A,
@@ -346,7 +346,7 @@ def _prescraamp(
 
     Returns
     -------
-    out1 : numpy.ndarray
+    out : numpy.ndarray
         The (top-k) matrix profile. When k=1 (default), the first (and only) column
         in this 2D array consists of the matrix profile. When k > 1, the output
         has exactly `k` columns consisting of the top-k matrix profile.
@@ -615,12 +615,17 @@ class scraamp:
             The number of top `k` smallest distances used to construct the matrix
             profile. Note that this will increase the total computational time and
             memory usage when k > 1.
+
+        Returns
+        -------
+        None
         """
         self._ignore_trivial = ignore_trivial
         self._p = p
 
         if T_B is None:
             T_B = T_A
+            core.check_self_join(self._ignore_trivial)
             self._ignore_trivial = True
 
         self._m = m
@@ -646,10 +651,15 @@ class scraamp:
                 "For multidimensional STUMP use `stumpy.mstump` or `stumpy.mstumped`"
             )
 
-        core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
         self._ignore_trivial = core.check_ignore_trivial(
             self._T_A, self._T_B, self._ignore_trivial
         )
+        if self._ignore_trivial:  # self-join
+            core.check_window_size(
+                m, max_size=min(T_A.shape[0], T_B.shape[0]), n=T_A.shape[0]
+            )
+        else:  # AB-join
+            core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
 
         self._n_A = self._T_A.shape[0]
         self._n_B = self._T_B.shape[0]
@@ -708,7 +718,7 @@ class scraamp:
             core._merge_topk_PI(self._P, P, self._I, I)
 
         if self._ignore_trivial:
-            self._diags = np.random.permutation(
+            self._diags = rng.RNG.permutation(
                 range(self._excl_zone + 1, self._n_A - self._m + 1)
             ).astype(np.int64)
             if self._diags.shape[0] == 0:  # pragma: no cover
@@ -718,7 +728,7 @@ class scraamp:
                     f"Please try a value of `m <= {max_m}`"
                 )
         else:
-            self._diags = np.random.permutation(
+            self._diags = rng.RNG.permutation(
                 range(-(self._n_A - self._m + 1) + 1, self._n_B - self._m + 1)
             ).astype(np.int64)
 
@@ -792,7 +802,11 @@ class scraamp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated (top-k) matrix profile. When `k=1` (default), this output is
+            a 1D array consisting of the updated matrix profile. When `k > 1`, the
+            output is a 2D array that has exactly `k` columns consisting of the updated
+            top-k matrix profile.
         """
         if self._k == 1:
             return self._P.flatten().astype(np.float64)
@@ -813,7 +827,11 @@ class scraamp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated (top-k) matrix profile indices. When `k=1` (default), this
+            output is a 1D array consisting of the updated matrix profile indices.
+            When `k > 1`, the output is a 2D array that has exactly `k` columns
+            consisting of the updated top-k matrix profile indices.
         """
         if self._k == 1:
             return self._I.flatten().astype(np.int64)
@@ -831,7 +849,8 @@ class scraamp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated left (top-1) matrix profile indices
         """
         return self._IL.astype(np.int64)
 
@@ -846,6 +865,7 @@ class scraamp:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The updated right (top-1) matrix profile indices
         """
         return self._IR.astype(np.int64)

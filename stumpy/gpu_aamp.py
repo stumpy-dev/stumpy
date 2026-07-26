@@ -519,6 +519,7 @@ def gpu_aamp(T_A, m, T_B=None, ignore_trivial=True, device_id=0, p=2.0, k=1):
     """
     if T_B is None:  # Self join!
         T_B = T_A
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
 
     T_A, T_A_subseq_isfinite = core.preprocess_non_normalized(T_A, m)
@@ -536,8 +537,13 @@ def gpu_aamp(T_A, m, T_B=None, ignore_trivial=True, device_id=0, p=2.0, k=1):
             "For multidimensional STUMP use `stumpy.mstump` or `stumpy.mstumped`"
         )
 
-    core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
     ignore_trivial = core.check_ignore_trivial(T_A, T_B, ignore_trivial)
+    if ignore_trivial:  # self-join
+        core.check_window_size(
+            m, max_size=min(T_A.shape[0], T_B.shape[0]), n=T_A.shape[0]
+        )
+    else:  # AB-join
+        core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
 
     n = T_B.shape[0]
     w = T_A.shape[0] - m + 1
@@ -712,5 +718,12 @@ def gpu_aamp(T_A, m, T_B=None, ignore_trivial=True, device_id=0, p=2.0, k=1):
     out[:, k:] = np.column_stack((indices[0], indices_L[0], indices_R[0]))
 
     core._check_P(out[:, 0])
+
+    for _id in device_ids:
+        with cuda.gpus[_id]:
+            if (
+                cuda.current_context().__class__.__name__ != "FakeCUDAContext"
+            ):  # pragma: no cover
+                cuda.current_context().deallocations.clear()
 
     return mparray(out, m, k, config.STUMPY_EXCL_ZONE_DENOM)

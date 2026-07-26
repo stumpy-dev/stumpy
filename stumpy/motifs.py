@@ -72,7 +72,9 @@ def _motifs(
         the first match is always the self-match/trivial-match for each motif.
 
     max_motifs : int
-        The maximum number of motifs to return.
+        The maximum number of motifs to return. To consider returning all possible
+        valid motifs, try setting `max_motifs` to the length of your input matrix
+        profile (i.e., ``max_motifs=len(P)``)
 
     atol : float, default 1e-8
         The absolute tolerance parameter. This value will be added to `max_distance`
@@ -138,6 +140,8 @@ def _motifs(
             query_matches = np.array([[np.nan, candidate_idx]])
 
         for idx in query_matches[:, 1]:
+            # Since the query motif is also included as the first item in the list of
+            # `query_matches`, the exclusion zone is also applied to the query motif!
             core.apply_exclusion_zone(P, int(idx), excl_zone, np.inf)
 
         candidate_idx = np.argmin(P[-1])
@@ -239,7 +243,9 @@ def motifs(
         self-match/trivial-match for each motif.
 
     max_motifs : int, default 1
-        The maximum number of motifs to return.
+        The maximum number of motifs to return. To consider returning all possible
+        valid motifs, try setting `max_motifs` to the length of your input matrix
+        profile (i.e., ``max_motifs=len(P)``)
 
     atol : float, default 1e-8
         The absolute tolerance parameter. This value will be added to ``max_distance``
@@ -334,7 +340,7 @@ def motifs(
     m = T.shape[-1] - P.shape[-1] + 1
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
     if max_matches is None:  # pragma: no cover
-        max_matches = np.inf
+        max_matches = P.shape[-1]
     if cutoff is None:  # pragma: no cover
         P_copy = P.copy().astype(np.float64)
         P_copy[np.isinf(P_copy)] = np.nan
@@ -414,13 +420,13 @@ def match(
     Find all matches of a query ``Q`` in a time series ``T``
 
     The indices of subsequences whose distances to ``Q`` are less than or equal to
-    ``max_distance``, sorted by distance (lowest to highest). Around each occurrence an
+    ``max_distance``, sorted by distance (lowest to highest). Around each occurrence, an
     exclusion zone is applied before searching for the next.
 
     Parameters
     ----------
     Q : numpy.ndarray
-        The query sequence. It doesn't have to be a subsequence of ``T``.
+        The query sequence. ``Q`` does not have to be a subsequence of ``T``.
 
     T : numpy.ndarray
         The time series of interest.

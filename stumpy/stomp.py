@@ -6,7 +6,8 @@ import warnings
 
 import numpy as np
 
-from . import config, core, stamp
+from . import config, core
+from .stamp import _mass_PI
 
 
 def _stomp(T_A, m, T_B=None, ignore_trivial=True):
@@ -70,6 +71,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
 
     if T_B is None:
         T_B = T_A
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
 
     T_A, μ_Q, σ_Q, Q_subseq_isconstant = core.preprocess(T_A, m)
@@ -81,8 +83,13 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
     if T_B.ndim != 1:  # pragma: no cover
         raise ValueError(f"T_B is {T_B.ndim}-dimensional and must be 1-dimensional. ")
 
-    core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
     ignore_trivial = core.check_ignore_trivial(T_A, T_B, ignore_trivial)
+    if ignore_trivial:  # self-join
+        core.check_window_size(
+            m, max_size=min(T_A.shape[0], T_B.shape[0]), n=T_A.shape[0]
+        )
+    else:  # AB-join
+        core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
 
     n = T_A.shape[0]
     l = n - m + 1
@@ -99,7 +106,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
         IR = -1
     else:
         if ignore_trivial:
-            P, I = stamp._mass_PI(
+            P, I = _mass_PI(
                 T_A[:m],
                 T_B,
                 M_T,
@@ -109,7 +116,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
                 T_subseq_isconstant=T_subseq_isconstant,
                 Q_subseq_isconstant=Q_subseq_isconstant[[0]],
             )
-            PR, IR = stamp._mass_PI(
+            PR, IR = _mass_PI(
                 T_A[:m],
                 T_B,
                 M_T,
@@ -121,7 +128,7 @@ def _stomp(T_A, m, T_B=None, ignore_trivial=True):
                 Q_subseq_isconstant=Q_subseq_isconstant[[0]],
             )
         else:
-            P, I = stamp._mass_PI(
+            P, I = _mass_PI(
                 T_A[:m],
                 T_B,
                 M_T,

@@ -11,7 +11,8 @@ import pytest
 from numba import cuda
 from scipy.spatial.distance import cdist
 
-from stumpy import config, core, stump
+from stumpy import config, core, rng
+from stumpy.stump import stump
 
 if cuda.is_available():
 
@@ -32,14 +33,6 @@ except ModuleNotFoundError:
     from numba.core.errors import NumbaPerformanceWarning
 
 TEST_THREADS_PER_BLOCK = 10
-
-
-def naive_rolling_window_dot_product(Q, T):
-    window = len(Q)
-    result = np.zeros(len(T) - window + 1)
-    for i in range(len(result)):
-        result[i] = np.dot(T[i : i + window], Q)
-    return result
 
 
 def naive_compute_mean_std_multidimensional(T, m):
@@ -148,7 +141,7 @@ test_data = [
         np.array([9, 8100, -60], dtype=np.float64),
         np.array([584, -11, 23, 79, 1001], dtype=np.float64),
     ),
-    (np.random.uniform(-1000, 1000, [8]), np.random.uniform(-1000, 1000, [64])),
+    (rng.RNG.uniform(-1000, 1000, [8]), rng.RNG.uniform(-1000, 1000, [64])),
 ]
 
 n = list(range(1, 50))
@@ -157,11 +150,11 @@ n = list(range(1, 50))
 def test_check_bad_dtype():
     for dtype in [np.int32, np.int64, np.float32]:
         with pytest.raises(TypeError):
-            core.check_dtype(np.random.rand(10).astype(dtype))
+            core.check_dtype(rng.RNG.rand(10).astype(dtype))
 
 
 def test_check_dtype_float64():
-    assert core.check_dtype(np.random.rand(10))
+    assert core.check_dtype(rng.RNG.rand(10))
 
 
 def test_get_max_window_size():
@@ -192,22 +185,30 @@ def test_check_max_window_size():
             core.check_window_size(m, max_size=3)
 
 
-@pytest.mark.parametrize("Q, T", test_data)
-def test_njit_sliding_dot_product(Q, T):
-    ref_mp = naive_rolling_window_dot_product(Q, T)
-    comp_mp = core._sliding_dot_product(Q, T)
-    npt.assert_almost_equal(ref_mp, comp_mp)
+def test_check_window_size_excl_zone():
+    # To ensure warning is raised if there is at least one subsequence
+    # that has no non-trivial neighbor
+    T = rng.RNG.rand(10)
+    m = 7
+
+    # For `len(T) == 10` and `m == 7`, the `excl_zone` is ceil(m / 4) = 2.
+    # In this case, there are `10 - 7 + 1 = 4` subsequences of length 7,
+    # starting at indices 0, 1, 2, and 3. For a subsequence that starts at
+    # index 1, there are no non-trivial neighbors. So, a warning should be
+    # raised.
+    with pytest.warns(UserWarning):
+        core.check_window_size(m, max_size=len(T), n=len(T))
 
 
 @pytest.mark.parametrize("Q, T", test_data)
 def test_sliding_dot_product(Q, T):
-    ref_mp = naive_rolling_window_dot_product(Q, T)
+    ref_mp = naive.rolling_window_dot_product(Q, T)
     comp_mp = core.sliding_dot_product(Q, T)
     npt.assert_almost_equal(ref_mp, comp_mp)
 
 
 def test_welford_nanvar():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     m = 10
 
     ref_var = np.nanvar(T)
@@ -229,7 +230,7 @@ def test_welford_nanvar_catastrophic_cancellation():
 
 
 def test_welford_nanvar_nan():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     m = 10
 
     T[1] = np.nan
@@ -246,7 +247,7 @@ def test_welford_nanvar_nan():
 
 
 def test_welford_nanstd():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     m = 10
 
     ref_var = np.nanstd(T)
@@ -259,7 +260,7 @@ def test_welford_nanstd():
 
 
 def test_rolling_std_1d():
-    a = np.random.rand(64)
+    a = rng.RNG.rand(64)
     for w in range(3, 6):
         ref_std = naive.rolling_nanstd(a, w)
 
@@ -275,7 +276,7 @@ def test_rolling_std_1d():
 def test_rolling_std_2d():
     w = 5
     for n_rows in range(1, 4):
-        a = np.random.rand(n_rows * 64).reshape(n_rows, 64)
+        a = rng.RNG.rand(n_rows * 64).reshape(n_rows, 64)
         ref_std = naive.rolling_nanstd(a, w)
 
         # welford = False (default)
@@ -288,7 +289,7 @@ def test_rolling_std_2d():
 
 
 def test_rolling_nanmin_1d():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_min = np.nanmin(T)
         comp_min = core._rolling_nanmin_1d(T)
@@ -300,7 +301,7 @@ def test_rolling_nanmin_1d():
 
 
 def test_rolling_nanmin():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_min = np.nanmin(core.rolling_window(T, m), axis=1)
         comp_min = core.rolling_nanmin(T, m)
@@ -312,7 +313,7 @@ def test_rolling_nanmin():
 
 
 def test_rolling_nanmax_1d():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_max = np.nanmax(T)
         comp_max = core._rolling_nanmax_1d(T)
@@ -324,7 +325,7 @@ def test_rolling_nanmax_1d():
 
 
 def test_rolling_nanmax():
-    T = np.random.rand(64)
+    T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_max = np.nanmax(core.rolling_window(T, m), axis=1)
         comp_max = core.rolling_nanmax(T, m)
@@ -386,8 +387,8 @@ def test_compute_mean_std_chunked_many(Q, T):
 def test_compute_mean_std_multidimensional(Q, T):
     m = Q.shape[0]
 
-    Q = np.array([Q, np.random.uniform(-1000, 1000, [Q.shape[0]])])
-    T = np.array([T, T, np.random.uniform(-1000, 1000, [T.shape[0]])])
+    Q = np.array([Q, rng.RNG.uniform(-1000, 1000, [Q.shape[0]])])
+    T = np.array([T, T, rng.RNG.uniform(-1000, 1000, [T.shape[0]])])
 
     ref_μ_Q, ref_σ_Q = naive_compute_mean_std_multidimensional(Q, m)
     ref_M_T, ref_Σ_T = naive_compute_mean_std_multidimensional(T, m)
@@ -404,8 +405,8 @@ def test_compute_mean_std_multidimensional(Q, T):
 def test_compute_mean_std_multidimensional_chunked(Q, T):
     m = Q.shape[0]
 
-    Q = np.array([Q, np.random.uniform(-1000, 1000, [Q.shape[0]])])
-    T = np.array([T, T, np.random.uniform(-1000, 1000, [T.shape[0]])])
+    Q = np.array([Q, rng.RNG.uniform(-1000, 1000, [Q.shape[0]])])
+    T = np.array([T, T, rng.RNG.uniform(-1000, 1000, [T.shape[0]])])
 
     with patch("stumpy.config.STUMPY_MEAN_STD_NUM_CHUNKS", 2):
         ref_μ_Q, ref_σ_Q = naive_compute_mean_std_multidimensional(Q, m)
@@ -423,8 +424,8 @@ def test_compute_mean_std_multidimensional_chunked(Q, T):
 def test_compute_mean_std_multidimensional_chunked_many(Q, T):
     m = Q.shape[0]
 
-    Q = np.array([Q, np.random.uniform(-1000, 1000, [Q.shape[0]])])
-    T = np.array([T, T, np.random.uniform(-1000, 1000, [T.shape[0]])])
+    Q = np.array([Q, rng.RNG.uniform(-1000, 1000, [Q.shape[0]])])
+    T = np.array([T, T, rng.RNG.uniform(-1000, 1000, [T.shape[0]])])
 
     with patch("stumpy.config.STUMPY_MEAN_STD_NUM_CHUNKS", 128):
         ref_μ_Q, ref_σ_Q = naive_compute_mean_std_multidimensional(Q, m)
@@ -919,7 +920,7 @@ def test_preprocess_diagonal():
 
 
 def test_replace_distance():
-    right = np.random.rand(30).reshape(5, 6)
+    right = rng.RNG.rand(30).reshape(5, 6)
     left = right.copy()
     np.fill_diagonal(right, config.STUMPY_MAX_DISTANCE - 1e-9)
     np.fill_diagonal(left, np.inf)
@@ -927,7 +928,7 @@ def test_replace_distance():
 
 
 def test_array_to_temp_file():
-    left = np.random.rand()
+    left = rng.RNG.rand()
     fname = core.array_to_temp_file(left)
     right = np.load(fname, allow_pickle=False)
     os.remove(fname)
@@ -939,7 +940,7 @@ def test_count_diagonal_ndist():
     for n_A in range(10, 15):
         for n_B in range(10, 15):
             for m in range(3, 6):
-                diags = np.random.permutation(
+                diags = rng.RNG.permutation(
                     range(-(n_A - m + 1) + 1, n_B - m + 1)
                 ).astype(np.int64)
                 ones_matrix = np.ones((n_A - m + 1, n_B - m + 1), dtype=np.int64)
@@ -1108,12 +1109,12 @@ def test_get_mask_slices():
 def test_idx_to_mp():
     n = 64
     m = 5
-    T = np.random.rand(n)
+    T = rng.RNG.rand(n)
     # T[1] = np.nan
     # T[8] = np.inf
     # T[:] = 1.0
     l = n - m + 1
-    I = np.random.randint(0, l, l)
+    I = rng.RNG.randint(0, l, l)
 
     # `normalize == True` and `T_subseq_isconstant` is None (default)
     ref_mp = naive_idx_to_mp(I, T, m)
@@ -1121,7 +1122,7 @@ def test_idx_to_mp():
     npt.assert_almost_equal(ref_mp, cmp_mp)
 
     # `normalize == True` and `T_subseq_isconstant` is provided
-    T_subseq_isconstant = np.random.choice([True, False], l, replace=True)
+    T_subseq_isconstant = rng.RNG.choice([True, False], l, replace=True)
     ref_mp = naive_idx_to_mp(I, T, m, T_subseq_isconstant=T_subseq_isconstant)
     cmp_mp = core._idx_to_mp(I, T, m, T_subseq_isconstant=T_subseq_isconstant)
     npt.assert_almost_equal(ref_mp, cmp_mp)
@@ -1172,7 +1173,7 @@ def test_bfs_indices_fill_value(n):
 
 
 def test_select_P_ABBA_val_inf():
-    P_ABBA = np.random.rand(10)
+    P_ABBA = rng.RNG.rand(10)
     k = 2
     P_ABBA[k:] = np.inf
     p_abba = P_ABBA.copy()
@@ -1188,13 +1189,14 @@ def test_merge_topk_PI_without_overlap():
     # is no overlap between row IA[i] and row IB[i].
     n = 50
     for k in range(1, 6):
-        PA = np.random.rand(n * k).reshape(n, k)
+        PA = rng.RNG.rand(n * k).reshape(n, k)
         PA[:, :] = np.sort(PA, axis=1)  # sorting each row separately
 
-        PB = np.random.rand(n * k).reshape(n, k)
-        col_idx = np.random.randint(0, k, size=n)
+        PB = rng.RNG.rand(n * k).reshape(n, k)
+        col_idx = rng.RNG.randint(0, k, size=n)
         for i in range(n):  # creating ties between values of PA and PB
-            PB[i, col_idx[i]] = np.random.choice(PA[i], size=1, replace=False)
+            val = rng.RNG.choice(PA[i], size=1, replace=False)
+            PB[i, col_idx[i]] = val.item()
         PB[:, :] = np.sort(PB, axis=1)  # sorting each row separately
 
         IA = np.arange(n * k).reshape(n, k)
@@ -1220,17 +1222,17 @@ def test_merge_topk_PI_with_overlap():
     for k in range(1, 6):
         # note: we do not have overlap issue when k is 1. The `k=1` is considered
         # for the sake of consistency with the `without-overlap` test function.
-        PA = np.random.rand(n * k).reshape(n, k)
-        PB = np.random.rand(n * k).reshape(n, k)
+        PA = rng.RNG.rand(n * k).reshape(n, k)
+        PB = rng.RNG.rand(n * k).reshape(n, k)
 
         IA = np.arange(n * k).reshape(n, k)
         IB = IA + n * k
 
-        num_overlaps = np.random.randint(1, k + 1, size=n)
+        num_overlaps = rng.RNG.randint(1, k + 1, size=n)
         for i in range(n):
             # create overlaps
-            col_IDX = np.random.choice(np.arange(k), num_overlaps[i], replace=False)
-            imprecision = np.random.uniform(low=-1e-06, high=1e-06, size=len(col_IDX))
+            col_IDX = rng.RNG.choice(np.arange(k), num_overlaps[i], replace=False)
+            imprecision = rng.RNG.uniform(low=-1e-06, high=1e-06, size=len(col_IDX))
             PB[i, col_IDX] = PA[i, col_IDX] + imprecision
             IB[i, col_IDX] = IA[i, col_IDX]
 
@@ -1259,15 +1261,15 @@ def test_merge_topk_PI_with_overlap():
 def test_merge_topk_PI_with_1D_input():
     # including some overlaps randomly
     n = 50
-    PA = np.random.rand(n)
-    PB = np.random.rand(n)
+    PA = rng.RNG.rand(n)
+    PB = rng.RNG.rand(n)
 
     IA = np.arange(n)
     IB = IA + n
 
-    n_overlaps = np.random.randint(1, n + 1)
-    IDX_rows_with_overlaps = np.random.choice(np.arange(n), n_overlaps, replace=False)
-    imprecision = np.random.uniform(low=-1e-06, high=1e-06, size=n_overlaps)
+    n_overlaps = rng.RNG.randint(1, n + 1)
+    IDX_rows_with_overlaps = rng.RNG.choice(np.arange(n), n_overlaps, replace=False)
+    imprecision = rng.RNG.uniform(low=-1e-06, high=1e-06, size=n_overlaps)
     PB[IDX_rows_with_overlaps] = PA[IDX_rows_with_overlaps] + imprecision
     IB[IDX_rows_with_overlaps] = IA[IDX_rows_with_overlaps]
 
@@ -1312,13 +1314,14 @@ def test_merge_topk_ρI_without_overlap():
     # is no overlap between row IA[i] and row IB[i].
     n = 50
     for k in range(1, 6):
-        ρA = np.random.rand(n * k).reshape(n, k)
+        ρA = rng.RNG.rand(n * k).reshape(n, k)
         ρA[:, :] = np.sort(ρA, axis=1)  # sorting each row separately
 
-        ρB = np.random.rand(n * k).reshape(n, k)
-        col_idx = np.random.randint(0, k, size=n)
+        ρB = rng.RNG.rand(n * k).reshape(n, k)
+        col_idx = rng.RNG.randint(0, k, size=n)
         for i in range(n):  # creating ties between values of PA and PB
-            ρB[i, col_idx[i]] = np.random.choice(ρA[i], size=1, replace=False)
+            val = rng.RNG.choice(ρA[i], size=1, replace=False)
+            ρB[i, col_idx[i]] = val.item()
         ρB[:, :] = np.sort(ρB, axis=1)  # sorting each row separately
 
         IA = np.arange(n * k).reshape(n, k)
@@ -1344,17 +1347,17 @@ def test_merge_topk_ρI_with_overlap():
     for k in range(1, 6):
         # note: we do not have overlap issue when k is 1. The `k=1` is considered
         # for the sake of consistency with the `without-overlap` test function.
-        ρA = np.random.rand(n * k).reshape(n, k)
-        ρB = np.random.rand(n * k).reshape(n, k)
+        ρA = rng.RNG.rand(n * k).reshape(n, k)
+        ρB = rng.RNG.rand(n * k).reshape(n, k)
 
         IA = np.arange(n * k).reshape(n, k)
         IB = IA + n * k
 
-        num_overlaps = np.random.randint(1, k + 1, size=n)
+        num_overlaps = rng.RNG.randint(1, k + 1, size=n)
         for i in range(n):
             # create overlaps
-            col_IDX = np.random.choice(np.arange(k), num_overlaps[i], replace=False)
-            imprecision = np.random.uniform(low=-1e-06, high=1e-06, size=len(col_IDX))
+            col_IDX = rng.RNG.choice(np.arange(k), num_overlaps[i], replace=False)
+            imprecision = rng.RNG.uniform(low=-1e-06, high=1e-06, size=len(col_IDX))
             ρB[i, col_IDX] = ρA[i, col_IDX] + imprecision
             IB[i, col_IDX] = IA[i, col_IDX]
 
@@ -1383,15 +1386,15 @@ def test_merge_topk_ρI_with_overlap():
 def test_merge_topk_ρI_with_1D_input():
     # including some overlaps randomly
     n = 50
-    ρA = np.random.rand(n)
-    ρB = np.random.rand(n)
+    ρA = rng.RNG.rand(n)
+    ρB = rng.RNG.rand(n)
 
     IA = np.arange(n)
     IB = IA + n
 
-    n_overlaps = np.random.randint(1, n + 1)
-    IDX_rows_with_overlaps = np.random.choice(np.arange(n), n_overlaps, replace=False)
-    imprecision = np.random.uniform(low=-1e-06, high=1e-06, size=n_overlaps)
+    n_overlaps = rng.RNG.randint(1, n + 1)
+    IDX_rows_with_overlaps = rng.RNG.choice(np.arange(n), n_overlaps, replace=False)
+    imprecision = rng.RNG.uniform(low=-1e-06, high=1e-06, size=n_overlaps)
     ρB[IDX_rows_with_overlaps] = ρA[IDX_rows_with_overlaps] + imprecision
     IB[IDX_rows_with_overlaps] = IA[IDX_rows_with_overlaps]
 
@@ -1433,12 +1436,12 @@ def test_merge_topk_ρI_with_1D_input_hardcoded():
 
 def test_shift_insert_at_index():
     for k in range(1, 6):
-        a = np.random.rand(k)
+        a = rng.RNG.rand(k)
         ref = np.empty(k, dtype=np.float64)
         comp = np.empty(k, dtype=np.float64)
 
         indices = np.arange(k + 1)
-        values = np.random.rand(k + 1)
+        values = rng.RNG.rand(k + 1)
 
         # test shift = "right"
         for idx, v in zip(indices, values):
@@ -1467,13 +1470,13 @@ def test_shift_insert_at_index():
 
 def test_check_P():
     with pytest.raises(ValueError):
-        core._check_P(np.random.rand(10).reshape(2, 5))
+        core._check_P(rng.RNG.rand(10).reshape(2, 5))
 
 
 def test_find_matches_all():
     # max_matches: None, i.e. find all matches
     max_distance = np.inf
-    D = np.random.rand(64)
+    D = rng.RNG.rand(64)
     for excl_zone in range(3):
         ref = naive.find_matches(D, excl_zone, max_distance, max_matches=None)
         comp = core._find_matches(D, excl_zone, max_distance, max_matches=None)
@@ -1483,9 +1486,9 @@ def test_find_matches_all():
 
 def test_find_matches_maxmatch():
     max_distance = np.inf
-    D = np.random.rand(64)
+    D = rng.RNG.rand(64)
     for excl_zone in range(3):
-        max_matches = np.random.randint(0, 100)
+        max_matches = rng.RNG.randint(0, 100)
         ref = naive.find_matches(D, excl_zone, max_distance, max_matches)
         comp = core._find_matches(D, excl_zone, max_distance, max_matches)
 
@@ -1508,11 +1511,11 @@ def test_gpu_searchsorted():
         device_bfs = cuda.to_device(core._bfs_indices(k, fill_value=-1))
         nlevel = np.floor(np.log2(k) + 1).astype(np.int64)
 
-        A = np.sort(np.random.rand(n, k), axis=1)
+        A = np.sort(rng.RNG.rand(n, k), axis=1)
         device_A = cuda.to_device(A)
 
-        V[:] = np.random.rand(n)
-        for i, idx in enumerate(np.random.choice(np.arange(n), size=k, replace=False)):
+        V[:] = rng.RNG.rand(n)
+        for i, idx in enumerate(rng.RNG.choice(np.arange(n), size=k, replace=False)):
             V[idx] = A[idx, i]  # create ties
         device_V = cuda.to_device(V)
 
@@ -1547,7 +1550,7 @@ def test_client_to_func():
 
 
 def test_apply_include():
-    D = np.random.uniform(-1000, 1000, [10, 20]).astype(np.float64)
+    D = rng.RNG.uniform(-1000, 1000, [10, 20]).astype(np.float64)
     ref_D = np.empty(D.shape)
     comp_D = np.empty(D.shape)
     for width in range(D.shape[0]):
@@ -1682,7 +1685,7 @@ def test_process_isconstant_1d():
     m = 8
 
     # case 1: without nan
-    T = np.random.rand(n)
+    T = rng.RNG.rand(n)
 
     T_subseq_isconstant_ref = naive.rolling_isconstant(T, m, isconstant_custom_func)
     T_subseq_isconstant_comp = core.process_isconstant(T, m, isconstant_custom_func)
@@ -1690,10 +1693,10 @@ def test_process_isconstant_1d():
     npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
 
     # case 2: with nan
-    T = np.random.rand(n)
-    idx = np.random.randint(n)
+    T = rng.RNG.rand(n)
+    idx = rng.RNG.randint(n)
     T[idx] = np.nan
-    T_subseq_isconstant = np.random.choice([True, False], n - m + 1, replace=True)
+    T_subseq_isconstant = rng.RNG.choice([True, False], n - m + 1, replace=True)
 
     T_subseq_isfinite = core.rolling_isfinite(T, m)
 
@@ -1713,11 +1716,11 @@ def test_process_isconstant_2d():
     d = 3
 
     # case 1: without nan
-    T = np.random.rand(d, n)
+    T = rng.RNG.rand(d, n)
     T_subseq_isconstant = [
         None,
         isconstant_custom_func,
-        np.random.choice([True, False], n - m + 1, replace=True),
+        rng.RNG.choice([True, False], n - m + 1, replace=True),
     ]
 
     T_subseq_isconstant_ref = np.array(
@@ -1729,8 +1732,8 @@ def test_process_isconstant_2d():
     npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
 
     # case 2: with nan
-    T = np.random.rand(d, n)
-    i, j = np.random.choice(np.arange(n - m + 1), size=2, replace=False)
+    T = rng.RNG.rand(d, n)
+    i, j = rng.RNG.choice(np.arange(n - m + 1), size=2, replace=False)
     T[-1, i : i + m] = 0.0
     T[-1, j : j + m] = 0.0
     T[-1, j] = np.nan
@@ -1757,6 +1760,7 @@ def test_process_isconstant_2d():
     npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
 
 
+
 @pytest.mark.filterwarnings(
     "error:divide by zero encountered in divide", category=RuntimeWarning
 )
@@ -1765,3 +1769,204 @@ def test_preprocess_diagonal_divide_by_zero():
     m = 3
     T[:m] = np.nan
     core.preprocess_diagonal(T, m)
+
+
+def test_process_isconstant_1d_default():
+    # test the default value of `T_subseq_isconstant` in `process_isconstant`
+    n = 64
+    m = 8
+
+    # case 1: without nan
+    T = rng.RNG.rand(n)
+    T[:m] = 0.5  # constant subsequence
+
+    T_subseq_isconstant_ref = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
+    T_subseq_isconstant_comp = core.process_isconstant(T, m, T_subseq_isconstant=None)
+
+    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+
+    # case 2: with nan
+    T = rng.RNG.rand(n)
+    T[:m] = 0.5  # constant subsequence
+    T[-m:] = np.nan  # non-finite subsequence
+
+    T_subseq_isconstant_ref = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
+    T_subseq_isconstant_comp = core.process_isconstant(T, m, T_subseq_isconstant=None)
+
+    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+
+
+def test_update_incremental_PI_egressFalse():
+    # This tests the function `core._update_incremental_PI`
+    # when `egress` is False, meaning new data point is being
+    # appended to the historical data.
+    T = rng.RNG.rand(64)
+    t = rng.RNG.rand()  # new datapoint
+    T_new = np.append(T, t)
+
+    m = 3
+    excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
+
+    for k in range(1, 4):
+        # ref
+        mp_ref = naive.stump(T_new, m, row_wise=True, k=k)
+        P_ref = mp_ref[:, :k].astype(np.float64)
+        I_ref = mp_ref[:, k : 2 * k].astype(np.int64)
+
+        # comp
+        mp = naive.stump(T, m, row_wise=True, k=k)
+        P_comp = mp[:, :k].astype(np.float64)
+        I_comp = mp[:, k : 2 * k].astype(np.int64)
+
+        # Because of the new data point, the length of matrix profile
+        # and matrix profile indices should be increased by one.
+        P_comp = np.pad(
+            P_comp,
+            [(0, 1), (0, 0)],
+            mode="constant",
+            constant_values=np.inf,
+        )
+        I_comp = np.pad(
+            I_comp,
+            [(0, 1), (0, 0)],
+            mode="constant",
+            constant_values=-1,
+        )
+
+        D = core.mass(T_new[-m:], T_new)
+        core._update_incremental_PI(D, P_comp, I_comp, excl_zone, n_appended=0)
+
+        # assertion
+        npt.assert_almost_equal(P_ref, P_comp)
+        npt.assert_almost_equal(I_ref, I_comp)
+
+
+def test_update_incremental_PI_egressTrue():
+    T = rng.RNG.rand(64)
+    t = rng.RNG.rand()  # new data point
+    m = 3
+    excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
+
+    for k in range(1, 4):
+        # ref
+        # In egress=True mode, a new data point, t, is being appended
+        # to the historical data, T, while the oldest data point is
+        # being removed. Therefore, the first  subsequence in T
+        # and the last subsequence does not get a chance to meet each
+        # other. Therefore, we need to exclude that distance.
+
+        T_with_t = np.append(T, t)
+        D = naive.distance_matrix(T_with_t, T_with_t, m)
+        D[-1, 0] = np.inf
+        D[0, -1] = np.inf
+
+        l = len(T_with_t) - m + 1
+        P = np.empty((l, k), dtype=np.float64)
+        I = np.empty((l, k), dtype=np.int64)
+        for i in range(l):
+            core.apply_exclusion_zone(D[i], i, excl_zone, np.inf)
+            IDX = np.argsort(D[i], kind="mergesort")[:k]
+            I[i] = IDX
+            P[i] = D[i, IDX]
+
+        P_ref = P[1:].copy()
+        I_ref = I[1:].copy()
+
+        # comp
+        mp = naive.stump(T, m, row_wise=True, k=k)
+        P_comp = mp[:, :k].astype(np.float64)
+        I_comp = mp[:, k : 2 * k].astype(np.int64)
+
+        P_comp[:-1] = P_comp[1:]
+        P_comp[-1] = np.inf
+        I_comp[:-1] = I_comp[1:]
+        I_comp[-1] = -1
+
+        T_new = np.append(T[1:], t)
+        D = core.mass(T_new[-m:], T_new)
+        core._update_incremental_PI(D, P_comp, I_comp, excl_zone, n_appended=1)
+
+        # assertion
+        npt.assert_almost_equal(P_ref, P_comp)
+        npt.assert_almost_equal(I_ref, I_comp)
+
+
+def test_update_incremental_PI_egressTrue_MemoryCheck():
+    # This test function is to ensure that the function
+    # `core._update_incremental_PI` does not forget the
+    # nearest neighbors that were pointing to those old data
+    # points that are removed in the `egress=True` mode.
+    # This can be tested by inserting the same subsequence, s, in the beginning,
+    # middle, and end of the time series. This is to allow us to know which
+    # neighbor is the nearest neighbor to each of those three subsequences.
+
+    # In the `egress=True` mode, the first element of the time series is removed and
+    # a new data point is appended. However, the updated matrix profile index for the
+    # middle subsequence `s` should still refer to  the first subsequence in
+    # the historical data.
+    with rng.fix_seed(0):
+        T = rng.RNG.rand(64)
+        m = 3
+        excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
+
+        s = rng.RNG.rand(m)
+        T[:m] = s
+        T[30 : 30 + m] = s
+        T[-m:] = s
+
+        t = rng.RNG.rand()  # new data point
+        T_with_t = np.append(T, t)
+
+        # In egress=True mode, a new data point, t, is being appended
+        # to the historical data, T, while the oldest data point is
+        # being removed. Therefore, the first  subsequence in T
+        # and the last subsequence does not get a chance to meet each
+        # other. Therefore, their pairwise distances should be excluded
+        # from the distance matrix.
+        D = naive.distance_matrix(T_with_t, T_with_t, m)
+        D[-1, 0] = np.inf
+        D[0, -1] = np.inf
+
+        l = len(T_with_t) - m + 1
+        for i in range(l):
+            core.apply_exclusion_zone(D[i], i, excl_zone, np.inf)
+
+        T_new = np.append(T[1:], t)
+        dist_profile = naive.distance_profile(T_new[-m:], T_new, m)
+        core.apply_exclusion_zone(
+            dist_profile, len(dist_profile) - 1, excl_zone, np.inf
+        )
+
+        for k in range(1, 4):
+            # ref
+            P = np.empty((l, k), dtype=np.float64)
+            I = np.empty((l, k), dtype=np.int64)
+            for i in range(l):
+                IDX = np.argsort(D[i], kind="mergesort")[:k]
+                I[i] = IDX
+                P[i] = D[i, IDX]
+
+            P_ref = P[1:].copy()
+            I_ref = I[1:].copy()
+
+            # comp
+            mp = naive.stump(T, m, row_wise=True, k=k)
+            P_comp = mp[:, :k].astype(np.float64)
+            I_comp = mp[:, k : 2 * k].astype(np.int64)
+
+            P_comp[:-1] = P_comp[1:]
+            P_comp[-1] = np.inf
+            I_comp[:-1] = I_comp[1:]
+            I_comp[-1] = -1
+            core._update_incremental_PI(
+                dist_profile, P_comp, I_comp, excl_zone, n_appended=1
+            )
+
+            npt.assert_almost_equal(P_ref, P_comp)
+            npt.assert_almost_equal(I_ref, I_comp)
+
+
+def test_check_self_join():
+    with pytest.warns(UserWarning):
+        ignore_trivial = False
+        core.check_self_join(ignore_trivial)

@@ -7,7 +7,7 @@ import copy
 import numpy as np
 import scipy.stats
 
-from . import config, core
+from . import config, core, rng
 
 
 def _nnmark(I):
@@ -84,34 +84,36 @@ def _iac(
     IAC : numpy.ndarray
         Idealized arc curve (IAC)
     """
-    np.random.seed(seed)
+    with rng.fix_seed(seed):
+        I = rng.RNG.randint(0, width, size=width, dtype=np.int64)
+        if bidirectional is False:  # Idealized 1-dimensional matrix profile index
+            I[:-1] = width
+            for i in range(width - 1):
+                I[i] = rng.RNG.randint(i + 1, width, dtype=np.int64)
 
-    I = np.random.randint(0, width, size=width, dtype=np.int64)
-    if bidirectional is False:  # Idealized 1-dimensional matrix profile index
-        I[:-1] = width
-        for i in range(width - 1):
-            I[i] = np.random.randint(i + 1, width, dtype=np.int64)
+        target_AC = _nnmark(I)
 
-    target_AC = _nnmark(I)
+        params = np.empty((n_iter, 2), dtype=np.float64)
+        for i in range(n_iter):
+            hist_dist = scipy.stats.rv_histogram(
+                (target_AC, np.append(np.arange(width), width))
+            )
+            hist_dist.random_state = rng.RNG
+            data = hist_dist.rvs(size=n_samples)
+            a, b, c, d = scipy.stats.beta.fit(data, floc=0, fscale=width)
 
-    params = np.empty((n_iter, 2), dtype=np.float64)
-    for i in range(n_iter):
-        hist_dist = scipy.stats.rv_histogram(
-            (target_AC, np.append(np.arange(width), width))
+            params[i, 0] = a
+            params[i, 1] = b
+
+        a_mean = np.round(np.mean(params[:, 0]), 2)
+        b_mean = np.round(np.mean(params[:, 1]), 2)
+
+        IAC = scipy.stats.beta.pdf(np.arange(width), a_mean, b_mean, loc=0, scale=width)
+        slope, _, _, _ = np.linalg.lstsq(
+            np.expand_dims(IAC, axis=1), target_AC, rcond=None
         )
-        data = hist_dist.rvs(size=n_samples)
-        a, b, c, d = scipy.stats.beta.fit(data, floc=0, fscale=width)
 
-        params[i, 0] = a
-        params[i, 1] = b
-
-    a_mean = np.round(np.mean(params[:, 0]), 2)
-    b_mean = np.round(np.mean(params[:, 1]), 2)
-
-    IAC = scipy.stats.beta.pdf(np.arange(width), a_mean, b_mean, loc=0, scale=width)
-    slope, _, _, _ = np.linalg.lstsq(np.expand_dims(IAC, axis=1), target_AC, rcond=None)
-
-    IAC *= slope
+        IAC *= slope
 
     return IAC
 
@@ -499,6 +501,10 @@ class floss:
             `functools.partial`. Any subsequence with at least one np.nan/np.inf will
             automatically have its corresponding value set to False in this boolean
             array.
+
+        Returns
+        -------
+        None
         """
         self._mp = copy.deepcopy(np.asarray(mp))
         self._T = copy.deepcopy(np.asarray(T))
@@ -608,6 +614,10 @@ class floss:
         t : float
             A single new data point to be appended to `T`
 
+        Returns
+        -------
+        None
+
         Notes
         -----
         DOI: 10.1109/ICDM.2017.21 \
@@ -651,9 +661,9 @@ class floss:
 
             self._M_T[:-1] = self._M_T[1:]
             self._Σ_T[:-1] = self._Σ_T[1:]
-            self._M_T[-1], self._Σ_T[-1] = core.compute_mean_std(
-                self._T[-self._m :], self._m
-            )
+
+            M_T, Σ_T = core.compute_mean_std(self._T[-self._m :], self._m)
+            self._M_T[-1], self._Σ_T[-1] = M_T.item(), Σ_T.item()
 
             D = core.mass(
                 self._finite_Q,
@@ -702,7 +712,8 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The 1-dimensional corrected arc curve (CAC_1D)
         """
         return self._cac.astype(np.float64)
 
@@ -717,7 +728,8 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The matrix profile
         """
         return self._mp[:, 0].astype(np.float64)
 
@@ -736,7 +748,8 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The (right) matrix profile indices
         """
         # Comparing the right matrix profile index value with the self index
         # position (i.e., self._mp[:, 3] == np.arange(len(self._mp)) is avoided
@@ -759,6 +772,7 @@ class floss:
 
         Returns
         -------
-        None
+        out : numpy.ndarray
+            The time series
         """
         return self._T.astype(np.float64)

@@ -2,8 +2,8 @@
 # Copyright 2019 TD Ameritrade. Released under the terms of the 3-Clause BSD license.
 # STUMPY is a trademark of TD Ameritrade IP Company, Inc. All rights reserved.
 
-from . import gpu_aamp
 from .aamp_stimp import _aamp_stimp
+from .gpu_aamp import gpu_aamp
 
 
 class gpu_aamp_stimp(_aamp_stimp):
@@ -102,6 +102,10 @@ class gpu_aamp_stimp(_aamp_stimp):
             The p-norm to apply for computing the Minkowski distance. Minkowski distance
             is typically used with `p` being 1 or 2, which correspond to the Manhattan
             distance and the Euclidean distance, respectively.
+
+        Returns
+        -------
+        None
         """
         super().__init__(
             T,

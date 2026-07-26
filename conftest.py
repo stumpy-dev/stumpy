@@ -4,3 +4,13 @@
 # to fix eventual module import errors that can arise, for example when
 # running tests from inside VS code.
 # See https://stackoverflow.com/a/34520971
+
+from stumpy import rng
+
+
+def pytest_configure(config):
+    """
+    Called after command line options have been parsed
+    and all plugins and initial conftest files been loaded.
+    """
+    print(f"STUMPY_SEED={rng.SEED} pixi run tests custom {config.args[0]}")

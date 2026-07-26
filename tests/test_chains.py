@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import allc, atsc
+from stumpy.chains import allc, atsc
 
 test_data = [
     (

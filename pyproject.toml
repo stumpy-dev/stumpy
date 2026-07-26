@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stumpy"
-version = "1.13.0"
-requires-python = ">=3.8"
+version = "1.14.1"
+requires-python = ">=3.10"
 authors = [
     {name = "Sean M. Law", email = "seanmylaw@gmail.com"}
 ]
@@ -15,31 +15,35 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python",
     "Topic :: Software Development",
     "Topic :: Scientific/Engineering",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: Unix",
     "Operating System :: MacOS",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 keywords = ["time series", "matrix profile", "motif", "discord"]
 maintainers = [
     {name = "Sean M. Law", email = "seanmylaw@gmail.com"},
     {name = "Nima Sarajpoor", email = "nimasarajpoor@gmail.com"}
 ]
-license = {text = "3-clause BSD License"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE.txt"]
 dependencies = [
-    "numpy >= 1.21",
+    "numpy >= 1.24",
     "scipy >= 1.10",
-    "numba >= 0.57.1"
+    "numba >= 0.61.2"
 ]
 
 [tool.setuptools]
 packages = ["stumpy"]
-license-files = ["LICENSE.txt"]
 
 [project.optional-dependencies]
 ci = [
@@ -52,11 +56,68 @@ ci = [
     "black >= 22.1.0",
     "pytest >= 4.4.1",
     "isort >= 5.11.0",
-    'tbb >= 2019.5 ; platform_system == "Linux"'
+    'tbb >= 2019.5 ; platform_system == "Linux"',
+    "polars >= 1.14.0",
+    "lxml"
 ]
 
 [project.urls]
-Homepage = "https://github.com/TDAmeritrade/stumpy"
+Homepage = "https://github.com/stumpy-dev/stumpy"
 Documentation = "https://stumpy.readthedocs.io/en/latest/"
-Repository = "https://github.com/TDAmeritrade/stumpy"
+Repository = "https://github.com/stumpy-dev/stumpy"
 
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
+
+[tool.pixi.dependencies]
+# All Conda dependencies.
+# Ignores PyPI [dependencies] and [project.optional-dependencies] above
+python = ">=3.10"
+numpy = ">=1.24"
+scipy = ">=1.10"
+numba = ">=0.61.2"
+# ci
+pandas = ">=0.20.0"
+dask = ">=1.2.2"
+distributed =">=1.28.1"
+coverage = ">=4.5.3"
+flake8 = ">=3.7.7"
+flake8-docstrings = ">=1.5.0"
+black = ">=22.1.0"
+pytest = ">=4.4.1"
+isort = ">=5.11.0"
+polars = ">=1.14.0"
+pip = "*"
+lxml = "*"
+# readthedocs
+sphinx = ">=3.5.3"
+pydata-sphinx-theme = "*"
+jupyterlab = "*"
+matplotlib = "*"
+scikit-learn = "*"
+numpydoc = "*"
+myst-nb = "*"
+jupyterlab-myst = "*"
+sphinx-togglebutton = "*"
+# release
+twine = "*"
+python-build = "*"  # Equivalent to PyPI `build` package
+
+[tool.pixi.activation]
+# Always execute ./setup.sh when activating the default environment
+# Note that 'stumpy' will only be listed via 'pip list | grep stumpy'
+# and not via 'pixi list | grep stumpy' since 'pip install .' is used!
+scripts = ["setup.sh"]
+
+[tool.pixi.target.linux-64.dependencies]
+# Conda dependencies specific to linux-64
+tbb = ">=2019.5"
+
+[tool.pixi.tasks]
+# Note that ./setup.sh is executed during [tool.pixi.activation] above
+tests = "./test.sh"
+coverage = "./test.sh coverage"
+docs = "cd docs && ./setup.sh"
+black = 'black --exclude=".*\.ipynb" --extend-exclude=".venv|.pixi" ./'
+isort = 'isort --profile black --skip .venv --skip .pixi ./'

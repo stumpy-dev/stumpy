@@ -68,6 +68,11 @@ class mparray(np.ndarray):
 
         excl_zone_denom : int
             The denominator used in computing the exclusion zone
+
+        Returns
+        -------
+        obj : mparray
+            The `mparray` instance
         """
         obj = np.asarray(input_array).view(cls)
         obj._m = m
@@ -86,6 +91,10 @@ class mparray(np.ndarray):
         ----------
         obj : object
             This is the class object
+
+        Returns
+        -------
+        None
         """
         if obj is None:  # pragma: no cover
             return
@@ -102,6 +111,11 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-k) matrix profile for `T`
         """
         if self._k == 1:
             return self[:, : self._k].flatten().astype(np.float64)
@@ -115,6 +129,11 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-k) matrix profile indices for `T`
         """
         if self._k == 1:
             return self[:, self._k : 2 * self._k].flatten().astype(np.int64)
@@ -128,6 +147,11 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The left (top-1) matrix profile indices for `T`
         """
         if self._k == 1:
             return self[:, 2 * self._k].flatten().astype(np.int64)
@@ -141,6 +165,11 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The right (top-1) matrix profile indices for `T`
         """
         if self._k == 1:
             return self[:, 2 * self._k + 1].flatten().astype(np.int64)
@@ -155,6 +184,11 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-k) matrix profile for `T`
         """
         return self._P()
 
@@ -166,6 +200,11 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The (top-k) matrix profile indices for `T`
         """
         return self._I()
 
@@ -177,6 +216,11 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The left (top-k) matrix profile indices for `T`
         """
         return self._left_I()
 
@@ -188,5 +232,10 @@ class mparray(np.ndarray):
         Parameters
         ----------
         None
+
+        Returns
+        -------
+        out : numpy.ndarray
+            The right (top-k) matrix profile indices for `T`
         """
         return self._right_I()

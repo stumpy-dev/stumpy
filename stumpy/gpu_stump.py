@@ -515,8 +515,11 @@ def gpu_stump(
         Default is  ``None`` which corresponds to a self-join.
 
     ignore_trivial : bool, default True
-        Set to ``True`` if this is a self-join. Otherwise, for AB-join, set this
-        to ``False``.
+        Set to ``True`` if this is a self-join (i.e., for a single time series
+        ``T_A`` without ``T_B``). This ensures that an exclusion zone is applied
+        to each subsequence in ``T_A`` and all trivial/self-matches are ignored.
+        Otherwise, for an AB-join (i.e., between two times series, ``T_A`` and
+        ``T_B``), set this to ``False``.
 
     device_id : int or list, default 0
         The (GPU) device number to use. The default value is ``0``. A list of
@@ -644,6 +647,7 @@ def gpu_stump(
     """
     if T_B is None:  # Self join!
         T_B = T_A
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
         T_B_subseq_isconstant = T_A_subseq_isconstant
 
@@ -666,8 +670,13 @@ def gpu_stump(
             "For multidimensional STUMP use `stumpy.mstump` or `stumpy.mstumped`"
         )
 
-    core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
     ignore_trivial = core.check_ignore_trivial(T_A, T_B, ignore_trivial)
+    if ignore_trivial:  # self-join
+        core.check_window_size(
+            m, max_size=min(T_A.shape[0], T_B.shape[0]), n=T_A.shape[0]
+        )
+    else:  # AB-join
+        core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
 
     n = T_B.shape[0]
     w = T_A.shape[0] - m + 1
@@ -854,5 +863,12 @@ def gpu_stump(
     out[:, k:] = np.column_stack((indices[0], indices_L[0], indices_R[0]))
 
     core._check_P(out[:, 0])
+
+    for _id in device_ids:
+        with cuda.gpus[_id]:
+            if (
+                cuda.current_context().__class__.__name__ != "FakeCUDAContext"
+            ):  # pragma: no cover
+                cuda.current_context().deallocations.clear()
 
     return mparray(out, m, k, config.STUMPY_EXCL_ZONE_DENOM)

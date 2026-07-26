@@ -51,6 +51,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
+    "sphinx_togglebutton",
     "numpydoc",
     "myst_nb",
 ]
@@ -108,10 +109,11 @@ html_logo = "_static/logo.png"
 # documentation.
 #
 html_theme_options = {
+    "header_links_before_dropdown": 7,
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/TDAmeritrade/stumpy",
+            "url": "https://github.com/stumpy-dev/stumpy",
             "icon": "fab fa-github-square",
         },
         {
@@ -143,7 +145,9 @@ html_css_files = ["css/custom.css"]
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+# html_sidebars = {
+#     "**": []
+# }
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -236,3 +240,6 @@ myst_enable_extensions = [
     "dollarmath",
     "tasklist",
 ]
+
+# Notebook cell execution timeout; defaults to 30.
+nb_execution_timeout = -1

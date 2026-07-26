@@ -2,10 +2,11 @@ import naive
 import numpy as np
 import numpy.testing as npt
 import pytest
+import tornado.ioloop
 from dask.distributed import Client, LocalCluster
 
-from stumpy import aampdist, aampdisted
-from stumpy.aampdist import _aampdist_vect
+from stumpy import rng
+from stumpy.aampdist import _aampdist_vect, aampdist, aampdisted
 
 
 @pytest.fixture(scope="module")
@@ -16,8 +17,11 @@ def dask_cluster():
         dashboard_address=None,
         worker_dashboard_address=None,
     )
-    yield cluster
-    cluster.close()
+    yield cluster.scheduler_address
+    try:
+        cluster.close(timeout=60)
+    except tornado.ioloop.TimeoutError:  # pragma: no cover
+        pass
 
 
 test_data = [
@@ -26,8 +30,8 @@ test_data = [
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, size=8).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64),
     ),
 ]
 

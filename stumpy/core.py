@@ -12,10 +12,9 @@ import numpy as np
 from numba import cuda, njit, prange
 from scipy import linalg
 from scipy.ndimage import maximum_filter1d, minimum_filter1d
-from scipy.signal import convolve
 from scipy.spatial.distance import cdist
 
-from . import config
+from . import config, sdp
 
 try:
     from numba.cuda.cudadrv.driver import _raise_driver_not_found
@@ -429,11 +428,11 @@ def check_dtype(a, dtype=np.float64):  # pragma: no cover
     TypeError
         If the array type does not match `dtype`
     """
-    if dtype == int:
+    if dtype is int:
         dtype = np.int64
-    if dtype == float:
+    if dtype is float:
         dtype = np.float64
-    if dtype == bool:
+    if dtype is bool:
         dtype = np.bool_
     if not np.issubdtype(a.dtype, dtype):
         msg = f"{dtype} dtype expected but found {a.dtype} in input array\n"
@@ -445,17 +444,18 @@ def check_dtype(a, dtype=np.float64):  # pragma: no cover
 
 def transpose_dataframe(df):  # pragma: no cover
     """
-    Check if the input is a column-wise Pandas `DataFrame`. If `True`, return a
+    Check if the input is a column-wise pandas/polars `DataFrame`. If `True`, return a
     transpose dataframe since stumpy assumes that each row represents data from a
     different dimension while each column represents data from the same dimension.
-    If `False`, return `a` unchanged. Pandas `Series` do not need to be transposed.
+    If `False`, return `a` unchanged. Pandas/polars `Series` do not need to be
+    transposed.
 
     Note that this function has zero dependency on Pandas (not even a soft dependency).
 
     Parameters
     ----------
-    df : numpy.ndarray
-        Pandas dataframe
+    df : DataFrame
+        pandas/polars dataframe
 
     Returns
     -------
@@ -463,7 +463,7 @@ def transpose_dataframe(df):  # pragma: no cover
         If `df` is a Pandas `DataFrame` then return `df.T`. Otherwise, return `df`
     """
     if type(df).__name__ == "DataFrame":
-        return df.T
+        return df.transpose()
 
     return df
 
@@ -553,11 +553,12 @@ def get_max_window_size(n):
     return max_m
 
 
-def check_window_size(m, max_size=None):
+def check_window_size(m, max_size=None, n=None):
     """
     Check the window size and ensure that it is greater than or equal to 3 and, if
-    `max_size` is provided, ensure that the window size is less than or equal to the
-    `max_size`
+    ``max_size`` is provided, ensure that the window size is less than or equal to
+    the ``max_size``. Furthermore, if ``n`` is provided, then a self-join is assumed
+    and it checks whether all subsequences have at least one non-trivial neighbor.
 
     Parameters
     ----------
@@ -566,6 +567,10 @@ def check_window_size(m, max_size=None):
 
     max_size : int, default None
         The maximum window size allowed
+
+    n : int, default None
+        The length of the time series in the case of a self-join.
+        ``n`` should not be supplied (or set to ``None``) in the case of an AB-join.
 
     Returns
     -------
@@ -588,37 +593,64 @@ def check_window_size(m, max_size=None):
     if max_size is not None and m > max_size:
         raise ValueError(f"The window size must be less than or equal to {max_size}")
 
+    if n is not None:
+        # Raise warning if there is at least one subsequence with no eligible
+        # (non-trivial) neighbor in the case of a self-join.
 
-@njit(fastmath=True)
-def _sliding_dot_product(Q, T):
-    """
-    A Numba JIT-compiled implementation of the sliding window dot product.
+        # For any time series `T`, an "eligible nearest neighbor" subsequence for
+        # the central-most subsequence must be located outside the `excl_zone`,
+        # and the central-most subsequence will ALWAYS have the smallest relative
+        # (index-wise) distance to its farthest neighbor amongst all other subsequences.
+        # Therefore, we only need to check whether the `excl_zone` eliminates all
+        # "neighbors" for the central-most subsequence in `T`. In fact, we just need to
+        # verify whether the `excl_zone` eliminates the "neighbor" that is farthest
+        # away (index-wise) from the central-most subsequence. If it does not, this
+        # implies that all subsequences in `T` will have at least one "eligible nearest
+        # neighbor" that is located outside of their respective excl_zone.
 
-    Parameters
-    ----------
-    Q : numpy.ndarray
-        Query array or subsequence
+        excl_zone = int(math.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
 
-    T : numpy.ndarray
-        Time series or sequence
+        l = n - m + 1
+        # The start index of subsequences are: 0, 1, ..., l-1
 
-    Returns
-    -------
-    out : numpy.ndarray
-        Sliding dot product between `Q` and `T`.
-    """
-    m = Q.shape[0]
-    l = T.shape[0] - m + 1
-    out = np.empty(l)
-    for i in range(l):
-        out[i] = np.dot(Q, T[i : i + m])
+        # If `l` is odd
+        # Suppose `l == 5`. So, the start index of the subsequences
+        # are: 0, 1, 2, 3, 4
+        # The central subsequence is located at index position c=2, with two
+        # farthest neighbors, one located at index 0, and the other is located
+        # at index 4. In both cases, the relative (index-wise) distance is 2,
+        # which is simply `5 // 2`. In general, it can be shown that the
+        # (index-wise) distance from the central subsequence to its farthest
+        # neighbor is `l // 2`.
 
-    return out
+        # If `l` is even
+        # Suppose `l == 6`. So, the start index of the subsequences
+        # are: 0, 1, 2, 3, 4, 5
+        # There are two central-most subsequences, located at the index
+        # positions c=2 and c=3. For the central-most subsequence at index
+        # position c=2, its farthest neighbor will be located at index 5 (to the
+        # right of c=2) and, for the central-most subsequence at index position
+        # c=3, its farthest neighbor will be located at index 0 (to the left of
+        # c=3). In both cases, the relative (index-wise) distance is 3,
+        # which is simply `6 // 2`. In general, it can be shown that the
+        # (index-wise) distance from the central-most subsequence to its
+        # farthest neighbor is `l // 2`.
+
+        # Therefore, regardless if `l` is even or odd, for the central
+        # subsequence for any time series, the index location of its
+        # farthest neighbor will always be `l // 2` index positions away.
+        diff_to_farthest_idx = l // 2
+        if diff_to_farthest_idx <= excl_zone:
+            msg = (
+                f"The window size, 'm = {m}', may be too large and could lead to "
+                + "meaningless results. Consider reducing 'm' where necessary"
+            )
+            warnings.warn(msg)
 
 
 def sliding_dot_product(Q, T):
     """
-    Use FFT convolution to calculate the sliding window dot product.
+    Calculate the sliding window dot product.
 
     Parameters
     ----------
@@ -632,32 +664,13 @@ def sliding_dot_product(Q, T):
     -------
     output : numpy.ndarray
         Sliding dot product between `Q` and `T`.
-
-    Notes
-    -----
-    Calculate the sliding dot product
-
-    `DOI: 10.1109/ICDM.2016.0179 \
-    <https://www.cs.ucr.edu/~eamonn/PID4481997_extend_Matrix%20Profile_I.pdf>`__
-
-    See Table I, Figure 4
-
-    Following the inverse FFT, Fig. 4 states that only cells [m-1:n]
-    contain valid dot products
-
-    Padding is done automatically in fftconvolve step
     """
-    n = T.shape[0]
-    m = Q.shape[0]
-    Qr = np.flipud(Q)  # Reverse/flip Q
-    QT = convolve(Qr, T)
-
-    return QT.real[m - 1 : n]
+    return sdp._sliding_dot_product(Q, T)
 
 
 @njit(
     # "f8[:](f8[:], i8, b1[:])",
-    fastmath={"nsz", "arcp", "contract", "afn", "reassoc"}
+    fastmath=config.STUMPY_FASTMATH_FLAGS
 )
 def _welford_nanvar(a, w, a_subseq_isfinite):
     """
@@ -771,7 +784,7 @@ def welford_nanstd(a, w=None):
     return np.sqrt(np.clip(welford_nanvar(a, w), a_min=0, a_max=None))
 
 
-@njit(parallel=True, fastmath={"nsz", "arcp", "contract", "afn", "reassoc"})
+@njit(parallel=True, fastmath=config.STUMPY_FASTMATH_FLAGS)
 def _rolling_nanstd_1d(a, w):
     """
     A Numba JIT-compiled and parallelized function for computing the rolling standard
@@ -1042,7 +1055,7 @@ def compute_mean_std(T, m):
 
 @njit(
     # "f8(i8, f8, f8, f8, f8, f8)",
-    fastmath={"nsz", "arcp", "contract", "afn", "reassoc"}
+    fastmath=config.STUMPY_FASTMATH_FLAGS
 )
 def _calculate_squared_distance(
     m, QT, μ_Q, σ_Q, M_T, Σ_T, Q_subseq_isconstant, T_subseq_isconstant
@@ -1110,7 +1123,7 @@ def _calculate_squared_distance(
 
 @njit(
     # "f8[:](i8, f8[:], f8, f8, f8[:], f8[:])",
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _calculate_squared_distance_profile(
     m, QT, μ_Q, σ_Q, M_T, Σ_T, Q_subseq_isconstant, T_subseq_isconstant
@@ -1176,7 +1189,7 @@ def _calculate_squared_distance_profile(
 
 @njit(
     # "f8[:](i8, f8[:], f8, f8, f8[:], f8[:])",
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def calculate_distance_profile(
     m, QT, μ_Q, σ_Q, M_T, Σ_T, Q_subseq_isconstant, T_subseq_isconstant
@@ -1229,7 +1242,7 @@ def calculate_distance_profile(
     return np.sqrt(D_squared)
 
 
-@njit(fastmath=True)
+@njit(fastmath=config.STUMPY_FASTMATH_TRUE)
 def _p_norm_distance_profile(Q, T, p=2.0):
     """
     A Numba JIT-compiled and parallelized function for computing the p-normalized
@@ -1250,6 +1263,10 @@ def _p_norm_distance_profile(Q, T, p=2.0):
     -------
     output : numpy.ndarray
         p-normalized distance profile between `Q` and `T`
+
+    Notes
+    -----
+    The special case `p==inf` is not supported.
     """
     m = Q.shape[0]
     l = T.shape[0] - m + 1
@@ -1263,7 +1280,7 @@ def _p_norm_distance_profile(Q, T, p=2.0):
             T_squared[i] = (
                 T_squared[i - 1] - T[i - 1] * T[i - 1] + T[i + m - 1] * T[i + m - 1]
             )
-        QT = _sliding_dot_product(Q, T)
+        QT = sdp._njit_sliding_dot_product(Q, T)
         for i in range(l):
             p_norm_profile[i] = Q_squared + T_squared[i] - 2.0 * QT[i]
     else:
@@ -1353,9 +1370,9 @@ def mass_absolute(Q, T, T_subseq_isfinite=None, p=2.0, query_idx=None):
         raise ValueError(f"`Q` is {Q.ndim}-dimensional and must be 1-dimensional. ")
     Q_isfinite = np.isfinite(Q)
 
-    check_window_size(m, max_size=Q.shape[-1])
+    check_window_size(m, max_size=Q.shape[0])
 
-    if query_idx is not None:  # pragma: no cover
+    if query_idx is not None:
         query_idx = int(query_idx)
         T_isfinite_idx = np.isfinite(T[query_idx : query_idx + m])
         if not np.all(Q_isfinite == T_isfinite_idx) or not np.allclose(
@@ -1390,7 +1407,7 @@ def mass_absolute(Q, T, T_subseq_isfinite=None, p=2.0, query_idx=None):
         if T_subseq_isfinite is None:
             T, T_subseq_isfinite = preprocess_non_normalized(T, m)
         distance_profile[:] = _mass_absolute(Q, T, p)
-        if query_idx is not None:  # pragma: no cover
+        if query_idx is not None:
             distance_profile[query_idx] = 0.0
 
         distance_profile[~T_subseq_isfinite] = np.inf
@@ -1505,7 +1522,7 @@ def mueen_calculate_distance_profile(Q, T):
 
 @njit(
     # "f8[:](f8[:], f8[:], f8[:], f8, f8, f8[:], f8[:])",
-    fastmath=True
+    fastmath=config.STUMPY_FASTMATH_TRUE
 )
 def _mass(Q, T, QT, μ_Q, σ_Q, M_T, Σ_T, Q_subseq_isconstant, T_subseq_isconstant):
     """
@@ -1700,7 +1717,7 @@ def mass(
         raise ValueError(f"Q is {Q.ndim}-dimensional and must be 1-dimensional. ")
     Q_isfinite = np.isfinite(Q)
 
-    check_window_size(m, max_size=Q.shape[-1])
+    check_window_size(m, max_size=Q.shape[0])
 
     if query_idx is not None:
         query_idx = int(query_idx)
@@ -1836,7 +1853,7 @@ def _mass_distance_matrix(
         if np.any(~np.isfinite(Q[i : i + m])):  # pragma: no cover
             distance_matrix[i, :] = np.inf
         else:
-            QT = _sliding_dot_product(Q[i : i + m], T)
+            QT = sdp._njit_sliding_dot_product(Q[i : i + m], T)
             distance_matrix[i, :] = _mass(
                 Q[i : i + m],
                 T,
@@ -1925,7 +1942,7 @@ def mass_distance_matrix(
         T_subseq_isconstant=T_subseq_isconstant,
     )
 
-    check_window_size(m, max_size=min(Q.shape[-1], T.shape[-1]))
+    check_window_size(m, max_size=min(Q.shape[0], T.shape[0]))
 
     return _mass_distance_matrix(
         Q,
@@ -1978,7 +1995,7 @@ def _get_QT(start, T_A, T_B, m):
 
 @njit(
     # ["(f8[:], i8, i8)", "(f8[:, :], i8, i8)"],
-    fastmath=True
+    fastmath=config.STUMPY_FASTMATH_FLAGS
 )
 def _apply_exclusion_zone(a, idx, excl_zone, val):
     """
@@ -2053,8 +2070,9 @@ def _preprocess(T, copy=True):
         Time series or sequence
 
     copy : bool, default True
-        A boolean value that indicates whether the process should be done on
-        input `T` (False) or its copy (True).
+        A boolean value that indicates whether the process should be performed on
+        input array `T` (False) or its copy (True). If `T` is a dataframe, then the
+        data is always copied into a brand new array.
 
     Returns
     -------
@@ -2062,8 +2080,19 @@ def _preprocess(T, copy=True):
         Modified time series
     """
     if copy:
-        T = T.copy()
+        try:
+            T = T.copy()
+        except AttributeError:  # Polars copy
+            T = T.clone()
+
     T = transpose_dataframe(T)
+
+    if "pandas" in str(type(T)):
+        T = T.to_numpy(copy=True)
+
+    if "polars" in str(type(T)):
+        T = T.to_numpy(writable=True)
+
     T = np.asarray(T)
     check_dtype(T)
 
@@ -2098,8 +2127,9 @@ def preprocess(
         Window size
 
     copy : bool, default True
-        A boolean value that indicates whether the process should be done on
-        input `T` (False) or its copy (True).
+        A boolean value that indicates whether the process should be performed on
+        input array `T` (False) or its copy (True). If `T` is a dataframe, then the
+        data is always copied into a brand new array.
 
     M_T : numpy.ndarray, default None
         Rolling mean
@@ -2161,8 +2191,9 @@ def preprocess_non_normalized(T, m, copy=True):
         Window size
 
     copy : bool, default True
-        A boolean value that indicates whether the process should be done on
-        input `T` (False) or its copy (True).
+        A boolean value that indicates whether the process should be performed on
+        input array `T` (False) or its copy (True). If `T` is a dataframe, then the
+        data is always copied into a brand new array.
 
     Returns
     -------
@@ -2221,8 +2252,9 @@ def preprocess_diagonal(
         corresponding value set to False in this boolean array.
 
     copy : bool, default True
-        A boolean value that indicates whether the process should be done on
-        input `T` (False) or its copy (True).
+        A boolean value that indicates whether the process should be performed on
+        input array `T` (False) or its copy (True). If `T` is a dataframe, then the
+        data is always copied into a brand new array.
 
     Returns
     -------
@@ -2300,16 +2332,16 @@ def array_to_temp_file(a):
     fname : str
         The output file name
     """
-    fname = tempfile.NamedTemporaryFile(delete=False)
-    fname = fname.name + ".npy"
-    np.save(fname, a, allow_pickle=False)
+    with tempfile.NamedTemporaryFile(delete=True) as tmp:
+        fname = tmp.name + ".npy"
+        np.save(fname, a, allow_pickle=False)
 
     return fname
 
 
 @njit(
     # "i8[:](i8[:], i8, i8, i8)",
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_TRUE,
 )
 def _count_diagonal_ndist(diags, m, n_A, n_B):
     """
@@ -2348,6 +2380,7 @@ def _count_diagonal_ndist(diags, m, n_A, n_B):
 
 @njit(
     # "i8[:, :](i8[:], i8, b1)"
+    fastmath=config.STUMPY_FASTMATH_TRUE
 )
 def _get_array_ranges(a, n_chunks, truncate):
     """
@@ -2396,6 +2429,7 @@ def _get_array_ranges(a, n_chunks, truncate):
 
 @njit(
     # "i8[:, :](i8, i8, b1)"
+    fastmath=config.STUMPY_FASTMATH_TRUE
 )
 def _get_ranges(size, n_chunks, truncate):
     """
@@ -2506,7 +2540,7 @@ def rolling_isfinite(a, w):
     )
 
 
-@njit(parallel=True, fastmath={"nsz", "arcp", "contract", "afn", "reassoc"})
+@njit(parallel=True, fastmath=config.STUMPY_FASTMATH_FLAGS)
 def _rolling_isconstant(a, w):
     """
     Compute the rolling isconstant for 1-D array.
@@ -2843,7 +2877,7 @@ def _idx_to_mp(
     return P
 
 
-@njit(fastmath=True)
+@njit(fastmath=config.STUMPY_FASTMATH_TRUE)
 def _total_diagonal_ndists(tile_lower_diag, tile_upper_diag, tile_height, tile_width):
     """
     Count the total number of distances covered by a range of diagonals
@@ -3248,7 +3282,7 @@ def _select_P_ABBA_value(P_ABBA, k, custom_func=None):
     return MPdist
 
 
-@njit()
+@njit(fastmath=config.STUMPY_FASTMATH_FLAGS)
 def _merge_topk_PI(PA, PB, IA, IB):
     """
     Merge two top-k matrix profiles `PA` and `PB`, and update `PA` (in place).
@@ -3321,7 +3355,7 @@ def _merge_topk_PI(PA, PB, IA, IB):
             IA[i] = tmp_I
 
 
-@njit()
+@njit(fastmath=config.STUMPY_FASTMATH_FLAGS)
 def _merge_topk_ρI(ρA, ρB, IA, IB):
     """
     Merge two top-k pearson profiles `ρA` and `ρB`, and update `ρA` (in place).
@@ -3395,7 +3429,7 @@ def _merge_topk_ρI(ρA, ρB, IA, IB):
             IA[i] = tmp_I
 
 
-@njit()
+@njit(fastmath=config.STUMPY_FASTMATH_FLAGS)
 def _shift_insert_at_index(a, idx, v, shift="right"):
     """
     If `shift=right` (default), all elements in `a[idx:]` are shifted to the right by
@@ -3665,11 +3699,10 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
 
     T_B : numpy.ndarray
         The time series or sequence that will be used to annotate T_A. For every
-        subsequence in T_A, its nearest neighbor in T_B will be recorded. Default is
-        `None` which corresponds to a self-join.
+        subsequence in T_A, its nearest neighbor in T_B will be recorded.
 
     ignore_trivial : bool
-        Set to `True` if this is a self-join. Otherwise, for AB-join, set this
+        Set to `True` if this is a self-join. Otherwise, for an AB-join, set this
         to `False`.
 
     Returns
@@ -3679,7 +3712,7 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
 
     Notes
     -----
-    These warnings may be supresse by using a context manager
+    These warnings may be suppressed by using a context manager
     ```
     import stumpy
     import numpy as np
@@ -3922,7 +3955,7 @@ def _subspace(D, k, include=None, discords=False):
     # `include` processing occur here since we are dealing with indices, not distances
     if include is not None:
         include = _preprocess_include(include)
-        mask = np.in1d(sorted_idx, include)
+        mask = np.isin(sorted_idx, include)
         include_idx = mask.nonzero()[0]
         exclude_idx = (~mask).nonzero()[0]
         sorted_idx[: include_idx.shape[0]], sorted_idx[include_idx.shape[0] :] = (
@@ -3971,7 +4004,7 @@ def _mdl(disc_subseqs, disc_neighbors, S, n_bit=8):
 
 @njit(
     # "(i8, i8, f8[:, :], f8[:], i8, f8[:, :], i8[:, :], f8)",
-    fastmath={"nsz", "arcp", "contract", "afn", "reassoc"},
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _compute_multi_PI(d, idx, D, D_prime, range_start, P, I, p=2.0):
     """
@@ -4222,7 +4255,7 @@ def _mpdist(
     return MPdist
 
 
-def process_isconstant(T, m, T_subseq_isconstant, T_subseq_isfinite=None):
+def process_isconstant(T, m, T_subseq_isconstant=None, T_subseq_isfinite=None):
     """
     A convenience wrapper around the `rolling_isconstant` and
     `fix_isconstant_isfinite_conflicts`.
@@ -4271,7 +4304,7 @@ def process_isconstant(T, m, T_subseq_isconstant, T_subseq_isfinite=None):
 
         if len(T_subseq_isconstant) != T.shape[0]:  # pragma: no cover
             msg = (
-                "The lenght of the list `T_subseq_isconstant` must be "
+                "The length of the list `T_subseq_isconstant` must be "
                 + "equal to the number of time series in `T`."
             )
             raise ValueError(msg)
@@ -4369,3 +4402,107 @@ def get_ray_nworkers(ray_client):
         Total number of Ray workers
     """
     return int(ray_client.cluster_resources().get("CPU"))
+
+
+@njit(fastmath=config.STUMPY_FASTMATH_FLAGS)
+def _update_incremental_PI(D, P, I, excl_zone, n_appended=0):
+    """
+    Given the 1D array distance profile, `D`, of the last subsequence of T,
+    update (in-place) the (top-k) matrix profile, `P`, and the matrix profile
+    index, I.
+
+    Parameters
+    ----------
+    D : numpy.ndarray
+        A 1D array (with dtype float) representing the distance profile of
+        the last subsequence of T
+
+    P : numpy.ndarray
+        A 2D array representing the matrix profile of T,
+        with shape (len(T) - m + 1, k), where `m` is the window size.
+        P[-1, :] should be set to np.inf
+
+    I : numpy.ndarray
+        A 2D array representing the matrix profile index of T,
+        with shape (len(T) - m + 1, k), where `m` is the window size
+        I[-1, :] should be set to -1.
+
+    excl_zone : int
+        Size of the exclusion zone.
+
+    n_appended : int
+        Number of times the timeseries start point is shifted one to the right.
+        See note below for more details.
+
+    Returns
+    -------
+    None
+
+    Note
+    -----
+    The `n_appended` parameter is used to indicate the number of times the timeseries
+    start point is shifted one to the right. When `egress=False` (see stumpy.stumpi),
+    the matrix profile and matrix profile index are updated in an incremental fashion
+    while considering all historical data. `n_appended` must be set to 0 in such
+    cases. However, when `egress=True`, the matrix profile and matrix profile index are
+    updated in an incremental fashion and they represent the matrix profile and matrix
+    profile index for the `l` most recent subsequences (where `l = len(T) - m + 1`).
+    In this case, each subsequence is only compared against upto `l-1` left neighbors
+    and upto `l-1` right neighbors.
+    """
+    _apply_exclusion_zone(D, D.shape[0] - 1, excl_zone, np.inf)
+
+    update_idx = np.argwhere(D < P[:, -1]).flatten()
+    for i in update_idx:
+        idx = np.searchsorted(P[i], D[i], side="right")
+        _shift_insert_at_index(P[i], idx, D[i])
+        _shift_insert_at_index(I[i], idx, D.shape[0] + n_appended - 1)
+
+    # Calculate the (top-k) matrix profile values/indidces
+    # for the last subsequence
+    P[-1] = np.inf
+    I[-1] = -1
+    for i, d in enumerate(D):
+        if d < P[-1, -1]:
+            idx = np.searchsorted(P[-1], d, side="right")
+            _shift_insert_at_index(P[-1], idx, d)
+            _shift_insert_at_index(I[-1], idx, i + n_appended)
+
+    return
+
+
+def check_self_join(ignore_trivial):
+    """
+    A simple function to check whether `ignore_trivial` is `True` for a self-join
+
+    Otherwise, warn the user.
+
+    Parameters
+    ----------
+    ignore_trivial : bool
+        Set to True if this is a self-join. Otherwise, for AB-join, set this to False.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    These warnings may be suppressed by using a context manager
+    ```
+    import stumpy
+    import numpy as np
+    import warnings
+
+    T = np.random.rand(10_000)
+    m = 50
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="`ignore_trivial` cannot be `False`")
+        for _ in range(5):
+            stumpy.stump(T, m, ignore_trivial=False)
+    ```
+    """
+    if ignore_trivial is False:
+        msg = "`ignore_trivial` cannot be `False` for a self-join and "
+        msg += "has been automatically overridden and set to `True`."
+        warnings.warn(msg)

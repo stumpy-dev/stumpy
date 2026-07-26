@@ -9,7 +9,13 @@ try:  # pragma: no cover
     RAY_IMPORTED = True
 except ImportError:  # pragma: no cover
     RAY_IMPORTED = False
-from stumpy import aamp_stimped, aamped, maamped, mstumped, stimped, stumped
+from stumpy import rng
+from stumpy.aamp_stimp import aamp_stimped
+from stumpy.aamped import aamped
+from stumpy.maamped import maamped
+from stumpy.mstumped import mstumped
+from stumpy.stimp import stimped
+from stumpy.stumped import stumped
 
 
 @pytest.fixture(scope="module")
@@ -31,19 +37,19 @@ test_data = [
         np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
     ),
     (
-        np.random.uniform(-1000, 1000, [8]).astype(np.float64),
-        np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [8]).astype(np.float64),
+        rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
     ),
 ]
 
 test_mdata = [
     (np.array([[584, -11, 23, 79, 1001, 0, -19]], dtype=np.float64), 3),
-    (np.random.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
+    (rng.RNG.uniform(-1000, 1000, [5, 20]).astype(np.float64), 5),
 ]
 
 T = [
     np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
-    np.random.uniform(-1000, 1000, [64]).astype(np.float64),
+    rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64),
 ]
 
 

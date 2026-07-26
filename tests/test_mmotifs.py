@@ -3,7 +3,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import config, mmotifs
+from stumpy import config
+from stumpy.mmotifs import mmotifs
 
 test_data = [
     np.array(

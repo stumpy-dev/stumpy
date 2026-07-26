@@ -15,7 +15,7 @@ from .mparray import mparray
     # "(f8[:], f8[:], i8, f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], f8[:],"
     # "b1[:], b1[:], b1[:], b1[:], i8[:], i8, i8, i8, f8[:, :, :], f8[:, :],"
     # "f8[:, :], i8[:, :, :], i8[:, :], i8[:, :], b1)",
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _compute_diagonal(
     T_A,
@@ -247,7 +247,7 @@ def _compute_diagonal(
     # "(f8[:], f8[:], i8, f8[:], f8[:], f8[:], f8[:], f8[:], f8[:], b1[:], b1[:],"
     # "b1[:], b1[:], i8[:], b1, i8)",
     parallel=True,
-    fastmath=True,
+    fastmath=config.STUMPY_FASTMATH_FLAGS,
 )
 def _stump(
     T_A,
@@ -542,8 +542,11 @@ def stump(
         Default is ``None`` which corresponds to a self-join.
 
     ignore_trivial : bool, default True
-        Set to ``True`` if this is a self-join. Otherwise, for AB-join, set this
-        to ``False``.
+        Set to ``True`` if this is a self-join (i.e., for a single time series
+        ``T_A`` without ``T_B``). This ensures that an exclusion zone is applied
+        to each subsequence in ``T_A`` and all trivial/self-matches are ignored.
+        Otherwise, for an AB-join (i.e., between two times series, ``T_A`` and
+        ``T_B``), set this to ``False``.
 
     normalize : bool, default True
         When set to ``True``, this z-normalizes subsequences prior to computing
@@ -677,6 +680,7 @@ def stump(
     mparray([4, 3, 0, 1, 0])
     """
     if T_B is None:
+        core.check_self_join(ignore_trivial)
         ignore_trivial = True
         T_B = T_A
         T_B_subseq_isconstant = T_A_subseq_isconstant
@@ -711,18 +715,17 @@ def stump(
             "For multidimensional STUMP use `stumpy.mstump` or `stumpy.mstumped`"
         )
 
-    core.check_window_size(m, max_size=min(T_A.shape[0], T_B.shape[0]))
-    ignore_trivial = core.check_ignore_trivial(T_A, T_B, ignore_trivial)
-
     n_A = T_A.shape[0]
     n_B = T_B.shape[0]
     l = n_A - m + 1
 
+    ignore_trivial = core.check_ignore_trivial(T_A, T_B, ignore_trivial)
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
-
-    if ignore_trivial:
+    if ignore_trivial:  # self-join
+        core.check_window_size(m, max_size=min(n_A, n_B), n=n_A)
         diags = np.arange(excl_zone + 1, n_A - m + 1, dtype=np.int64)
-    else:
+    else:  # AB-join
+        core.check_window_size(m, max_size=min(n_A, n_B))
         diags = np.arange(-(n_A - m + 1) + 1, n_B - m + 1, dtype=np.int64)
 
     P, PL, PR, I, IL, IR = _stump(

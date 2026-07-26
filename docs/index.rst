@@ -6,11 +6,11 @@ STUMPY documentation
    :maxdepth: 2
    :caption: Contents:
 
-   motivation
-   install
+   background
+   Install <install>
    api
    tutorials
-   Contribute.ipynb
+   Contribute <Contribute.ipynb>
    help
 
 .. include:: ../README.rst
