@@ -257,7 +257,7 @@ def test_divide_by_zero_ostinato():
     Ts = [np.random.rand(n) for n in [64, 128, 256]]
     m = 5
     Ts[0][:m] = np.nan
-    stumpy.ostinato(Ts, m)
+    ostinato(Ts, m)
 
 
 @pytest.mark.filterwarnings(
@@ -268,4 +268,4 @@ def test_divide_by_zero_ostinatoed(dask_cluster):
     m = 5
     Ts[0][:m] = np.nan
     with Client(dask_cluster) as dask_client:
-        stumpy.ostinatoed(dask_client, Ts, m)
+        ostinatoed(dask_client, Ts, m)

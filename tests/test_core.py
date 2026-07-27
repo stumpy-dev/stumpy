@@ -1760,7 +1760,6 @@ def test_process_isconstant_2d():
     npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
 
 
-
 @pytest.mark.filterwarnings(
     "error:divide by zero encountered in divide", category=RuntimeWarning
 )
