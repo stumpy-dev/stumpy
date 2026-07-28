@@ -159,7 +159,7 @@ gen_ray_coveragerc()
     echo "    def test_.*_ray*" >> .coveragerc_override
 }
 
-check_fftw_pyfftw()
+check_pyfftw()
 {
     if ! python -c "import pyfftw" &> /dev/null;
     then
@@ -188,13 +188,12 @@ set_coveragerc()
         echo "Ray installed"
     fi
 
-    if ! command -v fftw-wisdom &> /dev/null \
-    || ! python -c "import pyfftw" &> /dev/null;
+    if ! python -c "import pyfftw" &> /dev/null;
     then
-        echo "FFTW and/or pyFFTW not Installed"
+        echo "pyFFTW cannot be imported"
         gen_pyfftw_coveragerc
     else
-        echo "FFTW and pyFFTW Installed"
+        echo "pyFFTW was successfully imported"
     fi
 
     if [ -f .coveragerc_override ]; then
@@ -391,7 +390,7 @@ check_print
 check_pkg_imports
 check_naive
 check_ray
-check_fftw_pyfftw
+check_pyfftw
 
 
 if [[ -z $NUMBA_DISABLE_JIT || $NUMBA_DISABLE_JIT -eq 0 ]]; then
