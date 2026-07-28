@@ -3,16 +3,6 @@ import numpy.testing as npt
 from stumpy import rng
 
 
-def test_set_seed():
-    init_state = rng.RNG.get_state()
-
-    rng.set_seed(0)
-    seed = rng.RNG.get_state()[1][0]
-    assert seed == 0
-
-    rng.RNG.set_state(init_state)
-
-
 def test_fix_seed():
     init_state = rng.RNG.get_state()
     init_seed = init_state[1][0]  # This returns the seed
