@@ -3,6 +3,7 @@ import warnings
 from operator import eq, lt
 
 import naive
+import numpy as np
 import pytest
 from numpy import testing as npt
 
@@ -69,8 +70,10 @@ test_inputs = [
 
 def get_sdp_function_names():
     out = []
-    for func_name, func in inspect.getmembers(sdp, inspect.isfunction):
-        if func_name.endswith("sliding_dot_product"):
+    for func_name, func in inspect.getmembers(sdp, callable):
+        if func_name.endswith("sliding_dot_product") and inspect.signature(
+            func
+        ).parameters.keys() >= {"Q", "T"}:
             out.append(func_name)
 
     return out
@@ -149,5 +152,94 @@ def test_sdp_power2():
             msg = f"Error in {func_name}, with q={q} and p={p}"
             warnings.warn(msg)
             raise e
+
+    return
+
+
+def test_pyfftw_sdp_init_len():
+    if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
+        pytest.skip("Skipping Test pyFFTW Not Installed")
+
+    # When `len(T)` larger than original `init_len`,
+    # the callable object returned by `_make_pyfftw_sliding_dot_product`
+    # should still work correctly. This test checks that functionality.
+
+    init_len = 2**10
+    _pyfftw_sliding_dot_product = sdp._make_pyfftw_sliding_dot_product(
+        init_len=init_len, real_dtype="float64"
+    )
+
+    # len(T) > init_len to trigger internal array resizing
+    T = np.random.rand(init_len + 1)
+    Q = np.random.rand(2**2)
+
+    comp = _pyfftw_sliding_dot_product(Q, T)
+    ref = naive.rolling_window_dot_product(Q, T)
+
+    np.testing.assert_allclose(comp, ref)
+
+    return
+
+
+def test_pyfftw_sdp_longdoube():
+    if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
+        pytest.skip("Skipping Test pyFFTW Not Installed")
+
+    # This test checks that the callable object
+    # returned by `_make_pyfftw_sliding_dot_product`
+    # can support `real_dtype="longdouble"`
+    init_len = 2**10
+    sdp_func = sdp._make_pyfftw_sliding_dot_product(
+        init_len=init_len, real_dtype="longdouble"
+    )
+
+    T = np.random.rand(init_len)
+    Q = np.random.rand(2**8)
+
+    comp = sdp_func(Q, T)
+    ref = naive.rolling_window_dot_product(Q, T)
+
+    np.testing.assert_allclose(comp, ref)
+
+    return
+
+
+def test_pyfftw_sdp_multithreaded():
+    if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
+        pytest.skip("Skipping Test pyFFTW Not Installed")
+
+    # This test checks that the callable object
+    # returned by `_make_pyfftw_sliding_dot_product`
+    # can support multithreading.
+    T = np.random.rand(2**5)
+    Q = np.random.rand(2**4)
+
+    comp = sdp._pyfftw_sliding_dot_product(Q, T, n_threads=2)
+    ref = naive.rolling_window_dot_product(Q, T)
+
+    np.testing.assert_allclose(comp, ref)
+
+    return
+
+
+def test_pyfftw_sdp_multithreaded_longdouble():
+    if not sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
+        pytest.skip("Skipping Test pyFFTW Not Installed")
+
+    # This test checks that the callable object
+    # returned by `_make_pyfftw_sliding_dot_product`
+    # can support  multithreading and `real_dtype="longdouble"`
+    init_len = 2**10
+    sdp_func = sdp._make_pyfftw_sliding_dot_product(
+        init_len=init_len, real_dtype="longdouble"
+    )
+
+    T = np.random.rand(init_len)
+    Q = np.random.rand(2**8)
+
+    comp = sdp_func(Q, T, n_threads=2)
+    ref = naive.rolling_window_dot_product(Q, T)
+
+    np.testing.assert_allclose(comp, ref)
 
     return

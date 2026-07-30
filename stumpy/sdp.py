@@ -1,3 +1,8 @@
+# This file contains different implementations of
+# the sliding dot product (sdp). The name of any
+# callable object that computes the sliding dot product
+# should end with 'sliding_dot_product'.
+
 import numpy as np
 from numba import njit
 from scipy.fft import next_fast_len
@@ -10,6 +15,13 @@ try:
     from scipy.fft._duccfft.basic import c2r, r2c
 except ModuleNotFoundError:  # pragma: no cover
     from scipy.fft._pocketfft.basic import c2r, r2c
+
+try:  # pragma: no cover
+    import pyfftw
+
+    PYFFTW_IS_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    PYFFTW_IS_AVAILABLE = False
 
 
 @njit(fastmath=config.STUMPY_FASTMATH_TRUE)
@@ -114,9 +126,244 @@ def _pocketfft_sliding_dot_product(Q, T):
     return c2r(False, np.multiply(fft_2d[0], fft_2d[1]), n=next_fast_n)[m - 1 : n]
 
 
+def _make_pyfftw_sliding_dot_product(init_len=2**20, real_dtype="float64"):
+    """
+    A closure to compute the sliding dot product using FFTW via pyfftw
+
+    This closure returns a callable object that computes the sliding dot product
+    between a query array, ``Q``, and a time series, ``T``. It preallocates arrays
+    and caches FFTW objects to optimize repeated computations with similar-sized
+    inputs.
+
+    Parameters
+    ----------
+    init_len : int, default 2**20
+        Initial length to preallocate arrays for. This will be the size of the
+        real-valued array. A complex-valued array of size 1 + (init_len // 2)
+        will also be preallocated. If the length of input arrays exceeds
+        ``init_len``, then the preallocated arrays will automatically be
+        resized to accommodate larger sizes.
+
+    real_dtype : str, default "float64"
+        The real data type to use for the preallocated arrays. Must be either
+        "float64" or "longdouble". The complex data type will be set to
+        "complex128" or "clongdouble", respectively.
+
+    Returns
+    -------
+    sliding_dot_product : callable
+        A callable object that computes the sliding dot product between ``Q``
+        and ``T`` using FFTW via pyfftw, and caches FFTW objects if not already
+        cached. The callable object automatically resizes the preallocated arrays
+        if the length of input arrays exceeds the current initial length.
+        In addition, the callable object has the method `set_init_len` to set
+        the length of the preallocated arrays to a new initial length.
+
+    Notes
+    -----
+    The closure maintains internal caches of FFTW objects to avoid redundant planning
+    operations when called multiple times with similar-sized inputs and parameters.
+    When planning_flag == "FFTW_ESTIMATE", there will be no planning operation.
+    However, caching FFTW objects is still beneficial as the overhead of creating
+    those objects can be avoided in subsequent calls.
+
+    References
+    ----------
+    FFTW documentation: http://www.fftw.org/
+    pyfftw documentation: https://pyfftw.readthedocs.io/
+    """
+    REAL_TO_COMPLEX_MAP = {
+        "float64": "complex128",
+        "longdouble": "clongdouble",
+    }
+    if real_dtype not in ["float64", "longdouble"]:  # pragma: no cover
+        raise ValueError(
+            f"Invalid real_dtype: {real_dtype}. Must be 'float64' or 'longdouble'."
+        )
+    complex_dtype = REAL_TO_COMPLEX_MAP[real_dtype]
+
+    # Preallocate arrays
+    real_arr = pyfftw.empty_aligned(init_len, dtype=real_dtype)
+    complex_arr = pyfftw.empty_aligned(1 + (init_len // 2), dtype=complex_dtype)
+
+    # Store FFTW objects, keyed by (next_fast_n, n_threads, planning_flag)
+    rfft_objects = {}
+    irfft_objects = {}
+
+    def sliding_dot_product(Q, T, n_threads=1, planning_flag="FFTW_ESTIMATE"):
+        """
+        Compute the sliding dot product between ``Q`` and ``T`` using FFTW via pyfftw,
+        and cache FFTW objects if not already cached
+
+        Parameters
+        ----------
+        Q : numpy.ndarray
+            Query array or subsequence.
+
+        T : numpy.ndarray
+            Time series or sequence.
+
+        n_threads : int, default 1
+            Number of threads to use for FFTW computations.
+
+        planning_flag : str, default "FFTW_ESTIMATE"
+            The planning flag that will be used in FFTW for planning.
+            See pyfftw documentation for details. Current options, ordered
+            ascendingly by the level of aggressiveness in planning, are:
+            "FFTW_ESTIMATE", "FFTW_MEASURE", "FFTW_PATIENT", and "FFTW_EXHAUSTIVE".
+            The more aggressive the planning, the longer the planning time, but
+            the faster the execution time. Note that when ``planning_flag`` is
+            set to "FFTW_ESTIMATE" (default), there will be no planning operation!
+
+        Returns
+        -------
+        out : numpy.ndarray
+            Sliding dot product between ``Q`` and ``T``.
+
+        Notes
+        -----
+        The planning_flag is defaulted to "FFTW_ESTIMATE" to be aligned with
+        MATLAB's FFTW usage (as of version R2025b)
+        See: https://www.mathworks.com/help/matlab/ref/fftw.html
+
+        This implementation is inspired by the answer on StackOverflow:
+        https://stackoverflow.com/a/30615425/2955541
+        """
+        nonlocal real_arr, complex_arr
+
+        m = Q.shape[0]
+        n = T.shape[0]
+        next_fast_n = pyfftw.next_fast_len(n)
+
+        # Update preallocated arrays if needed
+        if next_fast_n > len(real_arr):
+            real_arr = pyfftw.empty_aligned(next_fast_n, dtype=real_arr.dtype)
+            complex_arr = pyfftw.empty_aligned(
+                1 + (next_fast_n // 2), dtype=complex_arr.dtype
+            )
+
+        real_view = real_arr[:next_fast_n]
+        complex_view = complex_arr[: 1 + (next_fast_n // 2)]
+
+        # Get or create FFTW objects
+        key = (next_fast_n, n_threads, planning_flag)
+
+        rfft_obj = rfft_objects.get(key, None)
+        irfft_obj = irfft_objects.get(key, None)
+
+        if rfft_obj is None or irfft_obj is None:
+            rfft_obj = pyfftw.FFTW(
+                input_array=real_view,
+                output_array=complex_view,
+                direction="FFTW_FORWARD",
+                flags=(planning_flag,),
+                threads=n_threads,
+            )
+            irfft_obj = pyfftw.FFTW(
+                input_array=complex_view,
+                output_array=real_view,
+                direction="FFTW_BACKWARD",
+                flags=(planning_flag, "FFTW_DESTROY_INPUT"),
+                threads=n_threads,
+            )
+            rfft_objects[key] = rfft_obj
+            irfft_objects[key] = irfft_obj
+        else:
+            # Update the input and output arrays of the cached FFTW objects
+            # in case their original input and output arrays were reallocated
+            # in a previous call
+            rfft_obj.update_arrays(real_view, complex_view)
+            irfft_obj.update_arrays(complex_view, real_view)
+
+        # Compute the circular convolution between T and Q[::-1], where both
+        # arrays are zero-padded to length `next_fast_n`.
+        #
+        # Let T' and Q' denote the zero-padded versions of T and Q[::-1],
+        # respectively, and let C denote their circular convolution:
+        #
+        # C = IFFT(FFT(T') * FFT(Q'))
+        #
+        # Since T' and Q' are real-valued, we can use the real-valued Fourier
+        # transforms instead:
+        #
+        # C = IRFFT(RFFT(T') * RFFT(Q'))
+        #
+        # By convention, the forward Fourier transform is unnormalized, while
+        # the inverse Fourier transform applies a factor of `1 / next_fast_n`.
+        # However, the `execute` method used below is a thin wrapper around the
+        # FFT implementation and performs no normalization. Therefore, the
+        # convolution must instead be computed as:
+        #
+        # C = (1 / next_fast_n) * IRFFT(RFFT(T') * RFFT(Q'))
+        # where RFFT and IRFFT are unnormalized.
+        #
+        # By linearity of the Fourier transform, this scaling factor can be
+        # applied either before or after the transform:
+        #
+        # C = IRFFT(RFFT(T') * ((1 / next_fast_n) * RFFT(Q')))
+        #   = IRFFT(RFFT(T') * RFFT((1 / next_fast_n) * Q'))
+        #
+        # Applying the scaling to original Q before padding it with zeros
+        # can reduce the number of multiplications since `len(Q)` is often
+        # much smaller than `next_fast_n`.
+        #
+        # The convolution is therefore computed in three steps:
+        # 1. Compute the (unnormalized) RFFT of the zero-padded T.
+        # 2. Compute the (unnormalized) RFFT of the reversed, scaled, and
+        #    zero-padded Q.
+        # 3. Multiply the RFFT outputs and compute the (unnormalized) inverse RFFT.
+
+        # Step 1
+        # Compute (unnormalized) RFFT of T (zero-padded)
+        rfft_obj.input_array[:n] = T
+        rfft_obj.input_array[n:] = 0.0
+        rfft_obj.execute()
+        rfft_T = rfft_obj.output_array.copy()  # To avoid losing it in step 2
+
+        # Step 2
+        # Compute (unnormalized) RFFT of Q (reversed, scaled, and zero-padded)
+        np.multiply(Q[::-1], 1.0 / next_fast_n, out=rfft_obj.input_array[:m])
+        rfft_obj.input_array[m:] = 0.0
+        rfft_obj.execute()
+        rfft_Q = rfft_obj.output_array
+
+        # Step 3
+        # Convert back to time domain by taking the (unnormalized) inverse RFFT
+        np.multiply(rfft_T, rfft_Q, out=irfft_obj.input_array)
+        irfft_obj.execute()
+
+        return irfft_obj.output_array[m - 1 : n]  # valid portion
+
+    def update_init_len(init_len):  # pragma: no cover
+        """
+        Update the size of the preallocated arrays to a new initial length
+
+        Parameters
+        ----------
+        init_len : int
+            New initial length for the preallocated arrays.
+
+        Returns
+        -------
+        None
+        """
+        nonlocal real_arr, complex_arr
+        real_arr = pyfftw.empty_aligned(init_len, dtype=real_arr.dtype)
+        complex_arr = pyfftw.empty_aligned(1 + (init_len // 2), dtype=complex_arr.dtype)
+
+    sliding_dot_product.update_init_len = update_init_len
+    return sliding_dot_product
+
+
+if PYFFTW_IS_AVAILABLE:  # pragma: no cover
+    _pyfftw_sliding_dot_product = _make_pyfftw_sliding_dot_product(
+        init_len=2**20, real_dtype="float64"
+    )
+
+
 def _sliding_dot_product(Q, T):
     """
-    Compute the sliding dot product between `Q` and `T`
+    Compute the sliding dot product between ``Q`` and ``T``
 
     Parameters
     ----------
@@ -129,6 +376,6 @@ def _sliding_dot_product(Q, T):
     Returns
     -------
     out : numpy.ndarray
-        Sliding dot product between `Q` and `T`.
+        Sliding dot product between ``Q`` and ``T``
     """
     return _convolve_sliding_dot_product(Q, T)
