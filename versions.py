@@ -37,8 +37,8 @@ def get_all_python_versions():
         )
         .rename(columns={"branch": "Branch"})
         .pipe(
-            lambda x: x.assign(
-                end_of_life=pd.to_datetime(x.end_of_life, format="mixed")
+            lambda df: df.assign(
+                end_of_life=pd.to_datetime(df.end_of_life, format="mixed")
             )
         )
         .query("end_of_life >= @today")
