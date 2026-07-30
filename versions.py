@@ -3,7 +3,9 @@
 import argparse
 import json
 import re
+import time
 from urllib import request
+from urllib.error import HTTPError
 
 import pandas as pd
 from docutils import nodes
@@ -24,11 +26,22 @@ def get_all_python_versions():
 
     Note that all versions are returned in descending order
     """
+    today = pd.Timestamp("today")
+    today = today.normalize()
+
     python_versions = (
-        pd.read_html(
-            "https://devguide.python.org/versions/",
-            storage_options=HEADERS,
-        )[0]
+        pd.read_json(
+            "https://peps.python.org/api/release-cycle.json",
+            orient="index",
+            convert_axes=False,
+        )
+        .rename(columns={"branch": "Branch"})
+        .pipe(
+            lambda x: x.assign(
+                end_of_life=pd.to_datetime(x.end_of_life, format="mixed")
+            )
+        )
+        .query("end_of_life >= @today")
         .query('Branch != "main"')
         .dropna()
         .Branch.to_list()
@@ -67,40 +80,50 @@ def get_min_numba_numpy_version(min_python):
     Find the minimum versions of Numba and NumPy that supports the specified
     `min_python` version
     """
-    df = (
-        pd.read_html(
-            "https://numba.readthedocs.io/en/stable/user/installing.html#version-support-information",  # noqa
-            storage_options=HEADERS,
-        )[0]
-        .dropna()
-        .drop(columns=["Numba.1", "llvmlite", "LLVM", "TBB"])
-        .query('`Python`.str.contains("2.7") == False')
-        .query('`Numba`.str.contains(".x") == False')
-        .query('`Numba`.str.contains("{") == False')
-        .pipe(
-            lambda df: df.assign(
-                MIN_PYTHON_SPEC=(
-                    df.Python.str.split().str[1].replace({"<": "="}, regex=True)
-                    + df.Python.str.split().str[0].replace({".x": ""}, regex=True)
-                ).apply(SpecifierSet)
+    url = "https://github.com/numba/numba/blob/main/docs/source/user/installing.rst"
+    try:
+        time.sleep(2)  # Avoid 429 error
+        df = (
+            pd.read_html(
+                url,
+                storage_options=HEADERS,
+            )[0]
+            .dropna()
+            .drop(columns=["Numba.1", "llvmlite", "LLVM", "TBB"])
+            .query('`Python`.str.contains("2.7") == False')
+            .query('`Numba`.str.contains(".x") == False')
+            .query('`Numba`.str.contains("{") == False')
+            .pipe(
+                lambda df: df.assign(
+                    MIN_PYTHON_SPEC=(
+                        df.Python.str.split().str[1].replace({"<": "="}, regex=True)
+                        + df.Python.str.split().str[0].replace({".x": ""}, regex=True)
+                    ).apply(SpecifierSet)
+                )
             )
-        )
-        .pipe(
-            lambda df: df.assign(
-                MIN_NUMPY=(df.NumPy.str.split().str[0].replace({".x": ""}, regex=True))
+            .pipe(
+                lambda df: df.assign(
+                    MIN_NUMPY=(
+                        df.NumPy.str.split().str[0].replace({".x": ""}, regex=True)
+                    )
+                )
             )
-        )
-        .assign(
-            COMPATIBLE=lambda row: row.apply(
-                check_python_compatibility, axis=1, args=(Version(min_python),)
+            .assign(
+                COMPATIBLE=lambda row: row.apply(
+                    check_python_compatibility, axis=1, args=(Version(min_python),)
+                )
             )
+            .query("COMPATIBLE == True")
+            .pipe(lambda df: df.assign(MINOR=df.Numba.str.split(".").str[1]))
+            .pipe(lambda df: df.assign(PATCH=df.Numba.str.split(".").str[2]))
+            .sort_values(["MINOR", "PATCH"], ascending=[False, True])
+            .iloc[-1]
         )
-        .query("COMPATIBLE == True")
-        .pipe(lambda df: df.assign(MINOR=df.Numba.str.split(".").str[1]))
-        .pipe(lambda df: df.assign(PATCH=df.Numba.str.split(".").str[2]))
-        .sort_values(["MINOR", "PATCH"], ascending=[False, True])
-        .iloc[-1]
-    )
+    except HTTPError as e:
+        if e.code == 429:
+            time.sleep(2)  # Avoid 429 error
+            return get_min_numba_numpy_version(min_python)
+
     return df.Numba, df.MIN_NUMPY
 
 
@@ -435,7 +458,7 @@ def match_pkg_version(line, pkg_name):
         rf"""
                         {pkg_name}  # Package name
                         [\s=><:"\'\[\]]*  # Zero or more spaces or special characters
-                        (\d+\.\d+[\.0-9]*)  # Capture "version" in `matches`
+                        (\d+\.\d+[\.0-9\*]*)  # Capture "version" in `matches`
                         """,
         line,
         re.VERBOSE | re.IGNORECASE,  # Ignores all whitespace and case in pattern
@@ -457,6 +480,7 @@ def find_pkg_mismatches(pkg_name, pkg_version, fnames):
                 matches = match_pkg_version(l, pkg_name)
                 if matches is not None:
                     version = matches.groups()[0]
+                    version = version.removesuffix(".*")
                     if version != pkg_version:
                         pkg_mismatches.append((pkg_name, version, fname, line_num))
 
@@ -537,10 +561,17 @@ def get_all_min_versions(MIN_PYTHON):
         ):
             if fname == "pyproject.toml":
                 line = pyproject_lines[line_num - 1]
+                prev_line = pyproject_lines[line_num - 2]
                 if "Programming Language :: Python" in line and Version(
                     pkg_version
                 ) <= Version(version):
                     # Skip lines in `pyproject.toml` where the "Programming Language"
+                    # version may be higher than the minimum Python version
+                    continue
+                elif "tool.pixi.feature." in prev_line and Version(
+                    pkg_version
+                ) < Version(version):
+                    # Skip lines in `pyproject.toml` where the "tool.pixi.feature"
                     # version may be higher than the minimum Python version
                     continue
 
