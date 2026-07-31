@@ -5,11 +5,63 @@
 # running tests from inside VS code.
 # See https://stackoverflow.com/a/34520971
 
-import json
+import os
+from importlib.metadata import PackageNotFoundError, version
 
 import pytest
 
 from stumpy import rng
+
+
+def get_specs():
+    """
+    Find and return all  package versions
+    """
+    pkgs = [
+        # Alphabetical Order
+        "black",
+        "coverage",
+        "dask",
+        "distributed",
+        "flake8",
+        "isort",
+        "numba",
+        "numpy",
+        "pandas",
+        "polars",
+        "pytest",
+        "python",
+        "ray",
+        "scipy",
+    ]
+
+    specs = []
+    for pkg in pkgs:
+        try:  # pragma: no cover
+            pkg_version = version(pkg)
+            specs.append(f"--spec {pkg}={pkg_version}")
+        except PackageNotFoundError:
+            pass
+
+    return " ".join(specs)
+
+
+def get_env_vars():
+    """
+    Find and return all environment variables
+    """
+    keys = [
+        "NUMBA_DISABLE_JIT",
+        "NUMBA_ENABLE_CUDASIM",
+    ]
+
+    env_vars = []
+    for key in keys:
+        value = os.getenv(key)
+        if value is not None:
+            env_vars.append(f"{key}={value}")
+
+    return " ".join(env_vars)
 
 
 def pytest_configure(config):
@@ -17,21 +69,11 @@ def pytest_configure(config):
     Called after command line options have been parsed
     and all plugins and initial conftest files been loaded.
     """
-    state = rng.STATE
-    state_str = json.dumps(
-        (
-            state[0],
-            state[1].tolist(),
-            state[2],
-            state[3],
-            state[4],
-        )
-    )
-
-    # Store details of starting random state in case of failure
-    pytest.STUMPY_MSG = (
-        f"\n\nSTUMPY_STATE='{state_str}' pixi run tests custom {config.args[0]}"
-    )
+    # Store details of starting random seed in case of failure
+    env_vars = get_env_vars()
+    specs = get_specs()
+    pytest.STUMPY_MSG = f"\n\nSTUMPY_SEED={rng.SEED} {env_vars} "
+    pytest.STUMPY_MSG += f"pixi exec {specs} ./test.sh custom 1 {config.args[0]}"
 
 
 def pytest_sessionfinish(session, exitstatus):

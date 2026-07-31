@@ -1,6 +1,4 @@
-import json
 import os
-import warnings
 from contextlib import contextmanager
 
 import numpy as np
@@ -9,27 +7,11 @@ import numpy as np
 # in order to account for unit testing
 if os.getenv("STUMPY_SEED") is not None:  # pragma: no cover
     SEED = int(os.getenv("STUMPY_SEED"))
+    if SEED == 0:
+        raise ValueError("STUMPY_SEED must be greater than zero!")
 else:
     SEED = np.random.randint(1, 4_294_967_296, dtype=np.uint32)
 RNG = np.random.RandomState(seed=SEED)
-
-if os.getenv("STUMPY_STATE") is not None:  # pragma: no cover
-    if os.getenv("STUMPY_SEED") is not None:  # pragma: no cover
-        warnings.warn("STUMPY_SEED was ignored in lieu of STUMPY_STATE")
-    state_str = os.getenv("STUMPY_STATE")
-    state = json.loads(state_str)
-    STATE = (
-        state[0],
-        np.array(state[1], dtype=np.uint32),
-        state[2],
-        state[3],
-        state[4],
-    )
-    RNG.set_state(STATE)
-else:
-    STATE = RNG.get_state()
-
-# seed = RNG.get_state()[1][0]
 
 
 @contextmanager
