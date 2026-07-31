@@ -12,8 +12,8 @@ from stumpy.stump import stump
 
 test_data = [
     (
-        np.array([9, 8100, -60, 7], dtype=np.float64),
-        np.array([584, -11, 23, 79, 1001, 0, -19], dtype=np.float64),
+        np.array([9.0, 810.0, -60.0, 7.0], dtype=np.float64),
+        np.array([58.4, -11.0, 23.0, 79.0, 100.1, 0.0, -19.0], dtype=np.float64),
     ),
     (
         rng.RNG.uniform(-1000, 1000, [8]).astype(np.float64),
