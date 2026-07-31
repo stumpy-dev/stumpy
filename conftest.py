@@ -72,10 +72,8 @@ def pytest_configure(config):
     # Store details of starting random seed in case of failure
     env_vars = get_env_vars()
     specs = get_specs()
-    pytest.STUMPY_MSG = (
-        f"\n\nSTUMPY_SEED={rng.SEED} {env_vars} "
-        f"pixi exec {specs} ./test.sh custom 1 {config.args[0]}"
-    )
+    pytest.STUMPY_MSG = f"\n\nSTUMPY_SEED={rng.SEED} {env_vars} "
+    pytest.STUMPY_MSG += f"pixi exec {specs} ./test.sh custom 1 {config.args[0]}"
 
 
 def pytest_sessionfinish(session, exitstatus):

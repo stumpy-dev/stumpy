@@ -7,6 +7,8 @@ import numpy as np
 # in order to account for unit testing
 if os.getenv("STUMPY_SEED") is not None:  # pragma: no cover
     SEED = int(os.getenv("STUMPY_SEED"))
+    if SEED == 0:
+        raise ValueError("STUMPY_SEED must be greater than zero!")
 else:
     SEED = np.random.randint(1, 4_294_967_296, dtype=np.uint32)
 RNG = np.random.RandomState(seed=SEED)
