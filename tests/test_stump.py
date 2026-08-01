@@ -1,6 +1,8 @@
 import functools
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))  # Add parent directory to path
 
-import naive
 import numpy as np
 import numpy.testing as npt
 import pandas as pd
@@ -9,6 +11,11 @@ import pytest
 
 from stumpy import config, rng
 from stumpy.stump import stump
+
+# Ensure naive module is available
+import naive
+if not hasattr(naive, 'stump'):
+    raise ImportError('naive module is not properly initialized. Please run pytest from the repository root or ensure tests/naive is in PYTHONPATH.')
 
 test_data = [
     (
