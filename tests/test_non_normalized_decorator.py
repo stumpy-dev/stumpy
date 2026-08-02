@@ -109,6 +109,7 @@ def test_stump(T, m):
     if T.ndim > 1:
         T = T.copy()
         T = T[0]
+    # else T is already 1D, no need to index
 
     ref = aamp(T, m)
     comp = stump(T, m, normalize=False)
