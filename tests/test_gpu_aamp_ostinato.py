@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import mersenne
 import numpy as np
 import numpy.testing as npt
 from numba import cuda
@@ -28,13 +29,10 @@ if not cuda.is_available():  # pragma: no cover
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
-@pytest.mark.parametrize(
-    "seed", rng.RNG.choice(np.arange(10000), size=2, replace=False)
-)
+@pytest.mark.parametrize("runs", range(2))
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
-def test_random_gpu_aamp_ostinato(seed):
+def test_random_gpu_aamp_ostinato(runs):
     m = 50
-    rng.RNG.seed(seed)
     Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
@@ -50,7 +48,8 @@ def test_random_gpu_aamp_ostinato(seed):
 @patch("stumpy.config.STUMPY_THREADS_PER_BLOCK", TEST_THREADS_PER_BLOCK)
 def test_deterministic_gpu_aamp_ostinato(seed):
     m = 50
-    with rng.fix_seed(seed):
+    state = mersenne.seed_to_state(seed)
+    with rng.fix_state(state):
         Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
         for p in [1.0, 2.0, 3.0]:

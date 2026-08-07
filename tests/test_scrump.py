@@ -1,5 +1,6 @@
 import functools
 
+import mersenne
 import naive
 import numpy as np
 import numpy.testing as npt
@@ -1030,7 +1031,8 @@ def test_prescrump_self_join_KNN_no_overlap():
     for (m, k), specified_seeds in test_cases.items():
         zone = int(np.ceil(m / 4))
         for seed in specified_seeds:
-            with rng.fix_seed(seed):
+            state = mersenne.seed_to_state(seed)
+            with rng.fix_state(state):
                 ref_P, ref_I = naive.prescrump(T, m, T, s=1, exclusion_zone=zone, k=k)
                 comp_P, comp_I = prescrump(T, m, s=1, k=k)
 

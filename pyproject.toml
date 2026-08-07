@@ -121,3 +121,4 @@ coverage = "./test.sh coverage"
 docs = "cd docs && ./setup.sh"
 black = 'black --exclude=".*\.ipynb" --extend-exclude=".venv|.pixi" ./'
 isort = 'isort --profile black --skip .venv --skip .pixi ./'
+flake8 = 'flake8 --extend-exclude=.venv/,.pixi/ ./'

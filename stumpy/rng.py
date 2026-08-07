@@ -43,23 +43,28 @@ def fix_seed(seed):
 
 
 @contextmanager
-def fix_state():
+def fix_state(state=None):
     """
     A context manager for setting the RNG state to a fixed, hardcoded, safe state
     and then returning the RNG back to its previous state prior to the state change
 
     This is typically used when you want to repeat the same random sequence more than
-    once.
+    once. Alternatively, if a specific Mersenne Twister state is needed, it
+    can be passed in temporarily and then the state will return back to the state
+    prior to the change upon completion.
 
     Parameters
     ----------
-    None
+    state : tuple, default None
+        A NumPy legacy mersenne twister state
 
     Returns
     -------
     None
     """
     curr_state = RNG.get_state()
+    if state is not None:
+        RNG.set_state(state)
     try:
         yield
     finally:

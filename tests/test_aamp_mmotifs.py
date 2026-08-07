@@ -1,3 +1,4 @@
+import mersenne
 import naive
 import numpy as np
 import numpy.testing as npt
@@ -60,7 +61,8 @@ def test_aamp_mmotifs_default_parameters():
         np.array([411.60964047, 423.69925001, 449.11032383, 476.95855027, 506.62406252])
     ]
 
-    with rng.fix_seed(0):
+    state = mersenne.seed_to_state(0)
+    with rng.fix_state(state):
         T = rng.RNG.rand(500).reshape(5, 100)
 
         m = 5

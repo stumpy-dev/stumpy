@@ -1,3 +1,4 @@
+import mersenne
 import naive
 import numpy as np
 import numpy.testing as npt
@@ -24,26 +25,24 @@ def dask_cluster():
         pass
 
 
-@pytest.mark.parametrize(
-    "seed", rng.RNG.choice(np.arange(10000), size=25, replace=False)
-)
-def test_random_ostinato(seed):
+@pytest.mark.parametrize("runs", range(25))
+def test_random_ostinato(runs):
     m = 50
-    with rng.fix_seed(seed):
-        Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
+    Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
-        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinato(Ts, m)
+    ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
+    comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinato(Ts, m)
 
-        npt.assert_almost_equal(ref_radius, comp_radius)
-        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+    npt.assert_almost_equal(ref_radius, comp_radius)
+    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.parametrize("seed", [41, 88, 290, 292, 310, 328, 538, 556, 563, 570])
 def test_deterministic_ostinato(seed):
     m = 50
-    with rng.fix_seed(seed):
+    state = mersenne.seed_to_state(seed)
+    with rng.fix_state(state):
         Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
         for p in [1.0, 2.0, 3.0]:
@@ -55,30 +54,26 @@ def test_deterministic_ostinato(seed):
             npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
-@pytest.mark.parametrize(
-    "seed", rng.RNG.choice(np.arange(10000), size=25, replace=False)
-)
-def test_random_ostinatoed(seed, dask_cluster):
+@pytest.mark.parametrize("runs", range(25))
+def test_random_ostinatoed(runs, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 50
-        with rng.fix_seed(seed):
-            Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
+        Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
-            ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
-            comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinatoed(
-                dask_client, Ts, m
-            )
+        ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
+        comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinatoed(dask_client, Ts, m)
 
-            npt.assert_almost_equal(ref_radius, comp_radius)
-            npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-            npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_almost_equal(ref_radius, comp_radius)
+        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
+        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
 
 
 @pytest.mark.parametrize("seed", [41, 88, 290, 292, 310, 328, 538, 556, 563, 570])
 def test_deterministic_ostinatoed(seed, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 50
-        with rng.fix_seed(seed):
+        state = mersenne.seed_to_state(seed)
+        with rng.fix_state(state):
             Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
             for p in [1.0, 2.0, 3.0]:

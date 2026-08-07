@@ -6,6 +6,7 @@
 # See https://stackoverflow.com/a/34520971
 
 import os
+import platform
 from importlib.metadata import PackageNotFoundError, version
 
 import pytest
@@ -29,8 +30,8 @@ def get_specs():
         "numpy",
         "pandas",
         "polars",
-        "pytest",
         "python",
+        "pytest",
         "ray",
         "scipy",
     ]
@@ -41,6 +42,8 @@ def get_specs():
             pkg_version = version(pkg)
             specs.append(f"--spec {pkg}={pkg_version}")
         except PackageNotFoundError:
+            if pkg == "python":
+                specs.append(f"--spec {pkg}={platform.python_version()}")
             pass
 
     return " ".join(specs)

@@ -3,6 +3,7 @@ import math
 import os
 from unittest.mock import patch
 
+import mersenne
 import naive
 import numpy as np
 import numpy.testing as npt
@@ -1891,7 +1892,8 @@ def test_update_incremental_PI_egressTrue_MemoryCheck():
     # a new data point is appended. However, the updated matrix profile index for the
     # middle subsequence `s` should still refer to  the first subsequence in
     # the historical data.
-    with rng.fix_seed(0):
+    state = mersenne.seed_to_state(0)
+    with rng.fix_state(state):
         T = rng.RNG.rand(64)
         m = 3
         excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))

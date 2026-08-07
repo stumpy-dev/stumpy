@@ -1,3 +1,4 @@
+import mersenne
 import naive
 import numpy as np
 import numpy.testing as npt
@@ -24,7 +25,8 @@ substitution_values = [np.nan, np.inf]
 
 
 def test_multi_mass_absolute_seeded():
-    with rng.fix_seed(5):
+    state = mersenne.seed_to_state(5)
+    with rng.fix_state(state):
         T = rng.RNG.uniform(-1000, 1000, [3, 10]).astype(np.float64)
         m = 5
 

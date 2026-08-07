@@ -1,3 +1,5 @@
+import mersenne
+import numpy as np
 import numpy.testing as npt
 
 from stumpy import rng
@@ -5,17 +7,15 @@ from stumpy import rng
 
 def test_fix_seed():
     init_state = rng.RNG.get_state()
-    init_seed = init_state[1][0]  # This returns the seed
 
     with rng.fix_seed(0):
-        state = rng.RNG.get_state()
-        seed = state[1][0]
-        assert seed == 0
-        assert seed != init_seed
+        ref_state = mersenne.seed_to_state(0)
+        cmp_state = rng.RNG.get_state()
 
-    state = rng.RNG.get_state()
-    seed = state[1][0]
-    assert seed == init_seed
+        npt.assert_array_equal(cmp_state[1], ref_state[1])
+        assert np.any(
+            cmp_state[1] != init_state[1]
+        )  # Assert at least one element is different
 
 
 def test_random():

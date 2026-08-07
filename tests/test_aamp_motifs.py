@@ -1,3 +1,4 @@
+import mersenne
 import naive
 import numpy as np
 import numpy.testing as npt
@@ -69,9 +70,11 @@ def test_aamp_motifs_one_motif():
 
 
 def test_aamp_motifs_two_motifs():
-    # Fix seed, because in some case motifs can be off by an index resulting in test
-    # fails, which is caused since one of the motifs is not repeated perfectly in T.
-    with rng.fix_seed(1234):
+    # Fix seed and state, because in some case motifs can be off by an index resulting
+    # in test fails, which is caused since one of the motifs is not repeated perfectly
+    # in T.
+    state = mersenne.seed_to_state(1234)
+    with rng.fix_state(state):
         # The time series is random noise with two motifs for m=10:
         # * (almost) identical step functions at indices 10, 110 and 210
         # * identical linear slopes at indices 70 and 170

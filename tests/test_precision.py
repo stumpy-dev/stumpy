@@ -1,6 +1,7 @@
 import functools
 from unittest.mock import patch
 
+import mersenne
 import naive
 import numba
 import numpy as np
@@ -14,6 +15,7 @@ if cuda.is_available():
     from stumpy.gpu_stump import gpu_stump
 else:  # pragma: no cover
     from stumpy.core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
+
 from stumpy.snippets import snippets
 
 try:
@@ -29,7 +31,8 @@ def test_mpdist_snippets_s():
     # a subsequence (of length `s`) and itelf becomes non-zero
     # in the performant version. Fixing this loss-of-precision can
     # result in this test being passed.
-    with rng.fix_seed(0):
+    state = mersenne.seed_to_state(0)
+    with rng.fix_state(state):
         T = rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64)
         m = 10
         k = 3
@@ -77,7 +80,8 @@ def test_distace_profile():
 def test_calculate_squared_distance():
     # This test function raises an error if the distance between a subsequence
     # and another does not satisfy the symmetry property.
-    with rng.fix_seed(332):
+    state = mersenne.seed_to_state(332)
+    with rng.fix_state(state):
         T = rng.RNG.uniform(-1000.0, 1000.0, [64])
         m = 3
 
@@ -124,7 +128,8 @@ def test_snippets():
     m = 10
     k = 3
     s = 3
-    with rng.fix_seed(332):
+    state = mersenne.seed_to_state(332)
+    with rng.fix_state(state):
         T = rng.RNG.uniform(-1000.0, 1000.0, [64])
 
         isconstant_custom_func = functools.partial(
@@ -204,7 +209,8 @@ def test_distance_symmetry_property_in_gpu():
 
     # This test function raises an error if the distance between a subsequence
     # and another one does not satisfy the symmetry property.
-    with rng.fix_seed(332):
+    state = mersenne.seed_to_state(332)
+    with rng.fix_state(state):
         T = rng.RNG.uniform(-1000.0, 1000.0, [64])
         m = 3
 
