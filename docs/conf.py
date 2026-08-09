@@ -16,6 +16,10 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import inspect
+import os
+import sys
+
 import stumpy
 
 # -- Project information -----------------------------------------------------
@@ -49,8 +53,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.linkcode",
     "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode",
     "sphinx_togglebutton",
     "numpydoc",
     "myst_nb",
@@ -243,3 +247,59 @@ myst_enable_extensions = [
 
 # Notebook cell execution timeout; defaults to 30.
 nb_execution_timeout = -1
+
+# -- Options for linkcode extension -------------------------------------
+
+
+def linkcode_resolve(domain, info):
+    """
+    Determine the GitHub URL corresponding to a Python object
+
+    Adapted from the `numpy` and `pandas` Sphinx `conf.py` files
+    """
+    if domain != "py":
+        return None
+
+    modname = info["module"]
+    fullname = info["fullname"]
+    if not modname:
+        return None
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split("."):
+        try:
+            obj = getattr(obj, part)
+        except AttributeError:
+            return None
+
+    obj = inspect.unwrap(obj)
+
+    try:
+        fn = inspect.getsourcefile(obj)
+    except TypeError:
+        fn = None
+    if not fn:
+        return None
+
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except (OSError, TypeError):
+        linespec = ""
+    else:
+        linespec = f"#L{lineno}-L{lineno + len(source) - 1}"
+
+    fn = os.path.relpath(fn, start=os.path.dirname(stumpy.__file__))
+
+    version = stumpy.__version__
+    # Fall back to `main` for dev/editable installs where `version` is not a
+    # proper release version (e.g., "dev" builds or an unresolvable install)
+    if "dev" in version or not version[:1].isdigit():
+        ref = "main"
+    else:
+        ref = f"v{version}"
+
+    return f"https://github.com/stumpy-dev/stumpy/blob/{ref}/stumpy/{fn}{linespec}"
