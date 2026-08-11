@@ -4,7 +4,7 @@ import numpy.testing as npt
 import pandas as pd
 import pytest
 
-from stumpy import config, rng
+from stumpy import rng
 from stumpy.aamp import aamp
 
 test_data = [
@@ -36,13 +36,13 @@ def test_aamp_self_join(T_A, T_B):
         naive.replace_inf(ref_mp)
         naive.replace_inf(comp_mp)
         npt.assert_allclose(
-            ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+            comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
         )
 
         comp_mp = aamp(pd.Series(T_B), m, p=p)
         naive.replace_inf(comp_mp)
         npt.assert_allclose(
-            ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+            comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
         )
 
 
@@ -55,13 +55,13 @@ def test_aamp_A_B_join(T_A, T_B):
         naive.replace_inf(ref_mp)
         naive.replace_inf(comp_mp)
         npt.assert_allclose(
-            ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+            comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
         )
 
         comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, p=p)
         naive.replace_inf(comp_mp)
         npt.assert_allclose(
-            ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+            comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
         )
 
 
@@ -73,13 +73,13 @@ def test_aamp_constant_subsequence_self_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
     comp_mp = aamp(pd.Series(T_A), m, ignore_trivial=True)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
 
@@ -92,13 +92,13 @@ def test_aamp_one_constant_subsequence_A_B_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
     comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
     # Swap inputs
@@ -107,7 +107,7 @@ def test_aamp_one_constant_subsequence_A_B_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
 
@@ -122,13 +122,13 @@ def test_aamp_two_constant_subsequences_A_B_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
     comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
     # Swap inputs
@@ -137,13 +137,13 @@ def test_aamp_two_constant_subsequences_A_B_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
     comp_mp = aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64), comp_mp[:, 0].astype(np.float64), atol=1.5e-07
+        comp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
     )  # ignore indices
 
 
@@ -158,17 +158,17 @@ def test_aamp_identical_subsequence_self_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64),
         comp_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5e-05,
     )  # ignore indices
 
     comp_mp = aamp(pd.Series(T_A), m, ignore_trivial=True)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64),
         comp_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5e-05,
     )  # ignore indices
 
 
@@ -184,17 +184,17 @@ def test_aamp_identical_subsequence_A_B_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64),
         comp_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5e-05,
     )  # ignore indices
 
     comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64),
         comp_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5e-05,
     )  # ignore indices
 
     # Swap inputs
@@ -203,9 +203,9 @@ def test_aamp_identical_subsequence_A_B_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp[:, 0].astype(np.float64),
         comp_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5e-05,
     )  # ignore indices
 
 
@@ -226,13 +226,13 @@ def test_aamp_nan_inf_self_join(T_A, T_B, substitute_B, substitution_locations):
         naive.replace_inf(ref_mp)
         naive.replace_inf(comp_mp)
         npt.assert_allclose(
-            ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+            comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
         )
 
         comp_mp = aamp(pd.Series(T_B_sub), m, ignore_trivial=True)
         naive.replace_inf(comp_mp)
         npt.assert_allclose(
-            ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+            comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
         )
 
 
@@ -260,7 +260,7 @@ def test_aamp_nan_inf_A_B_join(
             naive.replace_inf(ref_mp)
             naive.replace_inf(comp_mp)
             npt.assert_allclose(
-                ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+                comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
             )
 
             comp_mp = aamp(
@@ -268,7 +268,7 @@ def test_aamp_nan_inf_A_B_join(
             )
             naive.replace_inf(comp_mp)
             npt.assert_allclose(
-                ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+                comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
             )
 
 
@@ -282,7 +282,7 @@ def test_aamp_nan_zero_mean_self_join():
     naive.replace_inf(ref_mp)
     naive.replace_inf(comp_mp)
     npt.assert_allclose(
-        ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+        comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
     )
 
 
@@ -296,13 +296,13 @@ def test_aamp_self_join_KNN(T_A, T_B):
             naive.replace_inf(ref_mp)
             naive.replace_inf(comp_mp)
             npt.assert_allclose(
-                ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+                comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
             )
 
             comp_mp = aamp(pd.Series(T_B), m, p=p, k=k)
             naive.replace_inf(comp_mp)
             npt.assert_allclose(
-                ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+                comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
             )
 
 
@@ -316,7 +316,7 @@ def test_aamp_A_B_join_KNN(T_A, T_B):
             naive.replace_inf(ref_mp)
             naive.replace_inf(comp_mp)
             npt.assert_allclose(
-                ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+                comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
             )
 
             comp_mp = aamp(
@@ -324,5 +324,5 @@ def test_aamp_A_B_join_KNN(T_A, T_B):
             )
             naive.replace_inf(comp_mp)
             npt.assert_allclose(
-                ref_mp.astype(np.float64), comp_mp.astype(np.float64), atol=1.5e-07
+                comp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
             )
