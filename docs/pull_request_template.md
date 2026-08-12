@@ -16,7 +16,10 @@ Below is a simple checklist but please do not hesitate to ask for assistance!
 - [ ] Ran `black --exclude=".*\.ipynb" --extend-exclude=".venv" --diff ./` in the root stumpy directory
 - [ ] Ran `flake8 --extend-exclude=.venv ./` in the root stumpy directory
 - [ ] Ran `./setup.sh dev && ./test.sh` in the root stumpy directory and ensured that all tests are passing locally
-- [ ] Check this box if AI code assistance was used to generate 15%+ of the code in this pull request
+- [ ] Check this box if AI code assistance was used to generate
+  - [ ] less than 25% of the code in this pull request
+  - [ ] 25-50% of the code in this pull request
+  - [ ] more than 50% of the code in this pull request
 
 Please do not commit any code to avoid/circumvent a failing test and, instead, engage in a discussion (below) to determine the best course of action. 
 
