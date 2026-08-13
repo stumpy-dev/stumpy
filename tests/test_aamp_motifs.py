@@ -66,7 +66,7 @@ def test_aamp_motifs_one_motif():
         )
 
         npt.assert_array_equal(left_indices, right_indices)
-        npt.assert_almost_equal(left_profile_values, right_distance_values, decimal=4)
+        npt.assert_allclose(right_distance_values, left_profile_values, atol=1.5e-04)
 
 
 def test_aamp_motifs_two_motifs():
@@ -124,7 +124,7 @@ def test_aamp_motifs_two_motifs():
 
         # We ignore indices because of sorting ambiguities for equal distances.
         # As long as the distances are correct, the indices will be too.
-        npt.assert_almost_equal(left_profile_values, right_distance_values, decimal=6)
+        npt.assert_allclose(right_distance_values, left_profile_values, atol=1.5e-06)
 
 
 def test_aamp_naive_match_exact():
@@ -149,7 +149,11 @@ def test_aamp_naive_match_exact():
         # indices
         right.sort(key=lambda x: (x[1], x[0]))
 
-        npt.assert_almost_equal(left, right)
+        npt.assert_allclose(
+            np.array(right).astype(np.float64),
+            np.array(left).astype(np.float64),
+            atol=1.5e-07,
+        )
 
 
 def test_aamp_naive_match_exclusion_zone():
@@ -183,7 +187,11 @@ def test_aamp_naive_match_exclusion_zone():
         # indices
         right.sort(key=lambda x: (x[0], x[1]))
 
-        npt.assert_almost_equal(left, right)
+        npt.assert_allclose(
+            np.array(right).astype(np.float64),
+            np.array(left).astype(np.float64),
+            atol=1.5e-07,
+        )
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -209,7 +217,9 @@ def test_aamp_match(Q, T):
             max_distance=max_distance,
         )
 
-        npt.assert_almost_equal(left, right)
+        npt.assert_allclose(
+            right.astype(np.float64), left.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -237,7 +247,9 @@ def test_aamp_match_T_subseq_isfinite(Q, T):
             max_distance=max_distance,
         )
 
-        npt.assert_almost_equal(left, right)
+        npt.assert_allclose(
+            right.astype(np.float64), left.astype(np.float64), atol=1.5e-07
+        )
 
 
 def test_aamp_match_query_idx():
@@ -248,7 +260,7 @@ def test_aamp_match_query_idx():
 
     # `mass_absolute` zeroes the self-match distance when told where `Q` lives.
     D = core.mass_absolute(Q, T, query_idx=query_idx)
-    npt.assert_almost_equal(D[query_idx], 0.0)
+    npt.assert_allclose(D[query_idx], 0.0, atol=1.5e-07)
 
     # A `Q` that is not the subsequence at `query_idx` must still return the
     # self-match first, and must warn, exactly as `stumpy.match` does.
@@ -256,4 +268,4 @@ def test_aamp_match_query_idx():
         out = aamp_match(Q + 0.5, T, query_idx=query_idx, max_distance=1.0)
 
     assert out[0, 1] == query_idx
-    npt.assert_almost_equal(out[0, 0], 0.0)
+    npt.assert_allclose(out[0, 0], 0.0, atol=1.5e-07)
