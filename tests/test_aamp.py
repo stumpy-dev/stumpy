@@ -32,14 +32,18 @@ def test_aamp_self_join(T_A, T_B):
     m = 3
     for p in [1.0, 2.0, 3.0]:
         ref_mp = naive.aamp(T_B, m, p=p)
-        comp_mp = aamp(T_B, m, p=p)
+        cmp_mp = aamp(T_B, m, p=p)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        comp_mp = aamp(pd.Series(T_B), m, p=p)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        cmp_mp = aamp(pd.Series(T_B), m, p=p)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -47,28 +51,36 @@ def test_aamp_A_B_join(T_A, T_B):
     m = 3
     for p in [1.0, 2.0, 3.0]:
         ref_mp = naive.aamp(T_A, m, T_B=T_B, p=p)
-        comp_mp = aamp(T_A, m, T_B, ignore_trivial=False, p=p)
+        cmp_mp = aamp(T_A, m, T_B, ignore_trivial=False, p=p)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, p=p)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        cmp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, p=p)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 def test_aamp_constant_subsequence_self_join():
     T_A = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
     m = 3
     ref_mp = naive.aamp(T_A, m)
-    comp_mp = aamp(T_A, m, ignore_trivial=True)
+    cmp_mp = aamp(T_A, m, ignore_trivial=True)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    comp_mp = aamp(pd.Series(T_A), m, ignore_trivial=True)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    cmp_mp = aamp(pd.Series(T_A), m, ignore_trivial=True)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
 
 def test_aamp_one_constant_subsequence_A_B_join():
@@ -76,21 +88,27 @@ def test_aamp_one_constant_subsequence_A_B_join():
     T_B = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
     m = 3
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    comp_mp = aamp(T_A, m, T_B, ignore_trivial=False)
+    cmp_mp = aamp(T_A, m, T_B, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    cmp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
     # Swap inputs
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    comp_mp = aamp(T_B, m, T_A, ignore_trivial=False)
+    cmp_mp = aamp(T_B, m, T_A, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
 
 def test_aamp_two_constant_subsequences_A_B_join():
@@ -100,25 +118,33 @@ def test_aamp_two_constant_subsequences_A_B_join():
     T_B = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
     m = 3
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    comp_mp = aamp(T_A, m, T_B, ignore_trivial=False)
+    cmp_mp = aamp(T_A, m, T_B, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    cmp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
     # Swap inputs
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    comp_mp = aamp(T_B, m, T_A, ignore_trivial=False)
+    cmp_mp = aamp(T_B, m, T_A, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    comp_mp = aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    cmp_mp = aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
 
 def test_aamp_identical_subsequence_self_join():
@@ -128,17 +154,21 @@ def test_aamp_identical_subsequence_self_join():
     T_A[11 : 11 + identical.shape[0]] = identical
     m = 3
     ref_mp = naive.aamp(T_A, m)
-    comp_mp = aamp(T_A, m, ignore_trivial=True)
+    cmp_mp = aamp(T_A, m, ignore_trivial=True)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
-    comp_mp = aamp(pd.Series(T_A), m, ignore_trivial=True)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    cmp_mp = aamp(pd.Series(T_A), m, ignore_trivial=True)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
 
@@ -150,26 +180,32 @@ def test_aamp_identical_subsequence_A_B_join():
     T_B[11 : 11 + identical.shape[0]] = identical
     m = 3
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    comp_mp = aamp(T_A, m, T_B, ignore_trivial=False)
+    cmp_mp = aamp(T_A, m, T_B, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], config.STUMPY_TEST_PRECISION
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
-    comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], config.STUMPY_TEST_PRECISION
+    cmp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
     # Swap inputs
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    comp_mp = aamp(T_B, m, T_A, ignore_trivial=False)
+    cmp_mp = aamp(T_B, m, T_A, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], config.STUMPY_TEST_PRECISION
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
 
@@ -186,14 +222,18 @@ def test_aamp_nan_inf_self_join(T_A, T_B, substitute_B, substitution_locations):
         T_B_sub[substitution_location_B] = substitute_B
 
         ref_mp = naive.aamp(T_B_sub, m)
-        comp_mp = aamp(T_B_sub, m, ignore_trivial=True)
+        cmp_mp = aamp(T_B_sub, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        comp_mp = aamp(pd.Series(T_B_sub), m, ignore_trivial=True)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        cmp_mp = aamp(pd.Series(T_B_sub), m, ignore_trivial=True)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -216,16 +256,20 @@ def test_aamp_nan_inf_A_B_join(
             T_B_sub[substitution_location_B] = substitute_B
 
             ref_mp = naive.aamp(T_A_sub, m, T_B=T_B_sub)
-            comp_mp = aamp(T_A_sub, m, T_B_sub, ignore_trivial=False)
+            cmp_mp = aamp(T_A_sub, m, T_B_sub, ignore_trivial=False)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
-            comp_mp = aamp(
+            cmp_mp = aamp(
                 pd.Series(T_A_sub), m, pd.Series(T_B_sub), ignore_trivial=False
             )
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 def test_aamp_nan_zero_mean_self_join():
@@ -233,11 +277,13 @@ def test_aamp_nan_zero_mean_self_join():
     m = 3
 
     ref_mp = naive.aamp(T, m)
-    comp_mp = aamp(T, m, ignore_trivial=True)
+    cmp_mp = aamp(T, m, ignore_trivial=True)
 
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp, comp_mp)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+    )
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -246,14 +292,18 @@ def test_aamp_self_join_KNN(T_A, T_B):
     for k in range(2, 4):
         for p in [1.0, 2.0, 3.0]:
             ref_mp = naive.aamp(T_B, m, p=p, k=k)
-            comp_mp = aamp(T_B, m, p=p, k=k)
+            cmp_mp = aamp(T_B, m, p=p, k=k)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
-            comp_mp = aamp(pd.Series(T_B), m, p=p, k=k)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            cmp_mp = aamp(pd.Series(T_B), m, p=p, k=k)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -262,13 +312,17 @@ def test_aamp_A_B_join_KNN(T_A, T_B):
     for k in range(2, 4):
         for p in [1.0, 2.0, 3.0]:
             ref_mp = naive.aamp(T_A, m, T_B=T_B, p=p, k=k)
-            comp_mp = aamp(T_A, m, T_B, ignore_trivial=False, p=p, k=k)
+            cmp_mp = aamp(T_A, m, T_B, ignore_trivial=False, p=p, k=k)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
-            comp_mp = aamp(
+            cmp_mp = aamp(
                 pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, p=p, k=k
             )
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
