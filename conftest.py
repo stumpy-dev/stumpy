@@ -40,10 +40,12 @@ def get_specs():
     for pkg in pkgs:
         try:  # pragma: no cover
             pkg_version = version(pkg)
-            specs.append(f"--spec {pkg}={pkg_version}")
+            # specs.append(f"--spec {pkg}={pkg_version}")
+            specs.append(f"--with {pkg}=={pkg_version}")
         except PackageNotFoundError:
             if pkg == "python":
-                specs.append(f"--spec {pkg}={platform.python_version()}")
+                # specs.append(f"--spec {pkg}={platform.python_version()}")
+                specs.append(f"--python {pkg}=={platform.python_version()}")
             pass
 
     return " ".join(specs)
@@ -76,7 +78,7 @@ def pytest_configure(config):
     env_vars = get_env_vars()
     specs = get_specs()
     pytest.STUMPY_MSG = f"\n\nSTUMPY_SEED={rng.SEED} {env_vars} "
-    pytest.STUMPY_MSG += f"pixi exec {specs} ./test.sh custom 1 {config.args[0]}"
+    pytest.STUMPY_MSG += f"pixi exec uv run {specs} ./test.sh custom 1 {config.args[0]}"
 
 
 def pytest_sessionfinish(session, exitstatus):
