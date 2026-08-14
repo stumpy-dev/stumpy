@@ -31,11 +31,11 @@ def test_random_ostinato(runs):
     Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinato(Ts, m)
+    cmp_radius, cmp_Ts_idx, cmp_subseq_idx = aamp_ostinato(Ts, m)
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+    npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+    npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+    npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("seed", [41, 88, 290, 292, 310, 328, 538, 556, 563, 570])
@@ -47,11 +47,11 @@ def test_deterministic_ostinato(seed):
 
         for p in [1.0, 2.0, 3.0]:
             ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m, p=p)
-            comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinato(Ts, m, p=p)
+            cmp_radius, cmp_Ts_idx, cmp_subseq_idx = aamp_ostinato(Ts, m, p=p)
 
-            npt.assert_almost_equal(ref_radius, comp_radius)
-            npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-            npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+            npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+            npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+            npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("runs", range(25))
@@ -61,11 +61,11 @@ def test_random_ostinatoed(runs, dask_cluster):
         Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinatoed(dask_client, Ts, m)
+        cmp_radius, cmp_Ts_idx, cmp_subseq_idx = aamp_ostinatoed(dask_client, Ts, m)
 
-        npt.assert_almost_equal(ref_radius, comp_radius)
-        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+        npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+        npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("seed", [41, 88, 290, 292, 310, 328, 538, 556, 563, 570])
@@ -78,13 +78,13 @@ def test_deterministic_ostinatoed(seed, dask_cluster):
 
             for p in [1.0, 2.0, 3.0]:
                 ref_radius, ref_Ts_idx, ref_subseq_idx = naive.aamp_ostinato(Ts, m, p=p)
-                comp_radius, comp_Ts_idx, comp_subseq_idx = aamp_ostinatoed(
+                cmp_radius, cmp_Ts_idx, cmp_subseq_idx = aamp_ostinatoed(
                     dask_client, Ts, m, p=p
                 )
 
-                npt.assert_almost_equal(ref_radius, comp_radius)
-                npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-                npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+                npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+                npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+                npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 def test_input_not_overwritten_ostinato():
@@ -101,8 +101,10 @@ def test_input_not_overwritten_ostinato():
     aamp_ostinato(Ts_input, m)
     for i in range(len(Ts)):
         T_ref = Ts[i]
-        T_comp = Ts_input[i]
-        npt.assert_almost_equal(T_ref[np.isfinite(T_ref)], T_comp[np.isfinite(T_comp)])
+        T_cmp = Ts_input[i]
+        npt.assert_allclose(
+            T_cmp[np.isfinite(T_cmp)], T_ref[np.isfinite(T_ref)], atol=1.5e-07
+        )
 
 
 def test_extract_several_consensus_ostinato():
@@ -110,18 +112,18 @@ def test_extract_several_consensus_ostinato():
     # does not tamper with the original data.
     Ts = [rng.RNG.rand(n) for n in [256, 512, 1024]]
     Ts_ref = [T.copy() for T in Ts]
-    Ts_comp = [T.copy() for T in Ts]
+    Ts_cmp = [T.copy() for T in Ts]
 
     m = 20
 
     k = 5  # Get the first `k` consensus motifs
     for _ in range(k):
-        # Find consensus motif and its NN in each time series in Ts_comp
-        # Remove them from Ts_comp as well as Ts_ref, and assert that the
+        # Find consensus motif and its NN in each time series in Ts_cmp
+        # Remove them from Ts_cmp as well as Ts_ref, and assert that the
         # two time series are the same
-        radius, Ts_idx, subseq_idx = aamp_ostinato(Ts_comp, m)
-        consensus_motif = Ts_comp[Ts_idx][subseq_idx : subseq_idx + m].copy()
-        for i in range(len(Ts_comp)):
+        radius, Ts_idx, subseq_idx = aamp_ostinato(Ts_cmp, m)
+        consensus_motif = Ts_cmp[Ts_idx][subseq_idx : subseq_idx + m].copy()
+        for i in range(len(Ts_cmp)):
             if i == Ts_idx:
                 query_idx = subseq_idx
             else:
@@ -129,14 +131,16 @@ def test_extract_several_consensus_ostinato():
 
             idx = np.argmin(
                 core.mass(
-                    consensus_motif, Ts_comp[i], normalize=False, query_idx=query_idx
+                    consensus_motif, Ts_cmp[i], normalize=False, query_idx=query_idx
                 )
             )
-            Ts_comp[i][idx : idx + m] = np.nan
+            Ts_cmp[i][idx : idx + m] = np.nan
             Ts_ref[i][idx : idx + m] = np.nan
 
-            npt.assert_almost_equal(
-                Ts_ref[i][np.isfinite(Ts_ref[i])], Ts_comp[i][np.isfinite(Ts_comp[i])]
+            npt.assert_allclose(
+                Ts_cmp[i][np.isfinite(Ts_cmp[i])],
+                Ts_ref[i][np.isfinite(Ts_ref[i])],
+                atol=1.5e-07,
             )
 
 
@@ -155,9 +159,9 @@ def test_input_not_overwritten_ostinatoed(dask_cluster):
         aamp_ostinatoed(dask_client, Ts_input, m)
         for i in range(len(Ts)):
             T_ref = Ts[i]
-            T_comp = Ts_input[i]
-            npt.assert_almost_equal(
-                T_ref[np.isfinite(T_ref)], T_comp[np.isfinite(T_comp)]
+            T_cmp = Ts_input[i]
+            npt.assert_allclose(
+                T_cmp[np.isfinite(T_cmp)], T_ref[np.isfinite(T_ref)], atol=1.5e-07
             )
 
 
@@ -166,19 +170,19 @@ def test_extract_several_consensus_ostinatoed(dask_cluster):
     # does not tamper with the original data.
     Ts = [rng.RNG.rand(n) for n in [256, 512, 1024]]
     Ts_ref = [T.copy() for T in Ts]
-    Ts_comp = [T.copy() for T in Ts]
+    Ts_cmp = [T.copy() for T in Ts]
 
     m = 20
 
     with Client(dask_cluster) as dask_client:
         k = 5  # Get the first `k` consensus motifs
         for _ in range(k):
-            # Find consensus motif and its NN in each time series in Ts_comp
-            # Remove them from Ts_comp as well as Ts_ref, and assert that the
+            # Find consensus motif and its NN in each time series in Ts_cmp
+            # Remove them from Ts_cmp as well as Ts_ref, and assert that the
             # two time series are the same
-            radius, Ts_idx, subseq_idx = aamp_ostinatoed(dask_client, Ts_comp, m)
-            consensus_motif = Ts_comp[Ts_idx][subseq_idx : subseq_idx + m].copy()
-            for i in range(len(Ts_comp)):
+            radius, Ts_idx, subseq_idx = aamp_ostinatoed(dask_client, Ts_cmp, m)
+            consensus_motif = Ts_cmp[Ts_idx][subseq_idx : subseq_idx + m].copy()
+            for i in range(len(Ts_cmp)):
                 if i == Ts_idx:
                     query_idx = subseq_idx
                 else:
@@ -187,15 +191,16 @@ def test_extract_several_consensus_ostinatoed(dask_cluster):
                 idx = np.argmin(
                     core.mass(
                         consensus_motif,
-                        Ts_comp[i],
+                        Ts_cmp[i],
                         normalize=False,
                         query_idx=query_idx,
                     )
                 )
-                Ts_comp[i][idx : idx + m] = np.nan
+                Ts_cmp[i][idx : idx + m] = np.nan
                 Ts_ref[i][idx : idx + m] = np.nan
 
-                npt.assert_almost_equal(
+                npt.assert_allclose(
+                    Ts_cmp[i][np.isfinite(Ts_cmp[i])],
                     Ts_ref[i][np.isfinite(Ts_ref[i])],
-                    Ts_comp[i][np.isfinite(Ts_comp[i])],
+                    atol=1.5e-07,
                 )
