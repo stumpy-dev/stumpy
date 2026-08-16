@@ -57,10 +57,12 @@ def test_aamped_self_join(T_A, T_B, dask_cluster):
         m = 3
         for p in [1.0, 2.0, 3.0]:
             ref_mp = naive.aamp(T_B, m, p=p)
-            comp_mp = aamped(dask_client, T_B, m, p=p)
+            cmp_mp = aamped(dask_client, T_B, m, p=p)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -72,10 +74,12 @@ def test_aamped_self_join_df(T_A, T_B, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 3
         ref_mp = naive.aamp(T_B, m)
-        comp_mp = aamped(dask_client, pd.Series(T_B), m)
+        cmp_mp = aamped(dask_client, pd.Series(T_B), m)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -88,11 +92,13 @@ def test_aamped_self_join_larger_window(T_A, T_B, m, dask_cluster):
     with Client(dask_cluster) as dask_client:
         if len(T_B) > m:
             ref_mp = naive.aamp(T_B, m)
-            comp_mp = aamped(dask_client, T_B, m)
+            cmp_mp = aamped(dask_client, T_B, m)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
+            naive.replace_inf(cmp_mp)
 
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -105,11 +111,13 @@ def test_aamped_self_join_larger_window_df(T_A, T_B, m, dask_cluster):
     with Client(dask_cluster) as dask_client:
         if len(T_B) > m:
             ref_mp = naive.aamp(T_B, m)
-            comp_mp = aamped(dask_client, pd.Series(T_B), m)
+            cmp_mp = aamped(dask_client, pd.Series(T_B), m)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
+            naive.replace_inf(cmp_mp)
 
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -122,10 +130,12 @@ def test_aamped_A_B_join(T_A, T_B, dask_cluster):
         m = 3
         for p in [1.0, 2.0, 3.0]:
             ref_mp = naive.aamp(T_A, m, T_B=T_B, p=p)
-            comp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False, p=p)
+            cmp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False, p=p)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -137,12 +147,14 @@ def test_aamped_A_B_join_df(T_A, T_B, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(
+        cmp_mp = aamped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:A large number of values are smaller")
@@ -158,10 +170,14 @@ def test_aamped_one_constant_subsequence_self_join(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m)
-        comp_mp = aamped(dask_client, T_A, m, ignore_trivial=True)
+        cmp_mp = aamped(dask_client, T_A, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:A large number of values are smaller")
@@ -177,10 +193,14 @@ def test_aamped_one_constant_subsequence_self_join_df(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m)
-        comp_mp = aamped(dask_client, pd.Series(T_A), m, ignore_trivial=True)
+        cmp_mp = aamped(dask_client, pd.Series(T_A), m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -197,10 +217,14 @@ def test_aamped_one_constant_subsequence_A_B_join(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -217,12 +241,16 @@ def test_aamped_one_constant_subsequence_A_B_join_df(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(
+        cmp_mp = aamped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -239,10 +267,14 @@ def test_aamped_one_constant_subsequence_A_B_join_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -259,12 +291,16 @@ def test_aamped_one_constant_subsequence_A_B_join_df_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(
+        cmp_mp = aamped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:A large number of values are smaller")
@@ -281,11 +317,13 @@ def test_aamped_identical_subsequence_self_join(dask_cluster):
         T_A[11 : 11 + identical.shape[0]] = identical
         m = 3
         ref_mp = naive.aamp(T_A, m)
-        comp_mp = aamped(dask_client, T_A, m, ignore_trivial=True)
+        cmp_mp = aamped(dask_client, T_A, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(
-            ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
         )  # ignore indices
 
 
@@ -304,11 +342,13 @@ def test_aamped_identical_subsequence_A_B_join(dask_cluster):
         T_B[11 : 11 + identical.shape[0]] = identical
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(
-            ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
         )  # ignore indices
 
 
@@ -328,10 +368,12 @@ def test_aamped_one_subsequence_inf_A_B_join(
         T_B_sub[substitution_location_B] = np.inf
 
         ref_mp = naive.aamp(T_A, m, T_B=T_B_sub)
-        comp_mp = aamped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -350,10 +392,12 @@ def test_aamped_one_subsequence_inf_self_join(
         T_B_sub[substitution_location_B] = np.inf
 
         ref_mp = naive.aamp(T_B_sub, m)
-        comp_mp = aamped(dask_client, T_B_sub, m, ignore_trivial=True)
+        cmp_mp = aamped(dask_client, T_B_sub, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -366,11 +410,13 @@ def test_aamped_nan_zero_mean_self_join(dask_cluster):
         m = 3
 
         ref_mp = naive.aamp(T, m)
-        comp_mp = aamped(dask_client, T, m, ignore_trivial=True)
+        cmp_mp = aamped(dask_client, T, m, ignore_trivial=True)
 
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -389,10 +435,12 @@ def test_aamped_one_subsequence_nan_A_B_join(
         T_B_sub[substitution_location_B] = np.nan
 
         ref_mp = naive.aamp(T_A, m, T_B=T_B_sub)
-        comp_mp = aamped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -411,10 +459,12 @@ def test_aamped_one_subsequence_nan_self_join(
         T_B_sub[substitution_location_B] = np.nan
 
         ref_mp = naive.aamp(T_B_sub, m)
-        comp_mp = aamped(dask_client, T_B_sub, m, ignore_trivial=True)
+        cmp_mp = aamped(dask_client, T_B_sub, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -434,10 +484,14 @@ def test_two_constant_subsequences_A_B_join_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_B, m, T_B=T_A)
-        comp_mp = aamped(dask_client, T_B, m, T_A, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_B, m, T_A, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -457,12 +511,16 @@ def test_constant_subsequence_A_B_join_df_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_B, m, T_B=T_A)
-        comp_mp = aamped(
+        cmp_mp = aamped(
             dask_client, pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -481,10 +539,14 @@ def test_two_constant_subsequences_A_B_join(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -503,12 +565,16 @@ def test_two_constant_subsequences_A_B_join_df(dask_cluster):
         )
         m = 3
         ref_mp = naive.aamp(T_A, m, T_B=T_B)
-        comp_mp = aamped(
+        cmp_mp = aamped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -531,10 +597,12 @@ def test_aamped_two_subsequences_inf_A_B_join(
         T_B_sub[substitution_location_B] = np.inf
 
         ref_mp = naive.aamp(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -557,10 +625,12 @@ def test_aamped_two_subsequences_nan_A_B_join(
         T_B_sub[substitution_location_B] = np.nan
 
         ref_mp = naive.aamp(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -583,10 +653,12 @@ def test_aamped_two_subsequences_nan_inf_A_B_join(
         T_B_sub[substitution_location_B] = np.inf
 
         ref_mp = naive.aamp(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -609,10 +681,12 @@ def test_aamped_two_subsequences_nan_inf_A_B_join_swap(
         T_B_sub[substitution_location_B] = np.nan
 
         ref_mp = naive.aamp(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = aamped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -626,10 +700,12 @@ def test_aamped_self_join_KNN(T_A, T_B, dask_cluster):
         for k in range(2, 4):
             for p in [1.0, 2.0, 3.0]:
                 ref_mp = naive.aamp(T_B, m, p=p, k=k)
-                comp_mp = aamped(dask_client, T_B, m, p=p, k=k)
+                cmp_mp = aamped(dask_client, T_B, m, p=p, k=k)
                 naive.replace_inf(ref_mp)
-                naive.replace_inf(comp_mp)
-                npt.assert_almost_equal(ref_mp, comp_mp)
+                naive.replace_inf(cmp_mp)
+                npt.assert_allclose(
+                    cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+                )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -643,9 +719,11 @@ def test_aamped_A_B_join_KNN(T_A, T_B, dask_cluster):
         for k in range(2, 4):
             for p in [1.0, 2.0, 3.0]:
                 ref_mp = naive.aamp(T_A, m, T_B=T_B, p=p, k=k)
-                comp_mp = aamped(
+                cmp_mp = aamped(
                     dask_client, T_A, m, T_B, ignore_trivial=False, p=p, k=k
                 )
                 naive.replace_inf(ref_mp)
-                naive.replace_inf(comp_mp)
-                npt.assert_almost_equal(ref_mp, comp_mp)
+                naive.replace_inf(cmp_mp)
+                npt.assert_allclose(
+                    cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+                )
