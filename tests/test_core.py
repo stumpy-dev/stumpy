@@ -204,8 +204,8 @@ def test_check_window_size_excl_zone():
 @pytest.mark.parametrize("Q, T", test_data)
 def test_sliding_dot_product(Q, T):
     ref_mp = naive.rolling_window_dot_product(Q, T)
-    comp_mp = core.sliding_dot_product(Q, T)
-    npt.assert_almost_equal(ref_mp, comp_mp)
+    cmp_mp = core.sliding_dot_product(Q, T)
+    npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 def test_welford_nanvar():
@@ -213,12 +213,12 @@ def test_welford_nanvar():
     m = 10
 
     ref_var = np.nanvar(T)
-    comp_var = core.welford_nanvar(T)
-    npt.assert_almost_equal(ref_var, comp_var)
+    cmp_var = core.welford_nanvar(T)
+    npt.assert_allclose(cmp_var, ref_var, atol=1.5e-07)
 
     ref_var = np.nanvar(core.rolling_window(T, m), axis=1)
-    comp_var = core.welford_nanvar(T, m)
-    npt.assert_almost_equal(ref_var, comp_var)
+    cmp_var = core.welford_nanvar(T, m)
+    npt.assert_allclose(cmp_var, ref_var, atol=1.5e-07)
 
 
 def test_welford_nanvar_catastrophic_cancellation():
@@ -226,8 +226,8 @@ def test_welford_nanvar_catastrophic_cancellation():
     m = 4
 
     ref_var = np.nanvar(core.rolling_window(T, m), axis=1)
-    comp_var = core.welford_nanvar(T, m)
-    npt.assert_almost_equal(ref_var, comp_var)
+    cmp_var = core.welford_nanvar(T, m)
+    npt.assert_allclose(cmp_var, ref_var, atol=1.5e-07)
 
 
 def test_welford_nanvar_nan():
@@ -239,12 +239,12 @@ def test_welford_nanvar_nan():
     T[13:18] = np.nan
 
     ref_var = np.nanvar(T)
-    comp_var = core.welford_nanvar(T)
-    npt.assert_almost_equal(ref_var, comp_var)
+    cmp_var = core.welford_nanvar(T)
+    npt.assert_allclose(cmp_var, ref_var, atol=1.5e-07)
 
     ref_var = np.nanvar(core.rolling_window(T, m), axis=1)
-    comp_var = core.welford_nanvar(T, m)
-    npt.assert_almost_equal(ref_var, comp_var)
+    cmp_var = core.welford_nanvar(T, m)
+    npt.assert_allclose(cmp_var, ref_var, atol=1.5e-07)
 
 
 def test_welford_nanstd():
@@ -252,12 +252,12 @@ def test_welford_nanstd():
     m = 10
 
     ref_var = np.nanstd(T)
-    comp_var = core.welford_nanstd(T)
-    npt.assert_almost_equal(ref_var, comp_var)
+    cmp_var = core.welford_nanstd(T)
+    npt.assert_allclose(cmp_var, ref_var, atol=1.5e-07)
 
     ref_var = np.nanstd(core.rolling_window(T, m), axis=1)
-    comp_var = core.welford_nanstd(T, m)
-    npt.assert_almost_equal(ref_var, comp_var)
+    cmp_var = core.welford_nanstd(T, m)
+    npt.assert_allclose(cmp_var, ref_var, atol=1.5e-07)
 
 
 def test_rolling_std_1d():
@@ -266,12 +266,12 @@ def test_rolling_std_1d():
         ref_std = naive.rolling_nanstd(a, w)
 
         # welford = False (default)
-        comp_std = core.rolling_nanstd(a, w)
-        npt.assert_almost_equal(ref_std, comp_std)
+        cmp_std = core.rolling_nanstd(a, w)
+        npt.assert_allclose(cmp_std, ref_std, atol=1.5e-07)
 
         # welford = True
-        comp_std = core.rolling_nanstd(a, w, welford=True)
-        npt.assert_almost_equal(ref_std, comp_std)
+        cmp_std = core.rolling_nanstd(a, w, welford=True)
+        npt.assert_allclose(cmp_std, ref_std, atol=1.5e-07)
 
 
 def test_rolling_std_2d():
@@ -281,60 +281,60 @@ def test_rolling_std_2d():
         ref_std = naive.rolling_nanstd(a, w)
 
         # welford = False (default)
-        comp_std = core.rolling_nanstd(a, w)
-        npt.assert_almost_equal(ref_std, comp_std)
+        cmp_std = core.rolling_nanstd(a, w)
+        npt.assert_allclose(cmp_std, ref_std, atol=1.5e-07)
 
         # welford = True
-        comp_std = core.rolling_nanstd(a, w, welford=True)
-        npt.assert_almost_equal(ref_std, comp_std)
+        cmp_std = core.rolling_nanstd(a, w, welford=True)
+        npt.assert_allclose(cmp_std, ref_std, atol=1.5e-07)
 
 
 def test_rolling_nanmin_1d():
     T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_min = np.nanmin(T)
-        comp_min = core._rolling_nanmin_1d(T)
-        npt.assert_almost_equal(ref_min, comp_min)
+        cmp_min = core._rolling_nanmin_1d(T)
+        npt.assert_allclose(cmp_min, ref_min, atol=1.5e-07)
 
         ref_min = np.nanmin(T)
-        comp_min = core._rolling_nanmin_1d(T)
-        npt.assert_almost_equal(ref_min, comp_min)
+        cmp_min = core._rolling_nanmin_1d(T)
+        npt.assert_allclose(cmp_min, ref_min, atol=1.5e-07)
 
 
 def test_rolling_nanmin():
     T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_min = np.nanmin(core.rolling_window(T, m), axis=1)
-        comp_min = core.rolling_nanmin(T, m)
-        npt.assert_almost_equal(ref_min, comp_min)
+        cmp_min = core.rolling_nanmin(T, m)
+        npt.assert_allclose(cmp_min, ref_min, atol=1.5e-07)
 
         ref_min = np.nanmin(core.rolling_window(T, m), axis=1)
-        comp_min = core.rolling_nanmin(T, m)
-        npt.assert_almost_equal(ref_min, comp_min)
+        cmp_min = core.rolling_nanmin(T, m)
+        npt.assert_allclose(cmp_min, ref_min, atol=1.5e-07)
 
 
 def test_rolling_nanmax_1d():
     T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_max = np.nanmax(T)
-        comp_max = core._rolling_nanmax_1d(T)
-        npt.assert_almost_equal(ref_max, comp_max)
+        cmp_max = core._rolling_nanmax_1d(T)
+        npt.assert_allclose(cmp_max, ref_max, atol=1.5e-07)
 
         ref_max = np.nanmax(T)
-        comp_max = core._rolling_nanmax_1d(T)
-        npt.assert_almost_equal(ref_max, comp_max)
+        cmp_max = core._rolling_nanmax_1d(T)
+        npt.assert_allclose(cmp_max, ref_max, atol=1.5e-07)
 
 
 def test_rolling_nanmax():
     T = rng.RNG.rand(64)
     for m in range(1, 12):
         ref_max = np.nanmax(core.rolling_window(T, m), axis=1)
-        comp_max = core.rolling_nanmax(T, m)
-        npt.assert_almost_equal(ref_max, comp_max)
+        cmp_max = core.rolling_nanmax(T, m)
+        npt.assert_allclose(cmp_max, ref_max, atol=1.5e-07)
 
         ref_max = np.nanmax(core.rolling_window(T, m), axis=1)
-        comp_max = core.rolling_nanmax(T, m)
-        npt.assert_almost_equal(ref_max, comp_max)
+        cmp_max = core.rolling_nanmax(T, m)
+        npt.assert_allclose(cmp_max, ref_max, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -343,13 +343,13 @@ def test_compute_mean_std(Q, T):
 
     ref_μ_Q, ref_σ_Q = naive.compute_mean_std(Q, m)
     ref_M_T, ref_Σ_T = naive.compute_mean_std(T, m)
-    comp_μ_Q, comp_σ_Q = core.compute_mean_std(Q, m)
-    comp_M_T, comp_Σ_T = core.compute_mean_std(T, m)
+    cmp_μ_Q, cmp_σ_Q = core.compute_mean_std(Q, m)
+    cmp_M_T, cmp_Σ_T = core.compute_mean_std(T, m)
 
-    npt.assert_almost_equal(ref_μ_Q, comp_μ_Q)
-    npt.assert_almost_equal(ref_σ_Q, comp_σ_Q)
-    npt.assert_almost_equal(ref_M_T, comp_M_T)
-    npt.assert_almost_equal(ref_Σ_T, comp_Σ_T)
+    npt.assert_allclose(cmp_μ_Q, ref_μ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_σ_Q, ref_σ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_T, ref_M_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_T, ref_Σ_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -359,13 +359,13 @@ def test_compute_mean_std_chunked(Q, T):
     with patch("stumpy.config.STUMPY_MEAN_STD_NUM_CHUNKS", 2):
         ref_μ_Q, ref_σ_Q = naive.compute_mean_std(Q, m)
         ref_M_T, ref_Σ_T = naive.compute_mean_std(T, m)
-        comp_μ_Q, comp_σ_Q = core.compute_mean_std(Q, m)
-        comp_M_T, comp_Σ_T = core.compute_mean_std(T, m)
+        cmp_μ_Q, cmp_σ_Q = core.compute_mean_std(Q, m)
+        cmp_M_T, cmp_Σ_T = core.compute_mean_std(T, m)
 
-    npt.assert_almost_equal(ref_μ_Q, comp_μ_Q)
-    npt.assert_almost_equal(ref_σ_Q, comp_σ_Q)
-    npt.assert_almost_equal(ref_M_T, comp_M_T)
-    npt.assert_almost_equal(ref_Σ_T, comp_Σ_T)
+    npt.assert_allclose(cmp_μ_Q, ref_μ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_σ_Q, ref_σ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_T, ref_M_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_T, ref_Σ_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -375,13 +375,13 @@ def test_compute_mean_std_chunked_many(Q, T):
     with patch("stumpy.config.STUMPY_MEAN_STD_NUM_CHUNKS", 128):
         ref_μ_Q, ref_σ_Q = naive.compute_mean_std(Q, m)
         ref_M_T, ref_Σ_T = naive.compute_mean_std(T, m)
-        comp_μ_Q, comp_σ_Q = core.compute_mean_std(Q, m)
-        comp_M_T, comp_Σ_T = core.compute_mean_std(T, m)
+        cmp_μ_Q, cmp_σ_Q = core.compute_mean_std(Q, m)
+        cmp_M_T, cmp_Σ_T = core.compute_mean_std(T, m)
 
-    npt.assert_almost_equal(ref_μ_Q, comp_μ_Q)
-    npt.assert_almost_equal(ref_σ_Q, comp_σ_Q)
-    npt.assert_almost_equal(ref_M_T, comp_M_T)
-    npt.assert_almost_equal(ref_Σ_T, comp_Σ_T)
+    npt.assert_allclose(cmp_μ_Q, ref_μ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_σ_Q, ref_σ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_T, ref_M_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_T, ref_Σ_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -393,13 +393,13 @@ def test_compute_mean_std_multidimensional(Q, T):
 
     ref_μ_Q, ref_σ_Q = naive_compute_mean_std_multidimensional(Q, m)
     ref_M_T, ref_Σ_T = naive_compute_mean_std_multidimensional(T, m)
-    comp_μ_Q, comp_σ_Q = core.compute_mean_std(Q, m)
-    comp_M_T, comp_Σ_T = core.compute_mean_std(T, m)
+    cmp_μ_Q, cmp_σ_Q = core.compute_mean_std(Q, m)
+    cmp_M_T, cmp_Σ_T = core.compute_mean_std(T, m)
 
-    npt.assert_almost_equal(ref_μ_Q, comp_μ_Q)
-    npt.assert_almost_equal(ref_σ_Q, comp_σ_Q)
-    npt.assert_almost_equal(ref_M_T, comp_M_T)
-    npt.assert_almost_equal(ref_Σ_T, comp_Σ_T)
+    npt.assert_allclose(cmp_μ_Q, ref_μ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_σ_Q, ref_σ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_T, ref_M_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_T, ref_Σ_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -412,13 +412,13 @@ def test_compute_mean_std_multidimensional_chunked(Q, T):
     with patch("stumpy.config.STUMPY_MEAN_STD_NUM_CHUNKS", 2):
         ref_μ_Q, ref_σ_Q = naive_compute_mean_std_multidimensional(Q, m)
         ref_M_T, ref_Σ_T = naive_compute_mean_std_multidimensional(T, m)
-        comp_μ_Q, comp_σ_Q = core.compute_mean_std(Q, m)
-        comp_M_T, comp_Σ_T = core.compute_mean_std(T, m)
+        cmp_μ_Q, cmp_σ_Q = core.compute_mean_std(Q, m)
+        cmp_M_T, cmp_Σ_T = core.compute_mean_std(T, m)
 
-    npt.assert_almost_equal(ref_μ_Q, comp_μ_Q)
-    npt.assert_almost_equal(ref_σ_Q, comp_σ_Q)
-    npt.assert_almost_equal(ref_M_T, comp_M_T)
-    npt.assert_almost_equal(ref_Σ_T, comp_Σ_T)
+    npt.assert_allclose(cmp_μ_Q, ref_μ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_σ_Q, ref_σ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_T, ref_M_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_T, ref_Σ_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -431,13 +431,13 @@ def test_compute_mean_std_multidimensional_chunked_many(Q, T):
     with patch("stumpy.config.STUMPY_MEAN_STD_NUM_CHUNKS", 128):
         ref_μ_Q, ref_σ_Q = naive_compute_mean_std_multidimensional(Q, m)
         ref_M_T, ref_Σ_T = naive_compute_mean_std_multidimensional(T, m)
-        comp_μ_Q, comp_σ_Q = core.compute_mean_std(Q, m)
-        comp_M_T, comp_Σ_T = core.compute_mean_std(T, m)
+        cmp_μ_Q, cmp_σ_Q = core.compute_mean_std(Q, m)
+        cmp_M_T, cmp_Σ_T = core.compute_mean_std(T, m)
 
-    npt.assert_almost_equal(ref_μ_Q, comp_μ_Q)
-    npt.assert_almost_equal(ref_σ_Q, comp_σ_Q)
-    npt.assert_almost_equal(ref_M_T, comp_M_T)
-    npt.assert_almost_equal(ref_Σ_T, comp_Σ_T)
+    npt.assert_allclose(cmp_μ_Q, ref_μ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_σ_Q, ref_σ_Q, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_T, ref_M_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_T, ref_Σ_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -457,7 +457,7 @@ def test_calculate_squared_distance_profile(Q, T):
     T_subseq_isconstant = core.rolling_isconstant(T, m)
     M_T, Σ_T = core.compute_mean_std(T, m)
 
-    comp = core._calculate_squared_distance_profile(
+    cmp = core._calculate_squared_distance_profile(
         m,
         QT,
         μ_Q,
@@ -467,7 +467,7 @@ def test_calculate_squared_distance_profile(Q, T):
         Q_subseq_isconstant,
         T_subseq_isconstant,
     )
-    npt.assert_almost_equal(ref, comp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -484,7 +484,7 @@ def test_calculate_distance_profile(Q, T):
     T_subseq_isconstant = core.rolling_isconstant(T, m)
     M_T, Σ_T = core.compute_mean_std(T, m)
 
-    comp = core.calculate_distance_profile(
+    cmp = core.calculate_distance_profile(
         m,
         QT,
         μ_Q,
@@ -494,7 +494,7 @@ def test_calculate_distance_profile(Q, T):
         Q_subseq_isconstant,
         T_subseq_isconstant,
     )
-    npt.assert_almost_equal(ref, comp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -503,8 +503,8 @@ def test_mueen_calculate_distance_profile(Q, T):
     ref = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    comp = core.mueen_calculate_distance_profile(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mueen_calculate_distance_profile(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -515,8 +515,8 @@ def test_mass(Q, T):
     ref = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    comp = core.mass(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -531,8 +531,8 @@ def test_mass_Q_nan(Q, T):
     )
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -547,8 +547,8 @@ def test_mass_Q_inf(Q, T):
     )
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
     T[1] = 1e10
 
 
@@ -564,8 +564,8 @@ def test_mass_T_nan(Q, T):
     )
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -580,8 +580,8 @@ def test_mass_T_inf(Q, T):
     )
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
     T[1] = 1e10
 
 
@@ -599,7 +599,7 @@ def test_p_norm_distance_profile(Q, T):
         ).flatten()
         ref = np.power(ref, p)
         cmp = core._p_norm_distance_profile(Q, T, p)
-        npt.assert_almost_equal(ref, cmp)
+        npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -609,8 +609,8 @@ def test_mass_absolute(Q, T):
     m = Q.shape[0]
     for p in [1.0, 2.0, 3.0]:
         ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1, ord=p)
-        comp = core.mass_absolute(Q, T, p=p)
-        npt.assert_almost_equal(ref, comp)
+        cmp = core.mass_absolute(Q, T, p=p)
+        npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -623,8 +623,8 @@ def test_mass_absolute_Q_nan(Q, T):
     ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass_absolute(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -637,8 +637,8 @@ def test_mass_absolute_Q_inf(Q, T):
     ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass_absolute(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -651,8 +651,8 @@ def test_mass_absolute_T_nan(Q, T):
     ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass_absolute(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -665,8 +665,8 @@ def test_mass_absolute_T_inf(Q, T):
     ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
     ref[np.isnan(ref)] = np.inf
 
-    comp = core.mass_absolute(Q, T)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_mass_absolute_sqrt_input_negative():
@@ -725,8 +725,8 @@ def test_mass_absolute_sqrt_input_negative():
         ]
     )
     ref = 0.0
-    comp = core.mass_absolute(Q, Q)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.mass_absolute(Q, Q)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -736,10 +736,10 @@ def test_mass_distance_matrix(T_A, T_B):
     ref_distance_matrix = naive.distance_matrix(T_A, T_B, m)
     k = T_A.shape[0] - m + 1
     l = T_B.shape[0] - m + 1
-    comp_distance_matrix = np.full((k, l), np.inf)
-    core.mass_distance_matrix(T_A, T_B, m, comp_distance_matrix)
+    cmp_distance_matrix = np.full((k, l), np.inf)
+    core.mass_distance_matrix(T_A, T_B, m, cmp_distance_matrix)
 
-    npt.assert_almost_equal(ref_distance_matrix, comp_distance_matrix)
+    npt.assert_allclose(cmp_distance_matrix, ref_distance_matrix, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -751,64 +751,64 @@ def test_mass_absolute_distance_matrix(T_A, T_B):
     )
     k = T_A.shape[0] - m + 1
     l = T_B.shape[0] - m + 1
-    comp_distance_matrix = np.full((k, l), np.inf)
-    core._mass_absolute_distance_matrix(T_A, T_B, m, comp_distance_matrix)
+    cmp_distance_matrix = np.full((k, l), np.inf)
+    core._mass_absolute_distance_matrix(T_A, T_B, m, cmp_distance_matrix)
 
-    npt.assert_almost_equal(ref_distance_matrix, comp_distance_matrix)
+    npt.assert_allclose(cmp_distance_matrix, ref_distance_matrix, atol=1.5e-07)
 
 
 def test_apply_exclusion_zone():
     T = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
     ref = np.empty(T.shape, dtype=np.float64)
-    comp = np.empty(T.shape, dtype=np.float64)
+    cmp = np.empty(T.shape, dtype=np.float64)
     exclusion_zone = 2
 
     for i in range(T.shape[0]):
         ref[:] = T[:]
         naive.apply_exclusion_zone(ref, i, exclusion_zone, np.inf)
 
-        comp[:] = T[:]
-        core.apply_exclusion_zone(comp, i, exclusion_zone, np.inf)
+        cmp[:] = T[:]
+        core.apply_exclusion_zone(cmp, i, exclusion_zone, np.inf)
 
         naive.replace_inf(ref)
-        naive.replace_inf(comp)
-        npt.assert_array_equal(ref, comp)
+        naive.replace_inf(cmp)
+        npt.assert_array_equal(ref, cmp)
 
 
 def test_apply_exclusion_zone_int():
     T = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.int64)
     ref = np.empty(T.shape, dtype=np.int64)
-    comp = np.empty(T.shape, dtype=np.int64)
+    cmp = np.empty(T.shape, dtype=np.int64)
     exclusion_zone = 2
 
     for i in range(T.shape[0]):
         ref[:] = T[:]
         naive.apply_exclusion_zone(ref, i, exclusion_zone, -1)
 
-        comp[:] = T[:]
-        core.apply_exclusion_zone(comp, i, exclusion_zone, -1)
+        cmp[:] = T[:]
+        core.apply_exclusion_zone(cmp, i, exclusion_zone, -1)
 
         naive.replace_inf(ref)
-        naive.replace_inf(comp)
-        npt.assert_array_equal(ref, comp)
+        naive.replace_inf(cmp)
+        npt.assert_array_equal(ref, cmp)
 
 
 def test_apply_exclusion_zone_bool():
     T = np.ones(10, dtype=bool)
     ref = np.empty(T.shape, dtype=bool)
-    comp = np.empty(T.shape, dtype=bool)
+    cmp = np.empty(T.shape, dtype=bool)
     exclusion_zone = 2
 
     for i in range(T.shape[0]):
         ref[:] = T[:]
         naive.apply_exclusion_zone(ref, i, exclusion_zone, False)
 
-        comp[:] = T[:]
-        core.apply_exclusion_zone(comp, i, exclusion_zone, False)
+        cmp[:] = T[:]
+        core.apply_exclusion_zone(cmp, i, exclusion_zone, False)
 
         naive.replace_inf(ref)
-        naive.replace_inf(comp)
-        npt.assert_array_equal(ref, comp)
+        naive.replace_inf(cmp)
+        npt.assert_array_equal(ref, cmp)
 
 
 def test_apply_exclusion_zone_multidimensional():
@@ -817,19 +817,19 @@ def test_apply_exclusion_zone_multidimensional():
         dtype=np.float64,
     )
     ref = np.empty(T.shape, dtype=np.float64)
-    comp = np.empty(T.shape, dtype=np.float64)
+    cmp = np.empty(T.shape, dtype=np.float64)
     exclusion_zone = 2
 
     for i in range(T.shape[1]):
         ref[:, :] = T[:, :]
         naive.apply_exclusion_zone(ref, i, exclusion_zone, np.inf)
 
-        comp[:, :] = T[:, :]
-        core.apply_exclusion_zone(comp, i, exclusion_zone, np.inf)
+        cmp[:, :] = T[:, :]
+        core.apply_exclusion_zone(cmp, i, exclusion_zone, np.inf)
 
         naive.replace_inf(ref)
-        naive.replace_inf(comp)
-        npt.assert_array_equal(ref, comp)
+        naive.replace_inf(cmp)
+        npt.assert_array_equal(ref, cmp)
 
 
 def test_preprocess():
@@ -840,20 +840,20 @@ def test_preprocess():
     ref_subseq_isconstant = naive.rolling_isconstant(T, m)
     ref_M, ref_Σ = naive.compute_mean_std(T, m)
 
-    comp_T, comp_M, comp_Σ, comp_subseq_isconstant = core.preprocess(T, m)
+    cmp_T, cmp_M, cmp_Σ, cmp_subseq_isconstant = core.preprocess(T, m)
 
-    npt.assert_almost_equal(ref_T, comp_T)
-    npt.assert_almost_equal(ref_M, comp_M)
-    npt.assert_almost_equal(ref_Σ, comp_Σ)
-    npt.assert_almost_equal(ref_subseq_isconstant, comp_subseq_isconstant)
+    npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_M, ref_M, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ, ref_Σ, atol=1.5e-07)
+    npt.assert_allclose(cmp_subseq_isconstant, ref_subseq_isconstant, atol=1.5e-07)
 
     T = pd.Series(T)
-    comp_T, comp_M, comp_Σ, comp_subseq_isconstant = core.preprocess(T, m)
+    cmp_T, cmp_M, cmp_Σ, cmp_subseq_isconstant = core.preprocess(T, m)
 
-    npt.assert_almost_equal(ref_T, comp_T)
-    npt.assert_almost_equal(ref_M, comp_M)
-    npt.assert_almost_equal(ref_Σ, comp_Σ)
-    npt.assert_almost_equal(ref_subseq_isconstant, comp_subseq_isconstant)
+    npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_M, ref_M, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ, ref_Σ, atol=1.5e-07)
+    npt.assert_allclose(cmp_subseq_isconstant, ref_subseq_isconstant, atol=1.5e-07)
 
 
 def test_preprocess_non_normalized():
@@ -867,16 +867,16 @@ def test_preprocess_non_normalized():
 
     ref_T = np.array([0, 0, 2, 3, 4, 5, 6, 7, 0, 9], dtype=float)
 
-    comp_T, comp_T_subseq_isfinite = core.preprocess_non_normalized(T, m)
+    cmp_T, cmp_T_subseq_isfinite = core.preprocess_non_normalized(T, m)
 
-    npt.assert_almost_equal(ref_T, comp_T)
-    npt.assert_almost_equal(ref_T_subseq_isfinite, comp_T_subseq_isfinite)
+    npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_T_subseq_isfinite, ref_T_subseq_isfinite, atol=1.5e-07)
 
     T = pd.Series(T)
-    comp_T, comp_T_subseq_isfinite = core.preprocess_non_normalized(T, m)
+    cmp_T, cmp_T_subseq_isfinite = core.preprocess_non_normalized(T, m)
 
-    npt.assert_almost_equal(ref_T, comp_T)
-    npt.assert_almost_equal(ref_T_subseq_isfinite, comp_T_subseq_isfinite)
+    npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_T_subseq_isfinite, ref_T_subseq_isfinite, atol=1.5e-07)
 
 
 def test_preprocess_diagonal():
@@ -889,33 +889,33 @@ def test_preprocess_diagonal():
     ref_M_m_1, _ = naive.compute_mean_std(ref_T, m - 1)
 
     (
-        comp_T,
-        comp_M,
-        comp_Σ_inverse,
-        comp_M_m_1,
-        comp_T_subseq_isfinite,
-        comp_T_subseq_isconstant,
+        cmp_T,
+        cmp_M,
+        cmp_Σ_inverse,
+        cmp_M_m_1,
+        cmp_T_subseq_isfinite,
+        cmp_T_subseq_isconstant,
     ) = core.preprocess_diagonal(T, m)
 
-    npt.assert_almost_equal(ref_T, comp_T)
-    npt.assert_almost_equal(ref_M, comp_M)
-    npt.assert_almost_equal(ref_Σ_inverse, comp_Σ_inverse)
-    npt.assert_almost_equal(ref_M_m_1, comp_M_m_1)
+    npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_M, ref_M, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_inverse, ref_Σ_inverse, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_m_1, ref_M_m_1, atol=1.5e-07)
 
     T = pd.Series(T)
     (
-        comp_T,
-        comp_M,
-        comp_Σ_inverse,
-        comp_M_m_1,
-        comp_T_subseq_isfinite,
-        comp_T_subseq_isconstant,
+        cmp_T,
+        cmp_M,
+        cmp_Σ_inverse,
+        cmp_M_m_1,
+        cmp_T_subseq_isfinite,
+        cmp_T_subseq_isconstant,
     ) = core.preprocess_diagonal(T, m)
 
-    npt.assert_almost_equal(ref_T, comp_T)
-    npt.assert_almost_equal(ref_M, comp_M)
-    npt.assert_almost_equal(ref_Σ_inverse, comp_Σ_inverse)
-    npt.assert_almost_equal(ref_M_m_1, comp_M_m_1)
+    npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
+    npt.assert_allclose(cmp_M, ref_M, atol=1.5e-07)
+    npt.assert_allclose(cmp_Σ_inverse, ref_Σ_inverse, atol=1.5e-07)
+    npt.assert_allclose(cmp_M_m_1, ref_M_m_1, atol=1.5e-07)
 
 
 def test_replace_distance():
@@ -927,12 +927,12 @@ def test_replace_distance():
 
 
 def test_array_to_temp_file():
-    left = rng.RNG.rand()
-    fname = core.array_to_temp_file(left)
-    right = np.load(fname, allow_pickle=False)
+    ref_val = rng.RNG.rand()
+    fname = core.array_to_temp_file(ref_val)
+    cmp_val = np.load(fname, allow_pickle=False)
     os.remove(fname)
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp_val, ref_val, atol=1.5e-07)
 
 
 def test_count_diagonal_ndist():
@@ -947,9 +947,9 @@ def test_count_diagonal_ndist():
                 for i, diag in enumerate(diags):
                     ref_ndist_counts[i] = ones_matrix.diagonal(offset=diag).sum()
 
-                comp_ndist_counts = core._count_diagonal_ndist(diags, m, n_A, n_B)
+                cmp_ndist_counts = core._count_diagonal_ndist(diags, m, n_A, n_B)
 
-                npt.assert_almost_equal(ref_ndist_counts, comp_ndist_counts)
+                npt.assert_allclose(cmp_ndist_counts, ref_ndist_counts, atol=1.5e-07)
 
 
 def test_get_array_ranges():
@@ -958,7 +958,7 @@ def test_get_array_ranges():
         ref = naive.get_array_ranges(x, n_chunks, False)
 
         cmp = core._get_array_ranges(x, n_chunks, False)
-        npt.assert_almost_equal(ref, cmp)
+        npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_get_array_ranges_exhausted():
@@ -968,7 +968,7 @@ def test_get_array_ranges_exhausted():
     ref = naive.get_array_ranges(x, n_chunks, False)
 
     cmp = core._get_array_ranges(x, n_chunks, False)
-    npt.assert_almost_equal(ref, cmp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_get_array_ranges_exhausted_truncated():
@@ -978,7 +978,7 @@ def test_get_array_ranges_exhausted_truncated():
     ref = naive.get_array_ranges(x, n_chunks, True)
 
     cmp = core._get_array_ranges(x, n_chunks, True)
-    npt.assert_almost_equal(ref, cmp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_get_array_ranges_empty_array():
@@ -988,7 +988,7 @@ def test_get_array_ranges_empty_array():
     ref = naive.get_array_ranges(x, n_chunks, False)
 
     cmp = core._get_array_ranges(x, n_chunks, False)
-    npt.assert_almost_equal(ref, cmp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_get_ranges():
@@ -996,7 +996,7 @@ def test_get_ranges():
     size = 6
     n_chunks = 2
     cmp = core._get_ranges(size, n_chunks, False)
-    npt.assert_almost_equal(ref, cmp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_get_ranges_exhausted():
@@ -1004,7 +1004,7 @@ def test_get_ranges_exhausted():
     size = 6
     n_chunks = 8
     cmp = core._get_ranges(size, n_chunks, False)
-    npt.assert_almost_equal(ref, cmp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_get_ranges_exhausted_truncated():
@@ -1012,7 +1012,7 @@ def test_get_ranges_exhausted_truncated():
     size = 6
     n_chunks = 8
     cmp = core._get_ranges(size, n_chunks, True)
-    npt.assert_almost_equal(ref, cmp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_get_ranges_zero_size():
@@ -1020,7 +1020,7 @@ def test_get_ranges_zero_size():
     size = 0
     n_chunks = 8
     cmp = core._get_ranges(size, n_chunks, True)
-    npt.assert_almost_equal(ref, cmp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_rolling_isfinite():
@@ -1032,13 +1032,13 @@ def test_rolling_isfinite():
     a[9] = np.nan
 
     ref = np.all(core.rolling_window(np.isfinite(a), w), axis=1)
-    comp = core.rolling_isfinite(a, w)
+    cmp = core.rolling_isfinite(a, w)
 
-    npt.assert_almost_equal(ref, comp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
     # test `a` as all boolean isfinite array
-    comp = core.rolling_isfinite(np.isfinite(a), w)
-    npt.assert_almost_equal(ref, comp)
+    cmp = core.rolling_isfinite(np.isfinite(a), w)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_rolling_isconstant():
@@ -1051,9 +1051,9 @@ def test_rolling_isconstant():
     a[9:12] = [77.0, np.nan, 77.0]
 
     ref = naive.rolling_isconstant(a, w)
-    comp = core.rolling_isconstant(a, w)
+    cmp = core.rolling_isconstant(a, w)
 
-    npt.assert_almost_equal(ref, comp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_compare_parameters():
@@ -1101,8 +1101,8 @@ def test_get_mask_slices():
 
     for mask in mask_cases:
         ref_slices = naive._get_mask_slices(mask)
-        comp_slices = core._get_mask_slices(mask)
-        npt.assert_array_equal(ref_slices, comp_slices)
+        cmp_slices = core._get_mask_slices(mask)
+        npt.assert_array_equal(ref_slices, cmp_slices)
 
 
 def test_idx_to_mp():
@@ -1118,19 +1118,19 @@ def test_idx_to_mp():
     # `normalize == True` and `T_subseq_isconstant` is None (default)
     ref_mp = naive_idx_to_mp(I, T, m)
     cmp_mp = core._idx_to_mp(I, T, m)
-    npt.assert_almost_equal(ref_mp, cmp_mp)
+    npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
     # `normalize == True` and `T_subseq_isconstant` is provided
     T_subseq_isconstant = rng.RNG.choice([True, False], l, replace=True)
     ref_mp = naive_idx_to_mp(I, T, m, T_subseq_isconstant=T_subseq_isconstant)
     cmp_mp = core._idx_to_mp(I, T, m, T_subseq_isconstant=T_subseq_isconstant)
-    npt.assert_almost_equal(ref_mp, cmp_mp)
+    npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
     # `normalize == False`
     for p in range(1, 4):
         ref_mp = naive_idx_to_mp(I, T, m, normalize=False, p=p)
         cmp_mp = core._idx_to_mp(I, T, m, normalize=False, p=p)
-        npt.assert_almost_equal(ref_mp, cmp_mp)
+        npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 def test_total_diagonal_ndists():
@@ -1160,7 +1160,7 @@ def test_bfs_indices(n):
     ref_bfs_indices = naive_bfs_indices(n)
     cmp_bfs_indices = np.array(list(core._bfs_indices(n)))
 
-    npt.assert_almost_equal(ref_bfs_indices, cmp_bfs_indices)
+    npt.assert_allclose(cmp_bfs_indices, ref_bfs_indices, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("n", n)
@@ -1168,7 +1168,7 @@ def test_bfs_indices_fill_value(n):
     ref_bfs_indices = naive_bfs_indices(n, -1)
     cmp_bfs_indices = np.array(list(core._bfs_indices(n, -1)))
 
-    npt.assert_almost_equal(ref_bfs_indices, cmp_bfs_indices)
+    npt.assert_allclose(cmp_bfs_indices, ref_bfs_indices, atol=1.5e-07)
 
 
 def test_select_P_ABBA_val_inf():
@@ -1177,10 +1177,10 @@ def test_select_P_ABBA_val_inf():
     P_ABBA[k:] = np.inf
     p_abba = P_ABBA.copy()
 
-    comp = core._select_P_ABBA_value(P_ABBA, k=k)
+    cmp = core._select_P_ABBA_value(P_ABBA, k=k)
     p_abba.sort()
     ref = p_abba[k - 1]
-    npt.assert_almost_equal(ref, comp)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_merge_topk_PI_without_overlap():
@@ -1204,14 +1204,14 @@ def test_merge_topk_PI_without_overlap():
         ref_P = PA.copy()
         ref_I = IA.copy()
 
-        comp_P = PA.copy()
-        comp_I = IA.copy()
+        cmp_P = PA.copy()
+        cmp_I = IA.copy()
 
         naive.merge_topk_PI(ref_P, PB.copy(), ref_I, IB.copy())
-        core._merge_topk_PI(comp_P, PB.copy(), comp_I, IB.copy())
+        core._merge_topk_PI(cmp_P, PB.copy(), cmp_I, IB.copy())
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_merge_topk_PI_with_overlap():
@@ -1247,14 +1247,14 @@ def test_merge_topk_PI_with_overlap():
         ref_P = PA.copy()
         ref_I = IA.copy()
 
-        comp_P = PA.copy()
-        comp_I = IA.copy()
+        cmp_P = PA.copy()
+        cmp_I = IA.copy()
 
         naive.merge_topk_PI(ref_P, PB.copy(), ref_I, IB.copy())
-        core._merge_topk_PI(comp_P, PB.copy(), comp_I, IB.copy())
+        core._merge_topk_PI(cmp_P, PB.copy(), cmp_I, IB.copy())
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_merge_topk_PI_with_1D_input():
@@ -1274,14 +1274,14 @@ def test_merge_topk_PI_with_1D_input():
 
     ref_P = PA.copy()
     ref_I = IA.copy()
-    comp_P = PA.copy()
-    comp_I = IA.copy()
+    cmp_P = PA.copy()
+    cmp_I = IA.copy()
 
     naive.merge_topk_PI(ref_P, PB.copy(), ref_I, IB.copy())
-    core._merge_topk_PI(comp_P, PB.copy(), comp_I, IB.copy())
+    core._merge_topk_PI(cmp_P, PB.copy(), cmp_I, IB.copy())
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_merge_topk_PI_with_1D_input_hardcoded():
@@ -1298,14 +1298,14 @@ def test_merge_topk_PI_with_1D_input_hardcoded():
     ref_P = PA.copy()
     ref_I = IA.copy()
 
-    comp_P = PA.copy()
-    comp_I = IA.copy()
+    cmp_P = PA.copy()
+    cmp_I = IA.copy()
 
     naive.merge_topk_PI(ref_P, PB.copy(), ref_I, IB.copy())
-    core._merge_topk_PI(comp_P, PB.copy(), comp_I, IB.copy())
+    core._merge_topk_PI(cmp_P, PB.copy(), cmp_I, IB.copy())
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_merge_topk_ρI_without_overlap():
@@ -1329,14 +1329,14 @@ def test_merge_topk_ρI_without_overlap():
         ref_ρ = ρA.copy()
         ref_I = IA.copy()
 
-        comp_ρ = ρA.copy()
-        comp_I = IA.copy()
+        cmp_ρ = ρA.copy()
+        cmp_I = IA.copy()
 
         naive.merge_topk_ρI(ref_ρ, ρB.copy(), ref_I, IB.copy())
-        core._merge_topk_ρI(comp_ρ, ρB.copy(), comp_I, IB.copy())
+        core._merge_topk_ρI(cmp_ρ, ρB.copy(), cmp_I, IB.copy())
 
-        npt.assert_almost_equal(ref_ρ, comp_ρ)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_ρ, ref_ρ, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_merge_topk_ρI_with_overlap():
@@ -1372,14 +1372,14 @@ def test_merge_topk_ρI_with_overlap():
         ref_ρ = ρA.copy()
         ref_I = IA.copy()
 
-        comp_ρ = ρA.copy()
-        comp_I = IA.copy()
+        cmp_ρ = ρA.copy()
+        cmp_I = IA.copy()
 
         naive.merge_topk_ρI(ref_ρ, ρB.copy(), ref_I, IB.copy())
-        core._merge_topk_ρI(comp_ρ, ρB.copy(), comp_I, IB.copy())
+        core._merge_topk_ρI(cmp_ρ, ρB.copy(), cmp_I, IB.copy())
 
-        npt.assert_almost_equal(ref_ρ, comp_ρ)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_ρ, ref_ρ, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_merge_topk_ρI_with_1D_input():
@@ -1399,14 +1399,14 @@ def test_merge_topk_ρI_with_1D_input():
 
     ref_ρ = ρA.copy()
     ref_I = IA.copy()
-    comp_ρ = ρA.copy()
-    comp_I = IA.copy()
+    cmp_ρ = ρA.copy()
+    cmp_I = IA.copy()
 
     naive.merge_topk_ρI(ref_ρ, ρB.copy(), ref_I, IB.copy())
-    core._merge_topk_ρI(comp_ρ, ρB.copy(), comp_I, IB.copy())
+    core._merge_topk_ρI(cmp_ρ, ρB.copy(), cmp_I, IB.copy())
 
-    npt.assert_almost_equal(ref_ρ, comp_ρ)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_ρ, ref_ρ, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_merge_topk_ρI_with_1D_input_hardcoded():
@@ -1423,21 +1423,21 @@ def test_merge_topk_ρI_with_1D_input_hardcoded():
     ref_ρ = ρA.copy()
     ref_I = IA.copy()
 
-    comp_ρ = ρA.copy()
-    comp_I = IA.copy()
+    cmp_ρ = ρA.copy()
+    cmp_I = IA.copy()
 
     naive.merge_topk_ρI(ref_ρ, ρB.copy(), ref_I, IB.copy())
-    core._merge_topk_ρI(comp_ρ, ρB.copy(), comp_I, IB.copy())
+    core._merge_topk_ρI(cmp_ρ, ρB.copy(), cmp_I, IB.copy())
 
-    npt.assert_almost_equal(ref_ρ, comp_ρ)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_ρ, ref_ρ, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_shift_insert_at_index():
     for k in range(1, 6):
         a = rng.RNG.rand(k)
         ref = np.empty(k, dtype=np.float64)
-        comp = np.empty(k, dtype=np.float64)
+        cmp = np.empty(k, dtype=np.float64)
 
         indices = np.arange(k + 1)
         values = rng.RNG.rand(k + 1)
@@ -1445,26 +1445,26 @@ def test_shift_insert_at_index():
         # test shift = "right"
         for idx, v in zip(indices, values):
             ref[:] = a
-            comp[:] = a
+            cmp[:] = a
 
             ref = np.insert(ref, idx, v)[:-1]
             core._shift_insert_at_index(
-                comp, idx, v, shift="right"
-            )  # update comp in place
+                cmp, idx, v, shift="right"
+            )  # update cmp in place
 
-            npt.assert_almost_equal(ref, comp)
+            npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
         # test shift = "left"
         for idx, v in zip(indices, values):
             ref[:] = a
-            comp[:] = a
+            cmp[:] = a
 
             ref = np.insert(ref, idx, v)[1:]
             core._shift_insert_at_index(
-                comp, idx, v, shift="left"
-            )  # update comp in place
+                cmp, idx, v, shift="left"
+            )  # update cmp in place
 
-            npt.assert_almost_equal(ref, comp)
+            npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_check_P():
@@ -1478,9 +1478,11 @@ def test_find_matches_all():
     D = rng.RNG.rand(64)
     for excl_zone in range(3):
         ref = naive.find_matches(D, excl_zone, max_distance, max_matches=None)
-        comp = core._find_matches(D, excl_zone, max_distance, max_matches=None)
+        cmp = core._find_matches(D, excl_zone, max_distance, max_matches=None)
 
-        npt.assert_almost_equal(ref, comp)
+        npt.assert_allclose(
+            cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07
+        )
 
 
 def test_find_matches_maxmatch():
@@ -1489,9 +1491,11 @@ def test_find_matches_maxmatch():
     for excl_zone in range(3):
         max_matches = rng.RNG.randint(0, 100)
         ref = naive.find_matches(D, excl_zone, max_distance, max_matches)
-        comp = core._find_matches(D, excl_zone, max_distance, max_matches)
+        cmp = core._find_matches(D, excl_zone, max_distance, max_matches)
 
-        npt.assert_almost_equal(ref, comp)
+        npt.assert_allclose(
+            cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -1522,25 +1526,25 @@ def test_gpu_searchsorted():
         ref_IDX = [np.searchsorted(A[i], V[i], side="left") for i in range(n)]
         ref_IDX = np.asarray(ref_IDX, dtype=np.int64)
 
-        comp_IDX = np.full(n, -1, dtype=np.int64)
-        device_comp_IDX = cuda.to_device(comp_IDX)
+        cmp_IDX = np.full(n, -1, dtype=np.int64)
+        device_cmp_IDX = cuda.to_device(cmp_IDX)
         _gpu_searchsorted_kernel[blocks_per_grid, threads_per_block](
-            device_A, device_V, device_bfs, nlevel, is_left, device_comp_IDX
+            device_A, device_V, device_bfs, nlevel, is_left, device_cmp_IDX
         )
-        comp_IDX = device_comp_IDX.copy_to_host()
-        npt.assert_array_equal(ref_IDX, comp_IDX)
+        cmp_IDX = device_cmp_IDX.copy_to_host()
+        npt.assert_array_equal(ref_IDX, cmp_IDX)
 
         is_left = False  # test case
         ref_IDX = [np.searchsorted(A[i], V[i], side="right") for i in range(n)]
         ref_IDX = np.asarray(ref_IDX, dtype=np.int64)
 
-        comp_IDX = np.full(n, -1, dtype=np.int64)
-        device_comp_IDX = cuda.to_device(comp_IDX)
+        cmp_IDX = np.full(n, -1, dtype=np.int64)
+        device_cmp_IDX = cuda.to_device(cmp_IDX)
         _gpu_searchsorted_kernel[blocks_per_grid, threads_per_block](
-            device_A, device_V, device_bfs, nlevel, is_left, device_comp_IDX
+            device_A, device_V, device_bfs, nlevel, is_left, device_cmp_IDX
         )
-        comp_IDX = device_comp_IDX.copy_to_host()
-        npt.assert_array_equal(ref_IDX, comp_IDX)
+        cmp_IDX = device_cmp_IDX.copy_to_host()
+        npt.assert_array_equal(ref_IDX, cmp_IDX)
 
 
 def test_client_to_func():
@@ -1551,17 +1555,17 @@ def test_client_to_func():
 def test_apply_include():
     D = rng.RNG.uniform(-1000, 1000, [10, 20]).astype(np.float64)
     ref_D = np.empty(D.shape)
-    comp_D = np.empty(D.shape)
+    cmp_D = np.empty(D.shape)
     for width in range(D.shape[0]):
         for i in range(D.shape[0] - width):
             ref_D[:, :] = D[:, :]
-            comp_D[:, :] = D[:, :]
+            cmp_D[:, :] = D[:, :]
             include = np.asarray(range(i, i + width + 1))
 
             naive.apply_include(D, include)
             core._apply_include(D, include)
 
-            npt.assert_almost_equal(ref_D, comp_D)
+            npt.assert_allclose(cmp_D, ref_D, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -1578,9 +1582,9 @@ def test_mpdist_custom_func(T_A, T_B):
     partial_k_func = functools.partial(
         naive.mpdist_custom_func, m=m, percentage=percentage, n_A=n_A, n_B=n_B
     )
-    comp_mpdist = core._mpdist(T_A, T_B, m, partial_stump, custom_func=partial_k_func)
+    cmp_mpdist = core._mpdist(T_A, T_B, m, partial_stump, custom_func=partial_k_func)
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -1606,9 +1610,9 @@ def test_mpdist_with_isconstant(T_A, T_B):
         T_A_subseq_isconstant=T_A_subseq_isconstant,
         T_B_subseq_isconstant=T_B_subseq_isconstant,
     )
-    comp_mpdist = core._mpdist(T_A, T_B, m, partial_stump)
+    cmp_mpdist = core._mpdist(T_A, T_B, m, partial_stump)
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -1617,15 +1621,15 @@ def test_compute_P_ABBA(T_A, T_B):
     n_A = T_A.shape[0]
     n_B = T_B.shape[0]
     ref_P_ABBA = np.empty(n_A - m + 1 + n_B - m + 1, dtype=np.float64)
-    comp_P_ABBA = np.empty(n_A - m + 1 + n_B - m + 1, dtype=np.float64)
+    cmp_P_ABBA = np.empty(n_A - m + 1 + n_B - m + 1, dtype=np.float64)
 
     ref_P_ABBA[: n_A - m + 1] = naive.stump(T_A, m, T_B)[:, 0]
     ref_P_ABBA[n_A - m + 1 :] = naive.stump(T_B, m, T_A)[:, 0]
 
     partial_stump = functools.partial(stump)
-    core._compute_P_ABBA(T_A, T_B, m, comp_P_ABBA, partial_stump)
+    core._compute_P_ABBA(T_A, T_B, m, cmp_P_ABBA, partial_stump)
 
-    npt.assert_almost_equal(ref_P_ABBA, comp_P_ABBA)
+    npt.assert_allclose(cmp_P_ABBA, ref_P_ABBA, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -1642,7 +1646,7 @@ def test_compute_P_ABBA_with_isconstant(T_A, T_B):
     T_B_subseq_isconstant = isconstant_custom_func
 
     ref_P_ABBA = np.empty(n_A - m + 1 + n_B - m + 1, dtype=np.float64)
-    comp_P_ABBA = np.empty(n_A - m + 1 + n_B - m + 1, dtype=np.float64)
+    cmp_P_ABBA = np.empty(n_A - m + 1 + n_B - m + 1, dtype=np.float64)
 
     ref_P_ABBA[: n_A - m + 1] = naive.stump(
         T_A,
@@ -1668,11 +1672,11 @@ def test_compute_P_ABBA_with_isconstant(T_A, T_B):
         T_A,
         T_B,
         m,
-        comp_P_ABBA,
+        cmp_P_ABBA,
         mp_func,
     )
 
-    npt.assert_almost_equal(ref_P_ABBA, comp_P_ABBA)
+    npt.assert_allclose(cmp_P_ABBA, ref_P_ABBA, atol=1.5e-07)
 
 
 def test_process_isconstant_1d():
@@ -1686,10 +1690,10 @@ def test_process_isconstant_1d():
     # case 1: without nan
     T = rng.RNG.rand(n)
 
-    T_subseq_isconstant_ref = naive.rolling_isconstant(T, m, isconstant_custom_func)
-    T_subseq_isconstant_comp = core.process_isconstant(T, m, isconstant_custom_func)
+    ref_T_subseq_isconstant = naive.rolling_isconstant(T, m, isconstant_custom_func)
+    cmp_T_subseq_isconstant = core.process_isconstant(T, m, isconstant_custom_func)
 
-    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
 
     # case 2: with nan
     T = rng.RNG.rand(n)
@@ -1699,10 +1703,10 @@ def test_process_isconstant_1d():
 
     T_subseq_isfinite = core.rolling_isfinite(T, m)
 
-    T_subseq_isconstant_ref = T_subseq_isconstant & T_subseq_isfinite
-    T_subseq_isconstant_comp = core.process_isconstant(T, m, T_subseq_isconstant)
+    ref_T_subseq_isconstant = T_subseq_isconstant & T_subseq_isfinite
+    cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
-    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
 
 
 def test_process_isconstant_2d():
@@ -1722,13 +1726,13 @@ def test_process_isconstant_2d():
         rng.RNG.choice([True, False], n - m + 1, replace=True),
     ]
 
-    T_subseq_isconstant_ref = np.array(
+    ref_T_subseq_isconstant = np.array(
         [naive.rolling_isconstant(T[i], m, T_subseq_isconstant[i]) for i in range(d)]
     )
 
-    T_subseq_isconstant_comp = core.process_isconstant(T, m, T_subseq_isconstant)
+    cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
-    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
 
     # case 2: with nan
     T = rng.RNG.rand(d, n)
@@ -1749,14 +1753,14 @@ def test_process_isconstant_2d():
     # to True to test the functionality of `process_isconstant` in handling
     # such conflict.
 
-    T_subseq_isconstant_ref = np.array(
+    ref_T_subseq_isconstant = np.array(
         [naive.rolling_isconstant(T[i], m, T_subseq_isconstant[i]) for i in range(d)]
     )
-    T_subseq_isconstant_ref = T_subseq_isconstant_ref & core.rolling_isfinite(T, m)
+    ref_T_subseq_isconstant = ref_T_subseq_isconstant & core.rolling_isfinite(T, m)
 
-    T_subseq_isconstant_comp = core.process_isconstant(T, m, T_subseq_isconstant)
+    cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
-    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
 
 
 def test_process_isconstant_1d_default():
@@ -1768,20 +1772,20 @@ def test_process_isconstant_1d_default():
     T = rng.RNG.rand(n)
     T[:m] = 0.5  # constant subsequence
 
-    T_subseq_isconstant_ref = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
-    T_subseq_isconstant_comp = core.process_isconstant(T, m, T_subseq_isconstant=None)
+    ref_T_subseq_isconstant = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
+    cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant=None)
 
-    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
 
     # case 2: with nan
     T = rng.RNG.rand(n)
     T[:m] = 0.5  # constant subsequence
     T[-m:] = np.nan  # non-finite subsequence
 
-    T_subseq_isconstant_ref = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
-    T_subseq_isconstant_comp = core.process_isconstant(T, m, T_subseq_isconstant=None)
+    ref_T_subseq_isconstant = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
+    cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant=None)
 
-    npt.assert_array_equal(T_subseq_isconstant_ref, T_subseq_isconstant_comp)
+    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
 
 
 def test_update_incremental_PI_egressFalse():
@@ -1797,36 +1801,36 @@ def test_update_incremental_PI_egressFalse():
 
     for k in range(1, 4):
         # ref
-        mp_ref = naive.stump(T_new, m, row_wise=True, k=k)
-        P_ref = mp_ref[:, :k].astype(np.float64)
-        I_ref = mp_ref[:, k : 2 * k].astype(np.int64)
+        ref_mp = naive.stump(T_new, m, row_wise=True, k=k)
+        ref_P = ref_mp[:, :k].astype(np.float64)
+        ref_I = ref_mp[:, k : 2 * k].astype(np.int64)
 
-        # comp
+        # cmp
         mp = naive.stump(T, m, row_wise=True, k=k)
-        P_comp = mp[:, :k].astype(np.float64)
-        I_comp = mp[:, k : 2 * k].astype(np.int64)
+        cmp_P = mp[:, :k].astype(np.float64)
+        cmp_I = mp[:, k : 2 * k].astype(np.int64)
 
         # Because of the new data point, the length of matrix profile
         # and matrix profile indices should be increased by one.
-        P_comp = np.pad(
-            P_comp,
+        cmp_P = np.pad(
+            cmp_P,
             [(0, 1), (0, 0)],
             mode="constant",
             constant_values=np.inf,
         )
-        I_comp = np.pad(
-            I_comp,
+        cmp_I = np.pad(
+            cmp_I,
             [(0, 1), (0, 0)],
             mode="constant",
             constant_values=-1,
         )
 
         D = core.mass(T_new[-m:], T_new)
-        core._update_incremental_PI(D, P_comp, I_comp, excl_zone, n_appended=0)
+        core._update_incremental_PI(D, cmp_P, cmp_I, excl_zone, n_appended=0)
 
         # assertion
-        npt.assert_almost_equal(P_ref, P_comp)
-        npt.assert_almost_equal(I_ref, I_comp)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_update_incremental_PI_egressTrue():
@@ -1857,26 +1861,26 @@ def test_update_incremental_PI_egressTrue():
             I[i] = IDX
             P[i] = D[i, IDX]
 
-        P_ref = P[1:].copy()
-        I_ref = I[1:].copy()
+        ref_P = P[1:].copy()
+        ref_I = I[1:].copy()
 
-        # comp
+        # cmp
         mp = naive.stump(T, m, row_wise=True, k=k)
-        P_comp = mp[:, :k].astype(np.float64)
-        I_comp = mp[:, k : 2 * k].astype(np.int64)
+        cmp_P = mp[:, :k].astype(np.float64)
+        cmp_I = mp[:, k : 2 * k].astype(np.int64)
 
-        P_comp[:-1] = P_comp[1:]
-        P_comp[-1] = np.inf
-        I_comp[:-1] = I_comp[1:]
-        I_comp[-1] = -1
+        cmp_P[:-1] = cmp_P[1:]
+        cmp_P[-1] = np.inf
+        cmp_I[:-1] = cmp_I[1:]
+        cmp_I[-1] = -1
 
         T_new = np.append(T[1:], t)
         D = core.mass(T_new[-m:], T_new)
-        core._update_incremental_PI(D, P_comp, I_comp, excl_zone, n_appended=1)
+        core._update_incremental_PI(D, cmp_P, cmp_I, excl_zone, n_appended=1)
 
         # assertion
-        npt.assert_almost_equal(P_ref, P_comp)
-        npt.assert_almost_equal(I_ref, I_comp)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_update_incremental_PI_egressTrue_MemoryCheck():
@@ -1935,24 +1939,24 @@ def test_update_incremental_PI_egressTrue_MemoryCheck():
                 I[i] = IDX
                 P[i] = D[i, IDX]
 
-            P_ref = P[1:].copy()
-            I_ref = I[1:].copy()
+            ref_P = P[1:].copy()
+            ref_I = I[1:].copy()
 
-            # comp
+            # cmp
             mp = naive.stump(T, m, row_wise=True, k=k)
-            P_comp = mp[:, :k].astype(np.float64)
-            I_comp = mp[:, k : 2 * k].astype(np.int64)
+            cmp_P = mp[:, :k].astype(np.float64)
+            cmp_I = mp[:, k : 2 * k].astype(np.int64)
 
-            P_comp[:-1] = P_comp[1:]
-            P_comp[-1] = np.inf
-            I_comp[:-1] = I_comp[1:]
-            I_comp[-1] = -1
+            cmp_P[:-1] = cmp_P[1:]
+            cmp_P[-1] = np.inf
+            cmp_I[:-1] = cmp_I[1:]
+            cmp_I[-1] = -1
             core._update_incremental_PI(
-                dist_profile, P_comp, I_comp, excl_zone, n_appended=1
+                dist_profile, cmp_P, cmp_I, excl_zone, n_appended=1
             )
 
-            npt.assert_almost_equal(P_ref, P_comp)
-            npt.assert_almost_equal(I_ref, I_comp)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_check_self_join():
