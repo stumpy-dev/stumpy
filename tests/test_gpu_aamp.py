@@ -57,14 +57,18 @@ def test_gpu_aamp_self_join(T_A, T_B):
     zone = int(np.ceil(m / 4))
     for p in [1.0, 2.0, 3.0]:
         ref_mp = naive.aamp(T_B, m, exclusion_zone=zone, p=p, row_wise=True)
-        comp_mp = gpu_aamp(T_B, m, ignore_trivial=True, p=p)
+        cmp_mp = gpu_aamp(T_B, m, ignore_trivial=True, p=p)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        comp_mp = gpu_aamp(pd.Series(T_B), m, ignore_trivial=True, p=p)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        cmp_mp = gpu_aamp(pd.Series(T_B), m, ignore_trivial=True, p=p)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -75,19 +79,21 @@ def test_gpu_aamp_self_join_larger_window(T_A, T_B, m):
     if len(T_B) > m:
         zone = int(np.ceil(m / 4))
         ref_mp = naive.aamp(T_B, m, exclusion_zone=zone)
-        comp_mp = gpu_aamp(T_B, m, ignore_trivial=True)
+        cmp_mp = gpu_aamp(T_B, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
+        naive.replace_inf(cmp_mp)
 
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        # comp_mp = gpu_aamp(
+        # cmp_mp = gpu_aamp(
         #     pd.Series(T_B),
         #     m,
         #     ignore_trivial=True,
         # )
-        # naive.replace_inf(comp_mp)
-        # npt.assert_almost_equal(ref_mp, comp_mp)
+        # naive.replace_inf(cmp_mp)
+        # npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -97,16 +103,18 @@ def test_gpu_aamp_A_B_join(T_A, T_B):
     m = 3
     for p in [1.0, 2.0, 3.0]:
         ref_mp = naive.aamp(T_B, m, T_B=T_A, p=p, row_wise=True)
-        comp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False, p=p)
+        cmp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False, p=p)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        # comp_mp = gpu_aamp(
+        # cmp_mp = gpu_aamp(
         #     pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False, p=p
         # )
-        # naive.replace_inf(comp_mp)
-        # npt.assert_almost_equal(ref_mp, comp_mp)
+        # naive.replace_inf(cmp_mp)
+        # npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -118,24 +126,26 @@ def test_parallel_gpu_aamp_self_join(T_A, T_B):
         m = 3
         zone = int(np.ceil(m / 4))
         ref_mp = naive.aamp(T_B, m, exclusion_zone=zone)
-        comp_mp = gpu_aamp(
+        cmp_mp = gpu_aamp(
             T_B,
             m,
             ignore_trivial=True,
             device_id=device_ids,
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        # comp_mp = gpu_aamp(
+        # cmp_mp = gpu_aamp(
         #     pd.Series(T_B),
         #     m,
         #     ignore_trivial=True,
         #     device_id=device_ids,
         # )
-        # naive.replace_inf(comp_mp)
-        # npt.assert_almost_equal(ref_mp, comp_mp)
+        # naive.replace_inf(cmp_mp)
+        # npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -146,7 +156,7 @@ def test_parallel_gpu_aamp_A_B_join(T_A, T_B):
     if len(T_B) > 10:
         m = 3
         ref_mp = naive.aamp(T_B, m, T_B=T_A)
-        comp_mp = gpu_aamp(
+        cmp_mp = gpu_aamp(
             T_B,
             m,
             T_A,
@@ -154,18 +164,20 @@ def test_parallel_gpu_aamp_A_B_join(T_A, T_B):
             device_id=device_ids,
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        # comp_mp = gpu_aamp(
+        # cmp_mp = gpu_aamp(
         #     pd.Series(T_B),
         #     m,
         #     pd.Series(T_A),
         #     ignore_trivial=False,
         #     device_id=device_ids,
         # )
-        # naive.replace_inf(comp_mp)
-        # npt.assert_almost_equal(ref_mp, comp_mp)
+        # naive.replace_inf(cmp_mp)
+        # npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -175,14 +187,16 @@ def test_gpu_aamp_constant_subsequence_self_join():
     m = 3
     zone = int(np.ceil(m / 4))
     ref_mp = naive.aamp(T_A, m, exclusion_zone=zone)
-    comp_mp = gpu_aamp(T_A, m, ignore_trivial=True)
+    cmp_mp = gpu_aamp(T_A, m, ignore_trivial=True)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_A), m, ignore_trivial=True)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    # cmp_mp = gpu_aamp(pd.Series(T_A), m, ignore_trivial=True)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(cmp_mp[:, 0], ref_mp[:, 0], atol=1.5e-07)  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -192,25 +206,29 @@ def test_gpu_aamp_one_constant_subsequence_A_B_join():
     T_B = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
     m = 3
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    comp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False)
+    cmp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    # cmp_mp = gpu_aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(cmp_mp[:, 0], ref_mp[:, 0], atol=1.5e-07)  # ignore indices
 
     # Swap inputs
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    comp_mp = gpu_aamp(T_A, m, T_B, ignore_trivial=False)
+    cmp_mp = gpu_aamp(T_A, m, T_B, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    # cmp_mp = gpu_aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(cmp_mp[:, 0], ref_mp[:, 0], atol=1.5e-07)  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -220,25 +238,29 @@ def test_gpu_aamp_two_constant_subsequences_A_B_join():
     T_B = np.concatenate((np.zeros(20, dtype=np.float64), np.ones(5, dtype=np.float64)))
     m = 3
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    comp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False)
+    cmp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    # cmp_mp = gpu_aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(cmp_mp[:, 0], ref_mp[:, 0], atol=1.5e-07)  # ignore indices
 
     # Swap inputs
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    comp_mp = gpu_aamp(T_A, m, T_B, ignore_trivial=False)
+    cmp_mp = gpu_aamp(T_A, m, T_B, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64), ref_mp[:, 0].astype(np.float64), atol=1.5e-07
+    )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+    # cmp_mp = gpu_aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(cmp_mp[:, 0], ref_mp[:, 0], atol=1.5e-07)  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -251,17 +273,19 @@ def test_gpu_aamp_identical_subsequence_self_join():
     m = 3
     zone = int(np.ceil(m / 4))
     ref_mp = naive.aamp(T_A, m, exclusion_zone=zone)
-    comp_mp = gpu_aamp(T_A, m, ignore_trivial=True)
+    cmp_mp = gpu_aamp(T_A, m, ignore_trivial=True)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_A), m, ignore_trivial=True)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(
-    #     ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    # cmp_mp = gpu_aamp(pd.Series(T_A), m, ignore_trivial=True)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(
+    #     cmp_mp[:, 0], ref_mp[:, 0], atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     # )  # ignore indices
 
 
@@ -275,32 +299,36 @@ def test_gpu_aamp_identical_subsequence_A_B_join():
     T_B[11 : 11 + identical.shape[0]] = identical
     m = 3
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    comp_mp = gpu_aamp(T_A, m, T_B, ignore_trivial=False)
+    cmp_mp = gpu_aamp(T_A, m, T_B, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(
-    #     ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    # cmp_mp = gpu_aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(
+    #     cmp_mp[:, 0], ref_mp[:, 0], atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     # )  # ignore indices
 
     # Swap inputs
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    comp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False)
+    cmp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(
-        ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp[:, 0].astype(np.float64),
+        ref_mp[:, 0].astype(np.float64),
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
-    # comp_mp = gpu_aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
-    # naive.replace_inf(comp_mp)
-    # npt.assert_almost_equal(
-    #     ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+    # cmp_mp = gpu_aamp(pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False)
+    # naive.replace_inf(cmp_mp)
+    # npt.assert_allclose(
+    #     cmp_mp[:, 0], ref_mp[:, 0], atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     # )  # ignore indices
 
 
@@ -320,14 +348,16 @@ def test_gpu_aamp_nan_inf_self_join(T_A, T_B, substitute_B, substitution_locatio
 
         zone = int(np.ceil(m / 4))
         ref_mp = naive.aamp(T_B_sub, m, exclusion_zone=zone)
-        comp_mp = gpu_aamp(T_B_sub, m, ignore_trivial=True)
+        cmp_mp = gpu_aamp(T_B_sub, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        # comp_mp = gpu_aamp(pd.Series(T_B_sub), m, ignore_trivial=True)
-        # naive.replace_inf(comp_mp)
-        # npt.assert_almost_equal(ref_mp, comp_mp)
+        # cmp_mp = gpu_aamp(pd.Series(T_B_sub), m, ignore_trivial=True)
+        # naive.replace_inf(cmp_mp)
+        # npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -352,16 +382,18 @@ def test_gpu_aamp_nan_inf_A_B_join(
             T_B_sub[substitution_location_B] = substitute_B
 
             ref_mp = naive.aamp(T_B_sub, m, T_B=T_A_sub)
-            comp_mp = gpu_aamp(T_B_sub, m, T_A_sub, ignore_trivial=False)
+            cmp_mp = gpu_aamp(T_B_sub, m, T_A_sub, ignore_trivial=False)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
-            # comp_mp = gpu_aamp(
+            # cmp_mp = gpu_aamp(
             #     pd.Series(T_B_sub), m, pd.Series(T_A_sub), ignore_trivial=False
             # )
-            # naive.replace_inf(comp_mp)
-            # npt.assert_almost_equal(ref_mp, comp_mp)
+            # naive.replace_inf(cmp_mp)
+            # npt.assert_allclose(cmp_mp, ref_mp, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -372,11 +404,13 @@ def test_gpu_aamp_nan_zero_mean_self_join():
 
     zone = int(np.ceil(m / 4))
     ref_mp = naive.aamp(T, m, exclusion_zone=zone)
-    comp_mp = gpu_aamp(T, m, ignore_trivial=True)
+    cmp_mp = gpu_aamp(T, m, ignore_trivial=True)
 
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp, comp_mp)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+    )
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -387,14 +421,18 @@ def test_gpu_aamp_self_join_KNN(T_A, T_B):
     for k in range(2, 4):
         for p in [1.0, 2.0, 3.0]:
             ref_mp = naive.aamp(T_B, m, exclusion_zone=zone, p=p, k=k)
-            comp_mp = gpu_aamp(T_B, m, ignore_trivial=True, p=p, k=k)
+            cmp_mp = gpu_aamp(T_B, m, ignore_trivial=True, p=p, k=k)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
-            comp_mp = gpu_aamp(pd.Series(T_B), m, ignore_trivial=True, p=p, k=k)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            cmp_mp = gpu_aamp(pd.Series(T_B), m, ignore_trivial=True, p=p, k=k)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -404,7 +442,9 @@ def test_gpu_aamp_A_B_join_KNN(T_A, T_B):
     for k in range(2, 4):
         for p in [1.0, 2.0, 3.0]:
             ref_mp = naive.aamp(T_B, m, T_B=T_A, p=p, k=k)
-            comp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False, p=p, k=k)
+            cmp_mp = gpu_aamp(T_B, m, T_A, ignore_trivial=False, p=p, k=k)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
