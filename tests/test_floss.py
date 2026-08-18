@@ -103,8 +103,8 @@ substitution_values = [np.nan, np.inf]
 @pytest.mark.parametrize("I", test_data)
 def test_nnmark(I):
     ref = naive_nnmark(I)
-    comp = _nnmark(I)
-    npt.assert_almost_equal(ref, comp)
+    cmp = _nnmark(I)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)
@@ -114,8 +114,8 @@ def test_cac(I):
     custom_iac = _iac(I.shape[0])
     ref = naive_cac(I, L, excl_factor, custom_iac)
     bidirectional = True
-    comp = _cac(I, L, bidirectional, excl_factor)
-    npt.assert_almost_equal(ref, comp)
+    cmp = _cac(I, L, bidirectional, excl_factor)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)
@@ -125,8 +125,8 @@ def test_cac_custom_iac(I):
     ref = naive_cac(I, L, excl_factor)
     custom_iac = naive_iac(I.shape[0])
     bidirectional = True
-    comp = _cac(I, L, bidirectional, excl_factor, custom_iac)
-    npt.assert_almost_equal(ref, comp)
+    cmp = _cac(I, L, bidirectional, excl_factor, custom_iac)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)
@@ -136,8 +136,8 @@ def test_rea(I):
     cac = naive_cac(I, L, excl_factor)
     n_regimes = 3
     ref = naive_rea(cac, n_regimes, L, excl_factor)
-    comp = _rea(cac, n_regimes, L, excl_factor)
-    npt.assert_almost_equal(ref, comp)
+    cmp = _rea(cac, n_regimes, L, excl_factor)
+    npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)
@@ -148,9 +148,9 @@ def test_fluss(I):
     ref_cac = naive_cac(I, L, excl_factor)
     n_regimes = 3
     ref_rea = naive_rea(ref_cac, n_regimes, L, excl_factor)
-    comp_cac, comp_rea = fluss(I, L, n_regimes, excl_factor, custom_iac)
-    npt.assert_almost_equal(ref_cac, comp_cac)
-    npt.assert_almost_equal(ref_rea, comp_rea)
+    cmp_cac, cmp_rea = fluss(I, L, n_regimes, excl_factor, custom_iac)
+    npt.assert_allclose(cmp_cac, ref_cac, atol=1.5e-07)
+    npt.assert_allclose(cmp_rea, ref_rea, atol=1.5e-07)
 
 
 def test_floss():
@@ -160,14 +160,14 @@ def test_floss():
     old_data = data[:n]
 
     mp = naive_right_mp(old_data, m)
-    comp_mp = stump(old_data, m)
+    cmp_mp = stump(old_data, m)
     k = mp.shape[0]
 
     rolling_Ts = core.rolling_window(data[1:], n)
     L = 5
     excl_factor = 1
     custom_iac = _iac(k, bidirectional=False)
-    stream = floss(comp_mp, old_data, m, L, excl_factor, custom_iac=custom_iac)
+    stream = floss(cmp_mp, old_data, m, L, excl_factor, custom_iac=custom_iac)
     last_idx = n - m + 1
     excl_zone = int(np.ceil(m / 4))
     zone_start = max(0, k - excl_zone)
@@ -199,19 +199,23 @@ def test_floss():
         ref_I[ref_mp[:, 0] == np.inf] = -1
 
         stream.update(ref_T[-1])
-        comp_cac_1d = stream.cac_1d_
-        comp_P = stream.P_
+        cmp_cac_1d = stream.cac_1d_
+        cmp_P = stream.P_
 
-        comp_I = stream.I_
-        comp_T = stream.T_
+        cmp_I = stream.I_
+        cmp_T = stream.T_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_cac_1d, comp_cac_1d)
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_T, comp_T)
+        npt.assert_allclose(cmp_cac_1d, ref_cac_1d, atol=1.5e-07)
+        npt.assert_allclose(
+            cmp_P.astype(np.float64), ref_P.astype(np.float64), atol=1.5e-07
+        )
+        npt.assert_allclose(
+            cmp_I.astype(np.float64), ref_I.astype(np.float64), atol=1.5e-07
+        )
+        npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
 
 
 def test_aamp_floss():
@@ -222,7 +226,7 @@ def test_aamp_floss():
 
     for p in range(1, 4):
         mp = naive_right_mp(old_data, m, normalize=False, p=p)
-        comp_mp = aamp(old_data, m, p=p)
+        cmp_mp = aamp(old_data, m, p=p)
         k = mp.shape[0]
 
         rolling_Ts = core.rolling_window(data[1:], n)
@@ -230,7 +234,7 @@ def test_aamp_floss():
         excl_factor = 1
         custom_iac = _iac(k, bidirectional=False)
         stream = floss(
-            comp_mp,
+            cmp_mp,
             old_data,
             m,
             L,
@@ -270,18 +274,22 @@ def test_aamp_floss():
             ref_I[ref_mp[:, 0] == np.inf] = -1
 
             stream.update(ref_T[-1])
-            comp_cac_1d = stream.cac_1d_
-            comp_P = stream.P_
-            comp_I = stream.I_
-            comp_T = stream.T_
+            cmp_cac_1d = stream.cac_1d_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
+            cmp_T = stream.T_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_cac_1d, comp_cac_1d)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_T, comp_T)
+            npt.assert_allclose(cmp_cac_1d, ref_cac_1d, atol=1.5e-07)
+            npt.assert_allclose(
+                cmp_P.astype(np.float64), ref_P.astype(np.float64), atol=1.5e-07
+            )
+            npt.assert_allclose(
+                cmp_I.astype(np.float64), ref_I.astype(np.float64), atol=1.5e-07
+            )
+            npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("substitute", substitution_values)
@@ -297,14 +305,14 @@ def test_floss_inf_nan(substitute, substitution_locations):
         old_data = data[:n]
 
         mp = naive_right_mp(old_data, m)
-        comp_mp = stump(old_data, m)
+        cmp_mp = stump(old_data, m)
         k = mp.shape[0]
 
         rolling_Ts = core.rolling_window(data[1:], n)
         L = 5
         excl_factor = 1
         custom_iac = _iac(k, bidirectional=False)
-        stream = floss(comp_mp, old_data, m, L, excl_factor, custom_iac=custom_iac)
+        stream = floss(cmp_mp, old_data, m, L, excl_factor, custom_iac=custom_iac)
         last_idx = n - m + 1
         excl_zone = int(np.ceil(m / 4))
         zone_start = max(0, k - excl_zone)
@@ -342,18 +350,22 @@ def test_floss_inf_nan(substitute, substitution_locations):
             ref_I[ref_mp[:, 0] == np.inf] = -1
 
             stream.update(ref_T[-1])
-            comp_cac_1d = stream.cac_1d_
-            comp_P = stream.P_
-            comp_I = stream.I_
-            comp_T = stream.T_
+            cmp_cac_1d = stream.cac_1d_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
+            cmp_T = stream.T_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_cac_1d, comp_cac_1d)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_T, comp_T)
+            npt.assert_allclose(cmp_cac_1d, ref_cac_1d, atol=1.5e-07)
+            npt.assert_allclose(
+                cmp_P.astype(np.float64), ref_P.astype(np.float64), atol=1.5e-07
+            )
+            npt.assert_allclose(
+                cmp_I.astype(np.float64), ref_I.astype(np.float64), atol=1.5e-07
+            )
+            npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("substitute", substitution_values)
@@ -369,7 +381,7 @@ def test_aamp_floss_inf_nan(substitute, substitution_locations):
         old_data = data[:n]
 
         mp = naive_right_mp(old_data, m, normalize=False)
-        comp_mp = aamp(old_data, m)
+        cmp_mp = aamp(old_data, m)
         k = mp.shape[0]
 
         rolling_Ts = core.rolling_window(data[1:], n)
@@ -377,7 +389,7 @@ def test_aamp_floss_inf_nan(substitute, substitution_locations):
         excl_factor = 1
         custom_iac = _iac(k, bidirectional=False)
         stream = floss(
-            comp_mp, old_data, m, L, excl_factor, custom_iac=custom_iac, normalize=False
+            cmp_mp, old_data, m, L, excl_factor, custom_iac=custom_iac, normalize=False
         )
         last_idx = n - m + 1
         excl_zone = int(np.ceil(m / 4))
@@ -416,18 +428,22 @@ def test_aamp_floss_inf_nan(substitute, substitution_locations):
             ref_I[ref_mp[:, 0] == np.inf] = -1
 
             stream.update(ref_T[-1])
-            comp_cac_1d = stream.cac_1d_
-            comp_P = stream.P_
-            comp_I = stream.I_
-            comp_T = stream.T_
+            cmp_cac_1d = stream.cac_1d_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
+            cmp_T = stream.T_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_cac_1d, comp_cac_1d)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_T, comp_T)
+            npt.assert_allclose(cmp_cac_1d, ref_cac_1d, atol=1.5e-07)
+            npt.assert_allclose(
+                cmp_P.astype(np.float64), ref_P.astype(np.float64), atol=1.5e-07
+            )
+            npt.assert_allclose(
+                cmp_I.astype(np.float64), ref_I.astype(np.float64), atol=1.5e-07
+            )
+            npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
 
 
 def test_floss_with_isconstant():
@@ -445,7 +461,7 @@ def test_floss_with_isconstant():
     )
 
     mp = naive_right_mp(T=old_data, m=m, T_subseq_isconstant=isconstant_custom_func)
-    comp_mp = stump(T_A=old_data, m=m, T_A_subseq_isconstant=isconstant_custom_func)
+    cmp_mp = stump(T_A=old_data, m=m, T_A_subseq_isconstant=isconstant_custom_func)
     k = mp.shape[0]
 
     rolling_Ts = core.rolling_window(data[1:], n)
@@ -453,7 +469,7 @@ def test_floss_with_isconstant():
     excl_factor = 1
     custom_iac = _iac(k, bidirectional=False)
     stream = floss(
-        comp_mp,
+        cmp_mp,
         old_data,
         m,
         L,
@@ -502,15 +518,19 @@ def test_floss_with_isconstant():
         ref_I[ref_mp[:, 0] == np.inf] = -1
 
         stream.update(ref_T[-1])
-        comp_cac_1d = stream.cac_1d_
-        comp_P = stream.P_
-        comp_I = stream.I_
-        comp_T = stream.T_
+        cmp_cac_1d = stream.cac_1d_
+        cmp_P = stream.P_
+        cmp_I = stream.I_
+        cmp_T = stream.T_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_cac_1d, comp_cac_1d)
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_T, comp_T)
+        npt.assert_allclose(cmp_cac_1d, ref_cac_1d, atol=1.5e-07)
+        npt.assert_allclose(
+            cmp_P.astype(np.float64), ref_P.astype(np.float64), atol=1.5e-07
+        )
+        npt.assert_allclose(
+            cmp_I.astype(np.float64), ref_I.astype(np.float64), atol=1.5e-07
+        )
+        npt.assert_allclose(cmp_T, ref_T, atol=1.5e-07)
