@@ -772,7 +772,7 @@ def test_apply_exclusion_zone():
 
         naive.replace_inf(ref)
         naive.replace_inf(cmp)
-        npt.assert_array_equal(ref, cmp)
+        npt.assert_array_equal(cmp, ref)
 
 
 def test_apply_exclusion_zone_int():
@@ -790,7 +790,7 @@ def test_apply_exclusion_zone_int():
 
         naive.replace_inf(ref)
         naive.replace_inf(cmp)
-        npt.assert_array_equal(ref, cmp)
+        npt.assert_array_equal(cmp, ref)
 
 
 def test_apply_exclusion_zone_bool():
@@ -808,7 +808,7 @@ def test_apply_exclusion_zone_bool():
 
         naive.replace_inf(ref)
         naive.replace_inf(cmp)
-        npt.assert_array_equal(ref, cmp)
+        npt.assert_array_equal(cmp, ref)
 
 
 def test_apply_exclusion_zone_multidimensional():
@@ -829,7 +829,7 @@ def test_apply_exclusion_zone_multidimensional():
 
         naive.replace_inf(ref)
         naive.replace_inf(cmp)
-        npt.assert_array_equal(ref, cmp)
+        npt.assert_array_equal(cmp, ref)
 
 
 def test_preprocess():
@@ -1065,28 +1065,28 @@ def test_compare_parameters():
 def test_jagged_list_to_array():
     arr = [np.array([0, 1]), np.array([0]), np.array([0, 1, 2, 3])]
 
-    left = np.array([[0, 1, -1, -1], [0, -1, -1, -1], [0, 1, 2, 3]], dtype="int64")
-    right = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
-    npt.assert_array_equal(left, right)
+    ref = np.array([[0, 1, -1, -1], [0, -1, -1, -1], [0, 1, 2, 3]], dtype="int64")
+    cmp = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
+    npt.assert_array_equal(cmp, ref)
 
-    left = np.array(
+    ref = np.array(
         [[0, 1, np.nan, np.nan], [0, np.nan, np.nan, np.nan], [0, 1, 2, 3]],
         dtype="float64",
     )
-    right = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
-    npt.assert_array_equal(left, right)
+    cmp = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
+    npt.assert_array_equal(cmp, ref)
 
 
 def test_jagged_list_to_array_empty():
     arr = []
 
-    left = np.array([[]], dtype="int64")
-    right = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
-    npt.assert_array_equal(left, right)
+    ref = np.array([[]], dtype="int64")
+    cmp = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
+    npt.assert_array_equal(cmp, ref)
 
-    left = np.array([[]], dtype="float64")
-    right = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
-    npt.assert_array_equal(left, right)
+    ref = np.array([[]], dtype="float64")
+    cmp = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
+    npt.assert_array_equal(cmp, ref)
 
 
 def test_get_mask_slices():
@@ -1102,7 +1102,7 @@ def test_get_mask_slices():
     for mask in mask_cases:
         ref_slices = naive._get_mask_slices(mask)
         cmp_slices = core._get_mask_slices(mask)
-        npt.assert_array_equal(ref_slices, cmp_slices)
+        npt.assert_array_equal(cmp_slices, ref_slices)
 
 
 def test_idx_to_mp():
@@ -1532,7 +1532,7 @@ def test_gpu_searchsorted():
             device_A, device_V, device_bfs, nlevel, is_left, device_cmp_IDX
         )
         cmp_IDX = device_cmp_IDX.copy_to_host()
-        npt.assert_array_equal(ref_IDX, cmp_IDX)
+        npt.assert_array_equal(cmp_IDX, ref_IDX)
 
         is_left = False  # test case
         ref_IDX = [np.searchsorted(A[i], V[i], side="right") for i in range(n)]
@@ -1544,7 +1544,7 @@ def test_gpu_searchsorted():
             device_A, device_V, device_bfs, nlevel, is_left, device_cmp_IDX
         )
         cmp_IDX = device_cmp_IDX.copy_to_host()
-        npt.assert_array_equal(ref_IDX, cmp_IDX)
+        npt.assert_array_equal(cmp_IDX, ref_IDX)
 
 
 def test_client_to_func():
@@ -1693,7 +1693,7 @@ def test_process_isconstant_1d():
     ref_T_subseq_isconstant = naive.rolling_isconstant(T, m, isconstant_custom_func)
     cmp_T_subseq_isconstant = core.process_isconstant(T, m, isconstant_custom_func)
 
-    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
+    npt.assert_allclose(cmp_T_subseq_isconstant, ref_T_subseq_isconstant, atol=1.5e-07)
 
     # case 2: with nan
     T = rng.RNG.rand(n)
@@ -1706,7 +1706,7 @@ def test_process_isconstant_1d():
     ref_T_subseq_isconstant = T_subseq_isconstant & T_subseq_isfinite
     cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
-    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
+    npt.assert_allclose(cmp_T_subseq_isconstant, ref_T_subseq_isconstant, atol=1.5e-07)
 
 
 def test_process_isconstant_2d():
@@ -1732,7 +1732,7 @@ def test_process_isconstant_2d():
 
     cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
-    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
+    npt.assert_allclose(cmp_T_subseq_isconstant, ref_T_subseq_isconstant, atol=1.5e-07)
 
     # case 2: with nan
     T = rng.RNG.rand(d, n)
@@ -1760,7 +1760,7 @@ def test_process_isconstant_2d():
 
     cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant)
 
-    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
+    npt.assert_allclose(cmp_T_subseq_isconstant, ref_T_subseq_isconstant, atol=1.5e-07)
 
 
 def test_process_isconstant_1d_default():
@@ -1775,7 +1775,7 @@ def test_process_isconstant_1d_default():
     ref_T_subseq_isconstant = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
     cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant=None)
 
-    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
+    npt.assert_allclose(cmp_T_subseq_isconstant, ref_T_subseq_isconstant, atol=1.5e-07)
 
     # case 2: with nan
     T = rng.RNG.rand(n)
@@ -1785,7 +1785,7 @@ def test_process_isconstant_1d_default():
     ref_T_subseq_isconstant = naive.rolling_isconstant(T, m, a_subseq_isconstant=None)
     cmp_T_subseq_isconstant = core.process_isconstant(T, m, T_subseq_isconstant=None)
 
-    npt.assert_array_equal(ref_T_subseq_isconstant, cmp_T_subseq_isconstant)
+    npt.assert_allclose(cmp_T_subseq_isconstant, ref_T_subseq_isconstant, atol=1.5e-07)
 
 
 def test_update_incremental_PI_egressFalse():
