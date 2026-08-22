@@ -37,11 +37,11 @@ def test_random_gpu_ostinato(runs):
     Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m)
+    cmp_radius, cmp_Ts_idx, cmp_subseq_idx = gpu_ostinato(Ts, m)
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+    npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+    npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+    npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -54,11 +54,11 @@ def test_deterministic_gpu_ostinato(seed):
         Ts = [rng.RNG.rand(n) for n in [64, 128, 256]]
 
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m)
+        cmp_radius, cmp_Ts_idx, cmp_subseq_idx = gpu_ostinato(Ts, m)
 
-        npt.assert_almost_equal(ref_radius, comp_radius)
-        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+        npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+        npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -76,13 +76,13 @@ def test_random_gpu_ostinato_with_isconstant(runs):
     ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
         Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
     )
-    comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(
+    cmp_radius, cmp_Ts_idx, cmp_subseq_idx = gpu_ostinato(
         Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
     )
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+    npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+    npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+    npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -110,13 +110,13 @@ def test_deterministic_gpu_ostinato_with_isconstant(seed):
         ref_radius, ref_Ts_idx, ref_subseq_idx = naive.ostinato(
             Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
         )
-        comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(
+        cmp_radius, cmp_Ts_idx, cmp_subseq_idx = gpu_ostinato(
             Ts, m, Ts_subseq_isconstant=Ts_subseq_isconstant
         )
 
-        npt.assert_almost_equal(ref_radius, comp_radius)
-        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+        npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+        npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -135,8 +135,10 @@ def test_input_not_overwritten():
     gpu_ostinato(Ts_input, m)
     for i in range(len(Ts)):
         T_ref = Ts[i]
-        T_comp = Ts_input[i]
-        npt.assert_almost_equal(T_ref[np.isfinite(T_ref)], T_comp[np.isfinite(T_comp)])
+        T_cmp = Ts_input[i]
+        npt.assert_allclose(
+            T_cmp[np.isfinite(T_cmp)], T_ref[np.isfinite(T_ref)], atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -146,27 +148,29 @@ def test_extract_several_consensus():
     # does not tamper with the original data.
     Ts = [rng.RNG.rand(n) for n in [64, 128]]
     Ts_ref = [T.copy() for T in Ts]
-    Ts_comp = [T.copy() for T in Ts]
+    Ts_cmp = [T.copy() for T in Ts]
 
     m = 20
 
     k = 2  # Get the first `k` consensus motifs
     for _ in range(k):
-        # Find consensus motif and its NN in each time series in Ts_comp
-        # Remove them from Ts_comp as well as Ts_ref, and assert that the
+        # Find consensus motif and its NN in each time series in Ts_cmp
+        # Remove them from Ts_cmp as well as Ts_ref, and assert that the
         # two time series are the same
-        radius, Ts_idx, subseq_idx = gpu_ostinato(Ts_comp, m)
-        consensus_motif = Ts_comp[Ts_idx][subseq_idx : subseq_idx + m].copy()
-        for i in range(len(Ts_comp)):
+        radius, Ts_idx, subseq_idx = gpu_ostinato(Ts_cmp, m)
+        consensus_motif = Ts_cmp[Ts_idx][subseq_idx : subseq_idx + m].copy()
+        for i in range(len(Ts_cmp)):
             if i == Ts_idx:
                 query_idx = subseq_idx
             else:
                 query_idx = None
 
-            idx = np.argmin(core.mass(consensus_motif, Ts_comp[i], query_idx=query_idx))
-            Ts_comp[i][idx : idx + m] = np.nan
+            idx = np.argmin(core.mass(consensus_motif, Ts_cmp[i], query_idx=query_idx))
+            Ts_cmp[i][idx : idx + m] = np.nan
             Ts_ref[i][idx : idx + m] = np.nan
 
-            npt.assert_almost_equal(
-                Ts_ref[i][np.isfinite(Ts_ref[i])], Ts_comp[i][np.isfinite(Ts_comp[i])]
+            npt.assert_allclose(
+                Ts_cmp[i][np.isfinite(Ts_cmp[i])],
+                Ts_ref[i][np.isfinite(Ts_ref[i])],
+                atol=1.5e-07,
             )
