@@ -44,6 +44,6 @@ def test_gpu_aampdist(T_A, T_B):
     m = 3
     for p in [1.0, 2.0, 3.0]:
         ref_mpdist = naive.aampdist(T_A, T_B, m, p=p)
-        comp_mpdist = gpu_aampdist(T_A, T_B, m, p=p)
+        cmp_mpdist = gpu_aampdist(T_A, T_B, m, p=p)
 
-        npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+        npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
