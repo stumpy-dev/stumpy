@@ -44,9 +44,9 @@ test_data = [
 def test_gpu_mpdist(T_A, T_B):
     m = 3
     ref_mpdist = naive.mpdist(T_A, T_B, m)
-    comp_mpdist = gpu_mpdist(T_A, T_B, m)
+    cmp_mpdist = gpu_mpdist(T_A, T_B, m)
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -65,7 +65,7 @@ def test_gpu_mpdist_with_isconstant(T_A, T_B):
         T_A_subseq_isconstant=isconstant_custom_func,
         T_B_subseq_isconstant=isconstant_custom_func,
     )
-    comp_mpdist = gpu_mpdist(
+    cmp_mpdist = gpu_mpdist(
         T_A,
         T_B,
         m,
@@ -73,4 +73,4 @@ def test_gpu_mpdist_with_isconstant(T_A, T_B):
         T_B_subseq_isconstant=isconstant_custom_func,
     )
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
