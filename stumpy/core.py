@@ -665,7 +665,16 @@ def sliding_dot_product(Q, T):
     output : numpy.ndarray
         Sliding dot product between `Q` and `T`.
     """
-    return sdp._sliding_dot_product(Q, T)
+    if len(Q) == len(T):
+        func = np.dot
+    elif len(Q) <= 128:  # 2 ** 7
+        func = sdp._njit_sliding_dot_product
+    elif sdp.PYFFTW_IS_AVAILABLE:
+        func = sdp._pyfftw_sliding_dot_product
+    else:
+        func = sdp._sliding_dot_product
+
+    return func(Q, T)
 
 
 @njit(
