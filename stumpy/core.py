@@ -666,15 +666,15 @@ def sliding_dot_product(Q, T):
         Sliding dot product between `Q` and `T`.
     """
     if len(Q) == len(T):
-        func = np.dot
-    elif len(Q) <= 128:  # 2 ** 7
-        func = sdp._njit_sliding_dot_product
-    elif sdp.PYFFTW_IS_AVAILABLE:
-        func = sdp._pyfftw_sliding_dot_product
+        out = np.array([np.dot(Q, T)])
+    elif len(Q) <= config.STUMPY_NJIT_SDP_Q_LENGTH:
+        out = sdp._njit_sliding_dot_product(Q, T)
+    elif sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
+        out = sdp._pyfftw_sliding_dot_product(Q, T)
     else:
-        func = sdp._sliding_dot_product
+        out = sdp._sliding_dot_product(Q, T)
 
-    return func(Q, T)
+    return out
 
 
 @njit(
