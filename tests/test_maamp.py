@@ -37,11 +37,11 @@ def test_multi_mass_absolute_seeded():
         ref = naive.multi_mass_absolute(Q, T, m)
 
         T, T_subseq_isfinite = core.preprocess_non_normalized(T, m)
-        comp = _multi_mass_absolute(
+        cmp = _multi_mass_absolute(
             Q, T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite
         )
 
-        npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp, ref, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -54,11 +54,11 @@ def test_multi_mass_absolute(T, m):
         ref = naive.multi_mass_absolute(Q, T, m, p=p)
 
         _T, T_subseq_isfinite = core.preprocess_non_normalized(T, m)
-        comp = _multi_mass_absolute(
+        cmp = _multi_mass_absolute(
             Q, _T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite, p=p
         )
 
-        npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp, ref, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -68,9 +68,9 @@ def test_maamp_multi_distance_profile(T, m):
         for query_idx in range(_T.shape[0] - m + 1):
             ref_D = naive.maamp_multi_distance_profile(query_idx, _T, m, p=p)
 
-            comp_D = maamp_multi_distance_profile(query_idx, _T, m, p=p)
+            cmp_D = maamp_multi_distance_profile(query_idx, _T, m, p=p)
 
-            npt.assert_almost_equal(ref_D, comp_D)
+            npt.assert_allclose(cmp_D, ref_D, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -84,12 +84,12 @@ def test_get_first_maamp_profile(T, m):
         ref_I = ref_I[:, start]
 
         _T, T_subseq_isfinite = core.preprocess_non_normalized(T, m)
-        comp_P, comp_I = _get_first_maamp_profile(
+        cmp_P, cmp_I = _get_first_maamp_profile(
             start, _T, _T, m, excl_zone, T_subseq_isfinite, p=p
         )
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_equal(ref_I, cmp_I)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -100,8 +100,8 @@ def test_maamp_subspace(T, m):
     for p in [1.0, 2.0, 3.0]:
         for k in range(T.shape[0]):
             ref_S = naive.maamp_subspace(T, m, motif_idx, nn_idx, k, p=p)
-            comp_S = maamp_subspace(T, m, motif_idx, nn_idx, k, p=p)
-            npt.assert_almost_equal(ref_S, comp_S)
+            cmp_S = maamp_subspace(T, m, motif_idx, nn_idx, k, p=p)
+            npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -114,8 +114,8 @@ def test_maamp_subspace_include(T, m):
 
             for k in range(T.shape[0]):
                 ref_S = naive.maamp_subspace(T, m, motif_idx, nn_idx, k, include)
-                comp_S = maamp_subspace(T, m, motif_idx, nn_idx, k, include)
-                npt.assert_almost_equal(ref_S, comp_S)
+                cmp_S = maamp_subspace(T, m, motif_idx, nn_idx, k, include)
+                npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -125,8 +125,8 @@ def test_maamp_subspace_discords(T, m):
 
     for k in range(T.shape[0]):
         ref_S = naive.maamp_subspace(T, m, discord_idx, nn_idx, k, discords=True)
-        comp_S = maamp_subspace(T, m, discord_idx, nn_idx, k, discords=True)
-        npt.assert_almost_equal(ref_S, comp_S)
+        cmp_S = maamp_subspace(T, m, discord_idx, nn_idx, k, discords=True)
+        npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -141,10 +141,10 @@ def test_maamp_subspace_include_discords(T, m):
                 ref_S = naive.maamp_subspace(
                     T, m, discord_idx, nn_idx, k, include, discords=True
                 )
-                comp_S = maamp_subspace(
+                cmp_S = maamp_subspace(
                     T, m, discord_idx, nn_idx, k, include, discords=True
                 )
-                npt.assert_almost_equal(ref_S, comp_S)
+                npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -154,11 +154,11 @@ def test_maamp_mdl(T, m):
 
     for p in [1.0, 2.0, 3.0]:
         ref_MDL, ref_S = naive.maamp_mdl(T, m, subseq_idx, nn_idx, p=p)
-        comp_MDL, comp_S = maamp_mdl(T, m, subseq_idx, nn_idx, p=p)
-        npt.assert_almost_equal(ref_MDL, comp_MDL)
+        cmp_MDL, cmp_S = maamp_mdl(T, m, subseq_idx, nn_idx, p=p)
+        npt.assert_allclose(cmp_MDL, ref_MDL, atol=1.5e-07)
 
-        for ref, cmp in zip(ref_S, comp_S):
-            npt.assert_almost_equal(ref, cmp)
+        for ref, cmp in zip(ref_S, cmp_S):
+            npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
 def test_naive_maamp():
@@ -171,10 +171,14 @@ def test_naive_maamp():
     ref_P = ref_mp[np.newaxis, :, 0]
     ref_I = ref_mp[np.newaxis, :, 1]
 
-    comp_P, comp_I = naive.maamp(T, m, zone)
+    cmp_P, cmp_I = naive.maamp(T, m, zone)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(
+        cmp_P.astype(np.float64), ref_P.astype(np.float64), atol=1.5e-07
+    )
+    npt.assert_allclose(
+        cmp_I.astype(np.float64), ref_I.astype(np.float64), atol=1.5e-07
+    )
 
 
 def test_maamp_int_input():
@@ -188,10 +192,10 @@ def test_maamp(T, m):
 
     for p in [1.0, 2.0, 3.0]:
         ref_P, ref_I = naive.maamp(T, m, excl_zone, p=p)
-        comp_P, comp_I = maamp(T, m, p=p)
+        cmp_P, cmp_I = maamp(T, m, p=p)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -202,10 +206,10 @@ def test_maamp_include(T, m):
             excl_zone = int(np.ceil(m / 4))
 
             ref_P, ref_I = naive.maamp(T, m, excl_zone, include)
-            comp_P, comp_I = maamp(T, m, include)
+            cmp_P, cmp_I = maamp(T, m, include)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -213,10 +217,10 @@ def test_maamp_discords(T, m):
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.maamp(T, m, excl_zone, discords=True)
-    comp_P, comp_I = maamp(T, m, discords=True)
+    cmp_P, cmp_I = maamp(T, m, discords=True)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -228,10 +232,10 @@ def test_maamp_include_discords(T, m):
             excl_zone = int(np.ceil(m / 4))
 
             ref_P, ref_I = naive.maamp(T, m, excl_zone, include, discords=True)
-            comp_P, comp_I = maamp(T, m, include, discords=True)
+            cmp_P, cmp_I = maamp(T, m, include, discords=True)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -239,16 +243,16 @@ def test_maamp_wrapper(T, m):
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.maamp(T, m, excl_zone)
-    comp_P, comp_I = maamp(T, m)
+    cmp_P, cmp_I = maamp(T, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
     df = pd.DataFrame(T.T)
-    comp_P, comp_I = maamp(df, m)
+    cmp_P, cmp_I = maamp(df, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -260,16 +264,16 @@ def test_maamp_wrapper_include(T, m):
             excl_zone = int(np.ceil(m / 4))
 
             ref_P, ref_I = naive.maamp(T, m, excl_zone, include)
-            comp_P, comp_I = maamp(T, m, include)
+            cmp_P, cmp_I = maamp(T, m, include)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
             df = pd.DataFrame(T.T)
-            comp_P, comp_I = maamp(df, m, include)
+            cmp_P, cmp_I = maamp(df, m, include)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_constant_subsequence_self_join():
@@ -280,9 +284,9 @@ def test_constant_subsequence_self_join():
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.maamp(T, m, excl_zone)
-    comp_P, comp_I = maamp(T, m)
+    cmp_P, cmp_I = maamp(T, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)  # ignore indices
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)  # ignore indices
 
 
 def test_identical_subsequence_self_join():
@@ -296,10 +300,10 @@ def test_identical_subsequence_self_join():
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.maamp(T, m, excl_zone)
-    comp_P, comp_I = maamp(T, m)
+    cmp_P, cmp_I = maamp(T, m)
 
-    npt.assert_almost_equal(
-        ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION
+    npt.assert_allclose(
+        cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     )  # ignore indices
 
 
@@ -318,10 +322,10 @@ def test_maamp_nan_inf_self_join_first_dimension(
         T_sub[0, substitution_location] = substitute
 
         ref_P, ref_I = naive.maamp(T_sub, m, excl_zone)
-        comp_P, comp_I = maamp(T_sub, m)
+        cmp_P, cmp_I = maamp(T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -337,7 +341,7 @@ def test_maamp_nan_self_join_all_dimensions(T, m, substitute, substitution_locat
         T_sub[:, substitution_location] = substitute
 
         ref_P, ref_I = naive.maamp(T_sub, m, excl_zone)
-        comp_P, comp_I = maamp(T_sub, m)
+        cmp_P, cmp_I = maamp(T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
