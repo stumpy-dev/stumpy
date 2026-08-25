@@ -65,7 +65,7 @@ def test_gpu_stimp(T):
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
 
-    npt.assert_almost_equal(ref_PAN, cmp_PAN)
+    npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
     # Compare transformed pan
     cmp_pan = pan.PAN_
@@ -76,7 +76,7 @@ def test_gpu_stimp(T):
     naive.replace_inf(ref_pan)
     naive.replace_inf(cmp_pan)
 
-    npt.assert_almost_equal(ref_pan, cmp_pan)
+    npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -122,7 +122,7 @@ def test_gpu_stimp_with_isconstant():
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
 
-    npt.assert_almost_equal(ref_PAN, cmp_PAN)
+    npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
     # Compare transformed pan
     cmp_pan = pan.PAN_
@@ -133,4 +133,4 @@ def test_gpu_stimp_with_isconstant():
     naive.replace_inf(ref_pan)
     naive.replace_inf(cmp_pan)
 
-    npt.assert_almost_equal(ref_pan, cmp_pan)
+    npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
