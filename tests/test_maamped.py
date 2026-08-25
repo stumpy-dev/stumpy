@@ -46,10 +46,10 @@ def test_maamped(T, m, dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.maamp(T, m, excl_zone)
-        comp_P, comp_I = maamped(dask_client, T, m)
+        cmp_P, cmp_I = maamped(dask_client, T, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -63,10 +63,10 @@ def test_maamped_include(T, m, dask_cluster):
                 excl_zone = int(np.ceil(m / 4))
 
                 ref_P, ref_I = naive.maamp(T, m, excl_zone, include)
-                comp_P, comp_I = maamped(dask_client, T, m, include)
+                cmp_P, cmp_I = maamped(dask_client, T, m, include)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -76,10 +76,10 @@ def test_maamped_discords(T, m, dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.maamp(T, m, excl_zone, discords=True)
-        comp_P, comp_I = maamped(dask_client, T, m, discords=True)
+        cmp_P, cmp_I = maamped(dask_client, T, m, discords=True)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -93,10 +93,10 @@ def test_maamped_include_discords(T, m, dask_cluster):
                 excl_zone = int(np.ceil(m / 4))
 
                 ref_P, ref_I = naive.maamp(T, m, excl_zone, include, discords=True)
-                comp_P, comp_I = maamped(dask_client, T, m, include, discords=True)
+                cmp_P, cmp_I = maamped(dask_client, T, m, include, discords=True)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -107,10 +107,10 @@ def test_maamped_df(T, m, dask_cluster):
 
         ref_P, ref_I = naive.maamp(T, m, excl_zone)
         df = pd.DataFrame(T.T)
-        comp_P, comp_I = maamped(dask_client, df, m)
+        cmp_P, cmp_I = maamped(dask_client, df, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -125,9 +125,9 @@ def test_maamped_constant_subsequence_self_join(dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.maamp(T, m, excl_zone)
-        comp_P, comp_I = maamped(dask_client, T, m)
+        cmp_P, cmp_I = maamped(dask_client, T, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)  # ignore indices
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -143,10 +143,10 @@ def test_maamped_identical_subsequence_self_join(dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.maamp(T, m, excl_zone)
-        comp_P, comp_I = maamped(dask_client, T, m)
+        cmp_P, cmp_I = maamped(dask_client, T, m)
 
-        npt.assert_almost_equal(
-            ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )  # ignore indices
 
 
@@ -163,10 +163,10 @@ def test_maamped_one_subsequence_inf_self_join_first_dimension(
         T_sub[0, substitution_location] = np.inf
 
         ref_P, ref_I = naive.maamp(T_sub, m, excl_zone)
-        comp_P, comp_I = maamped(dask_client, T_sub, m)
+        cmp_P, cmp_I = maamped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -182,10 +182,10 @@ def test_maamped_one_subsequence_inf_self_join_all_dimensions(
         T_sub[:, substitution_location] = np.inf
 
         ref_P, ref_I = naive.maamp(T_sub, m, excl_zone)
-        comp_P, comp_I = maamped(dask_client, T_sub, m)
+        cmp_P, cmp_I = maamped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -201,10 +201,10 @@ def test_maamped_one_subsequence_nan_self_join_first_dimension(
         T_sub[0, substitution_location] = np.nan
 
         ref_P, ref_I = naive.maamp(T_sub, m, excl_zone)
-        comp_P, comp_I = maamped(dask_client, T_sub, m)
+        cmp_P, cmp_I = maamped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -220,7 +220,7 @@ def test_maamped_one_subsequence_nan_self_join_all_dimensions(
         T_sub[:, substitution_location] = np.nan
 
         ref_P, ref_I = naive.maamp(T_sub, m, excl_zone)
-        comp_P, comp_I = maamped(dask_client, T_sub, m)
+        cmp_P, cmp_I = maamped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
