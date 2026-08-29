@@ -8,7 +8,7 @@ from numba import cuda
 if cuda.is_available():
     from stumpy.gpu_stimp import gpu_stimp
 else:  # pragma: no cover
-    from stumpy.core import _gpu_stimp_driver_not_found as gpu_stimp  # noqa: F401
+    from stumpy.core import _gpu_stimp_dnf as gpu_stimp  # noqa: F401
 
 try:
     from numba.errors import NumbaPerformanceWarning

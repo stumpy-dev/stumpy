@@ -14,7 +14,7 @@ from stumpy import cache, config, core, fastmath, rng, sdp
 if cuda.is_available():
     from stumpy.gpu_stump import gpu_stump
 else:  # pragma: no cover
-    from stumpy.core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
+    from stumpy.core import _gpu_stump_dnf as gpu_stump  # noqa: F401
 
 from stumpy.snippets import snippets
 

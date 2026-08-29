@@ -166,7 +166,7 @@ def driver_not_found(*args, **kwargs):  # pragma: no cover
     _raise_driver_not_found()
 
 
-def _gpu_stump_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_stump_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -181,7 +181,7 @@ def _gpu_stump_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_aamp_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_aamp_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -196,7 +196,7 @@ def _gpu_aamp_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_ostinato_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_ostinato_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -211,7 +211,7 @@ def _gpu_ostinato_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_aamp_ostinato_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_aamp_ostinato_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -226,7 +226,7 @@ def _gpu_aamp_ostinato_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_mpdist_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_mpdist_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -241,7 +241,7 @@ def _gpu_mpdist_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_aampdist_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_aampdist_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -256,7 +256,7 @@ def _gpu_aampdist_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_stimp_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_stimp_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -271,7 +271,7 @@ def _gpu_stimp_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_aamp_stimp_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_aamp_stimp_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -286,7 +286,7 @@ def _gpu_aamp_stimp_driver_not_found(*args, **kwargs):  # pragma: no cover
     driver_not_found()
 
 
-def _gpu_searchsorted_left_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_searchsorted_left_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 
@@ -301,7 +301,7 @@ def _gpu_searchsorted_left_driver_not_found(*args, **kwargs):  # pragma: no cove
     driver_not_found()
 
 
-def _gpu_searchsorted_right_driver_not_found(*args, **kwargs):  # pragma: no cover
+def _gpu_searchsorted_right_dnf(*args, **kwargs):  # pragma: no cover
     """
     Dummy function to raise CudaSupportError driver not found error.
 

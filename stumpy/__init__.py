@@ -99,19 +99,17 @@ if cuda.is_available():
     )
 else:  # pragma: no cover
     from . import core
-    from .core import _gpu_aamp_driver_not_found as gpu_aamp  # noqa: F401
-    from .core import (  # noqa: F401
-        _gpu_aamp_ostinato_driver_not_found as gpu_aamp_ostinato,
-    )
-    from .core import _gpu_aamp_stimp_driver_not_found as gpu_aamp_stimp  # noqa: F401
-    from .core import _gpu_aampdist_driver_not_found as gpu_aampdist  # noqa: F401
-    from .core import _gpu_mpdist_driver_not_found as gpu_mpdist  # noqa: F401
-    from .core import _gpu_ostinato_driver_not_found as gpu_ostinato  # noqa: F401
-    from .core import _gpu_stimp_driver_not_found as gpu_stimp  # noqa: F401
-    from .core import _gpu_stump_driver_not_found as gpu_stump  # noqa: F401
+    from .core import _gpu_aamp_dnf as gpu_aamp  # noqa: F401
+    from .core import _gpu_aamp_ostinato_dnf as gpu_aamp_ostinato  # noqa: F401
+    from .core import _gpu_aamp_stimp_dnf as gpu_aamp_stimp  # noqa: F401
+    from .core import _gpu_aampdist_dnf as gpu_aampdist  # noqa: F401
+    from .core import _gpu_mpdist_dnf as gpu_mpdist  # noqa: F401
+    from .core import _gpu_ostinato_dnf as gpu_ostinato  # noqa: F401
+    from .core import _gpu_stimp_dnf as gpu_stimp  # noqa: F401
+    from .core import _gpu_stump_dnf as gpu_stump  # noqa: F401
 
-    core._gpu_searchsorted_left = core._gpu_searchsorted_left_driver_not_found
-    core._gpu_searchsorted_right = core._gpu_searchsorted_right_driver_not_found
+    core._gpu_searchsorted_left = core._gpu_searchsorted_left_dnf
+    core._gpu_searchsorted_right = core._gpu_searchsorted_right_dnf
 
     # Fix GPU-STUMP Docs
     gpu_stump.__doc__ = ""

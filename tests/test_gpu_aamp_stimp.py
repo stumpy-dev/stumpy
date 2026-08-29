@@ -7,9 +7,7 @@ from numba import cuda
 if cuda.is_available():
     from stumpy.gpu_aamp_stimp import gpu_aamp_stimp
 else:  # pragma: no cover
-    from stumpy.core import (  # noqa: F401
-        _gpu_aamp_stimp_driver_not_found as gpu_aamp_stimp,
-    )
+    from stumpy.core import _gpu_aamp_stimp_dnf as gpu_aamp_stimp  # noqa: F401
 
 try:
     from numba.errors import NumbaPerformanceWarning
