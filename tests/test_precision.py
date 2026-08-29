@@ -3,20 +3,19 @@ from unittest.mock import patch
 
 import mersenne
 import naive
-import numba
 import numpy as np
 import numpy.testing as npt
 import pytest
 from numba import cuda
 
-from stumpy import cache, config, core, fastmath, rng, sdp
+from stumpy import config, core, rng, sdp
 
 if cuda.is_available():
     from stumpy.gpu_stump import gpu_stump
 else:  # pragma: no cover
     from stumpy.core import _gpu_stump_dnf as gpu_stump  # noqa: F401
 
-from stumpy.snippets import snippets
+from stumpy.snippets import _get_all_profiles, snippets
 
 try:
     from numba.errors import NumbaPerformanceWarning
@@ -122,18 +121,22 @@ def test_calculate_squared_distance():
                 npt.assert_almost_equal(ref, comp, decimal=14)
 
 
-def test_snippets():
-    # This test function raises an error if there is a considerable loss of precision
-    # that violates the symmetry property of a distance measure.
-    m = 10
-    k = 3
-    s = 3
-    state = mersenne.seed_to_state(332)
+@pytest.mark.parametrize(
+    "seed, m, k, s",
+    [(2135137202, 10, 3, 3), (2636, 9, 3, 3), (332, 10, 3, 3), (1615, 10, 3, 3)],
+)
+def test_snippets(seed, m, k, s):
+    state = mersenne.seed_to_state(seed)
     with rng.fix_state(state):
-        T = rng.RNG.uniform(-1000.0, 1000.0, [64])
-
+        T = rng.RNG.uniform(-1000, 1000, [64]).astype(np.float64)
         isconstant_custom_func = functools.partial(
             naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
+        )
+        D = _get_all_profiles(
+            T,
+            m,
+            s=s,
+            mpdist_T_subseq_isconstant=isconstant_custom_func,
         )
         (
             ref_snippets,
@@ -143,7 +146,12 @@ def test_snippets():
             ref_areas,
             ref_regimes,
         ) = naive.mpdist_snippets(
-            T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func
+            T,
+            m,
+            k,
+            s=s,
+            mpdist_T_subseq_isconstant=isconstant_custom_func,
+            D=D,
         )
 
         (
@@ -154,29 +162,6 @@ def test_snippets():
             cmp_areas,
             cmp_regimes,
         ) = snippets(T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func)
-
-        if (
-            not np.allclose(ref_snippets, cmp_snippets) and not numba.config.DISABLE_JIT
-        ):  # pragma: no cover
-            # Revise fastmath flags by removing reassoc (to improve precision),
-            # recompile njit functions, and re-compute snippets.
-            fastmath._set(
-                "core",
-                "_calculate_squared_distance",
-                {"nsz", "arcp", "contract", "afn"},
-            )
-            cache._recompile()
-
-            (
-                cmp_snippets,
-                cmp_indices,
-                cmp_profiles,
-                cmp_fractions,
-                cmp_areas,
-                cmp_regimes,
-            ) = snippets(
-                T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func
-            )
 
         npt.assert_almost_equal(
             ref_snippets, cmp_snippets, decimal=config.STUMPY_TEST_PRECISION
@@ -194,11 +179,6 @@ def test_snippets():
             ref_areas, cmp_areas, decimal=config.STUMPY_TEST_PRECISION
         )
         npt.assert_almost_equal(ref_regimes, cmp_regimes)
-
-    if not numba.config.DISABLE_JIT:  # pragma: no cover
-        # Revert fastmath flag back to their default values
-        fastmath._reset("core", "_calculate_squared_distance")
-        cache._recompile()
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -221,7 +201,7 @@ def test_distance_symmetry_property_in_gpu():
 
         # This test raises an error if arithmetic operation in ...
         # ... `gpu_stump._compute_and_update_PI_kernel` does not
-        # generates the same result if values of variable for mean and std
+        # generate the same result if values of variable for mean and std
         # are swapped.
 
         T_A = T[i : i + m]
