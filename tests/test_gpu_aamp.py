@@ -10,7 +10,7 @@ from stumpy import config, rng
 if cuda.is_available():
     from stumpy.gpu_aamp import gpu_aamp
 else:  # pragma: no cover
-    from stumpy.core import _gpu_aamp_driver_not_found as gpu_aamp  # noqa: F401
+    from stumpy.core import _gpu_aamp_dnf as gpu_aamp  # noqa: F401
 
 
 try:

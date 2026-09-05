@@ -47,36 +47,100 @@ def test_mparray_self_join(T_A, T_B, k):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.stump(T_B, m, exclusion_zone=zone, k=k)
-    comp_mp = stump(T_B, m, ignore_trivial=True, k=k)
+    cmp_mp = stump(T_B, m, ignore_trivial=True, k=k)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )
 
-    comp_mp = stump(pd.Series(T_B), m, ignore_trivial=True, k=k)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    cmp_mp = stump(pd.Series(T_B), m, ignore_trivial=True, k=k)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )
 
     ref_mp = naive.aamp(T_B, m, exclusion_zone=zone, k=k)
-    comp_mp = aamp(T_B, m, ignore_trivial=True, k=k)
+    cmp_mp = aamp(T_B, m, ignore_trivial=True, k=k)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )
 
-    comp_mp = aamp(pd.Series(T_B), m, ignore_trivial=True, k=k)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    cmp_mp = aamp(pd.Series(T_B), m, ignore_trivial=True, k=k)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -84,33 +148,97 @@ def test_mparray_self_join(T_A, T_B, k):
 def test_mparray_A_B_join(T_A, T_B, k):
     m = 3
     ref_mp = naive.stump(T_A, m, T_B=T_B, k=k)
-    comp_mp = stump(T_A, m, T_B, ignore_trivial=False, k=k)
+    cmp_mp = stump(T_A, m, T_B, ignore_trivial=False, k=k)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )
 
-    comp_mp = stump(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, k=k)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    cmp_mp = stump(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, k=k)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )
 
     ref_mp = naive.aamp(T_A, m, T_B=T_B, k=k)
-    comp_mp = aamp(T_A, m, T_B, ignore_trivial=False, k=k)
+    cmp_mp = aamp(T_A, m, T_B, ignore_trivial=False, k=k)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )
 
-    comp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, k=k)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, :k]), comp_mp.P_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, k : 2 * k]), comp_mp.I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k]), comp_mp.left_I_)
-    npt.assert_almost_equal(np.squeeze(ref_mp[:, 2 * k + 1]), comp_mp.right_I_)
+    cmp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False, k=k)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.P_.astype(np.float64),
+        np.squeeze(ref_mp[:, :k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.I_.astype(np.float64),
+        np.squeeze(ref_mp[:, k : 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.left_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k]).astype(np.float64),
+        atol=1.5e-07,
+    )
+    npt.assert_allclose(
+        cmp_mp.right_I_.astype(np.float64),
+        np.squeeze(ref_mp[:, 2 * k + 1]).astype(np.float64),
+        atol=1.5e-07,
+    )

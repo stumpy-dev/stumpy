@@ -166,11 +166,11 @@ def test_motifs_one_motif():
     m = 3
     max_motifs = 1
 
-    left_indices = [[0, 5, 9]]
-    left_profile_values = [[0.0, 0.0, 0.0]]
+    ref_indices = [[0, 5, 9]]
+    ref_profile_values = [[0.0, 0.0, 0.0]]
 
     mp = naive.stump(T, m)
-    right_distance_values, right_indices = motifs(
+    cmp_distance_values, cmp_indices = motifs(
         T,
         mp[:, 0],
         max_distance=lambda D: 0.001,  # Also test lambda functionality
@@ -178,8 +178,8 @@ def test_motifs_one_motif():
         cutoff=np.inf,
     )
 
-    npt.assert_array_equal(left_indices, right_indices)
-    npt.assert_almost_equal(left_profile_values, right_distance_values)
+    npt.assert_array_equal(cmp_indices, ref_indices)
+    npt.assert_allclose(cmp_distance_values, ref_profile_values, atol=1.5e-07)
 
 
 def test_motifs_two_motifs():
@@ -217,8 +217,8 @@ def test_motifs_two_motifs():
 
         mp = naive.stump(T, m)
 
-        # left_indices = [[70, 170, -1], [10, 210, 110]]
-        left_profile_values = [
+        # ref_indices = [[70, 170, -1], [10, 210, 110]]
+        ref_profile_values = [
             [0.0, 0.0, np.nan],
             [
                 0.0,
@@ -227,7 +227,7 @@ def test_motifs_two_motifs():
             ],
         ]
 
-        right_distance_values, right_indices = motifs(
+        cmp_distance_values, cmp_indices = motifs(
             T,
             mp[:, 0],
             max_motifs=max_motifs,
@@ -237,7 +237,7 @@ def test_motifs_two_motifs():
 
         # We ignore indices because of sorting ambiguities for equal distances.
         # As long as the distances are correct, the indices will be too.
-        npt.assert_almost_equal(left_profile_values, right_distance_values)
+        npt.assert_allclose(cmp_distance_values, ref_profile_values, atol=1.5e-07)
 
 
 def test_motifs_max_matches():
@@ -277,20 +277,20 @@ def test_motifs_max_matches():
     max_motifs = 2
     max_matches = 3
 
-    left_indices = [[0, 7], [4, 11]]
-    left_profile_values = [
+    ref_indices = [[0, 7], [4, 11]]
+    ref_profile_values = [
         [0.0, 0.0],
         [
             0.0,
             naive.distance(
-                core.z_norm(T[left_indices[1][0] : left_indices[1][0] + m]),
-                core.z_norm(T[left_indices[1][1] : left_indices[1][1] + m]),
+                core.z_norm(T[ref_indices[1][0] : ref_indices[1][0] + m]),
+                core.z_norm(T[ref_indices[1][1] : ref_indices[1][1] + m]),
             ),
         ],
     ]
 
     mp = naive.stump(T, m)
-    right_distance_values, right_indices = motifs(
+    cmp_distance_values, cmp_indices = motifs(
         T,
         mp[:, 0],
         max_motifs=max_motifs,
@@ -301,7 +301,7 @@ def test_motifs_max_matches():
 
     # We ignore indices because of sorting ambiguities for equal distances.
     # As long as the distances are correct, the indices will be too.
-    npt.assert_almost_equal(left_profile_values, right_distance_values)
+    npt.assert_allclose(cmp_distance_values, ref_profile_values, atol=1.5e-07)
 
 
 def test_motifs_max_matches_max_distances_inf():
@@ -342,21 +342,21 @@ def test_motifs_max_matches_max_distances_inf():
     max_matches = 2
     max_distance = np.inf
 
-    left_indices = [[0, 7], [4, 11]]
-    left_profile_values = [
+    ref_indices = [[0, 7], [4, 11]]
+    ref_profile_values = [
         [0.0, 0.0],
         [
             0.0,
             naive.distance(
-                core.z_norm(T[left_indices[1][0] : left_indices[1][0] + m]),
-                core.z_norm(T[left_indices[1][1] : left_indices[1][1] + m]),
+                core.z_norm(T[ref_indices[1][0] : ref_indices[1][0] + m]),
+                core.z_norm(T[ref_indices[1][1] : ref_indices[1][1] + m]),
             ),
         ],
     ]
 
     # set `row_wise` to True so that we can compare the indices of motifs as well
     mp = naive.stump(T, m, row_wise=True)
-    right_distance_values, right_indices = motifs(
+    cmp_distance_values, cmp_indices = motifs(
         T,
         mp[:, 0],
         max_motifs=max_motifs,
@@ -365,8 +365,8 @@ def test_motifs_max_matches_max_distances_inf():
         max_matches=max_matches,
     )
 
-    npt.assert_almost_equal(left_indices, right_indices)
-    npt.assert_almost_equal(left_profile_values, right_distance_values)
+    npt.assert_allclose(cmp_indices, ref_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_distance_values, ref_profile_values, atol=1.5e-07)
 
 
 def test_naive_match_exclusion_zone():
@@ -378,12 +378,12 @@ def test_naive_match_exclusion_zone():
     m = Q.shape[0]
     excl_zone = int(np.ceil(m / 4))
 
-    left = [
+    ref = [
         [0, 1],
         [naive.distance(core.z_norm(Q), core.z_norm(T[5 : 5 + m])), 5],
         [naive.distance(core.z_norm(Q), core.z_norm(T[9 : 9 + m])), 9],
     ]
-    right = list(
+    cmp = list(
         naive_match(
             Q,
             T,
@@ -392,9 +392,11 @@ def test_naive_match_exclusion_zone():
         )
     )
     # To avoid sorting errors we first sort based on distance and then based on indices
-    right.sort(key=lambda x: (x[1], x[0]))
+    cmp.sort(key=lambda x: (x[1], x[0]))
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(
+        np.array(cmp).astype(np.float64), np.array(ref).astype(np.float64), atol=1.5e-07
+    )
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -403,21 +405,21 @@ def test_match(Q, T):
     excl_zone = int(np.ceil(m / 4))
     max_distance = 0.3
 
-    left = naive_match(
+    ref = naive_match(
         Q,
         T,
         excl_zone,
         max_distance=max_distance,
     )
 
-    right = match(
+    cmp = match(
         Q,
         T,
         max_matches=None,
         max_distance=lambda D: max_distance,  # also test lambda functionality
     )
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -426,7 +428,7 @@ def test_match_mean_stddev(Q, T):
     excl_zone = int(np.ceil(m / 4))
     max_distance = 0.3
 
-    left = naive_match(
+    ref = naive_match(
         Q,
         T,
         excl_zone,
@@ -435,7 +437,7 @@ def test_match_mean_stddev(Q, T):
 
     M_T, Σ_T = naive.compute_mean_std(T, len(Q))
 
-    right = match(
+    cmp = match(
         Q,
         T,
         M_T,
@@ -444,7 +446,7 @@ def test_match_mean_stddev(Q, T):
         max_distance=lambda D: max_distance,  # also test lambda functionality
     )
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -457,7 +459,7 @@ def test_match_isconstant(Q, T):
         naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
     )
 
-    left = naive_match(
+    ref = naive_match(
         Q,
         T,
         excl_zone,
@@ -465,7 +467,7 @@ def test_match_isconstant(Q, T):
         T_subseq_isconstant=T_subseq_isconstant,
     )
 
-    right = match(
+    cmp = match(
         Q,
         T,
         max_matches=None,
@@ -473,12 +475,12 @@ def test_match_isconstant(Q, T):
         T_subseq_isconstant=T_subseq_isconstant,
     )
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07)
 
     # Test for when Q is constant
     Q_subseq_isconstant = np.array([True])
 
-    left = naive_match(
+    ref = naive_match(
         Q,
         T,
         excl_zone,
@@ -487,7 +489,7 @@ def test_match_isconstant(Q, T):
         Q_subseq_isconstant=Q_subseq_isconstant,
     )
 
-    right = match(
+    cmp = match(
         Q,
         T,
         max_matches=None,
@@ -496,7 +498,7 @@ def test_match_isconstant(Q, T):
         Q_subseq_isconstant=Q_subseq_isconstant,
     )
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -505,7 +507,7 @@ def test_match_mean_stddev_isconstant(Q, T):
     excl_zone = int(np.ceil(m / 4))
     max_distance = 0.3
 
-    left = naive_match(
+    ref = naive_match(
         Q,
         T,
         excl_zone,
@@ -515,7 +517,7 @@ def test_match_mean_stddev_isconstant(Q, T):
     T_subseq_isconstant = naive.rolling_isconstant(T, m)
     M_T, Σ_T = naive.compute_mean_std(T, len(Q))
 
-    right = match(
+    cmp = match(
         Q,
         T,
         M_T,
@@ -525,7 +527,7 @@ def test_match_mean_stddev_isconstant(Q, T):
         T_subseq_isconstant=T_subseq_isconstant,
     )
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07)
 
 
 def test_multi_match():
@@ -536,21 +538,21 @@ def test_multi_match():
     excl_zone = int(np.ceil(m / 4))
     max_distance = 0.3
 
-    left = naive_multi_match(
+    ref = naive_multi_match(
         Q,
         T,
         excl_zone,
         max_distance=max_distance,
     )
 
-    right = match(
+    cmp = match(
         Q,
         T,
         max_matches=None,
         max_distance=lambda D: max_distance,  # also test lambda functionality
     )
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07)
 
 
 def test_multi_match_isconstant():
@@ -572,7 +574,7 @@ def test_multi_match_isconstant():
         ]
     )
 
-    left = naive_multi_match(
+    ref = naive_multi_match(
         Q,
         T,
         excl_zone,
@@ -581,7 +583,7 @@ def test_multi_match_isconstant():
         Q_subseq_isconstant=Q_subseq_isconstant,
     )
 
-    right = match(
+    cmp = match(
         Q,
         T,
         max_matches=None,
@@ -590,7 +592,7 @@ def test_multi_match_isconstant():
         Q_subseq_isconstant=Q_subseq_isconstant,
     )
 
-    npt.assert_almost_equal(left, right)
+    npt.assert_allclose(cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07)
 
 
 def test_motifs():
@@ -608,7 +610,7 @@ def test_motifs():
 
     # performant
     mp = naive.stump(T, m, row_wise=True)
-    comp_distance, comp_indices = motifs(
+    cmp_distance, cmp_indices = motifs(
         T,
         mp[:, 0].astype(np.float64),
         min_neighbors=1,
@@ -618,8 +620,8 @@ def test_motifs():
         max_motifs=max_motifs,
     )
 
-    npt.assert_almost_equal(ref_indices, comp_indices)
-    npt.assert_almost_equal(ref_distances, comp_distance)
+    npt.assert_allclose(cmp_indices, ref_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_distance, ref_distances, atol=1.5e-07)
 
 
 def test_motifs_with_isconstant():
@@ -643,7 +645,7 @@ def test_motifs_with_isconstant():
 
     # performant
     mp = naive.stump(T, m, row_wise=True, T_A_subseq_isconstant=isconstant_custom_func)
-    comp_distance, comp_indices = motifs(
+    cmp_distance, cmp_indices = motifs(
         T,
         mp[:, 0].astype(np.float64),
         min_neighbors=1,
@@ -654,8 +656,8 @@ def test_motifs_with_isconstant():
         T_subseq_isconstant=isconstant_custom_func,
     )
 
-    npt.assert_almost_equal(ref_distances, comp_distance)
-    npt.assert_almost_equal(ref_indices, comp_indices)
+    npt.assert_allclose(cmp_distance, ref_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_indices, ref_indices, atol=1.5e-07)
 
 
 def test_motifs_with_max_matches_none():
@@ -669,7 +671,7 @@ def test_motifs_with_max_matches_none():
 
     # performant
     mp = naive.stump(T, m, row_wise=True)
-    comp_distance, comp_indices = motifs(
+    cmp_distance, cmp_indices = motifs(
         T,
         mp[:, 0].astype(np.float64),
         min_neighbors=1,
@@ -681,5 +683,5 @@ def test_motifs_with_max_matches_none():
 
     ref_len = len(T) - m + 1
 
-    npt.assert_(ref_len >= comp_distance.shape[1])
-    npt.assert_(ref_len >= comp_indices.shape[1])
+    npt.assert_(ref_len >= cmp_distance.shape[1])
+    npt.assert_(ref_len >= cmp_indices.shape[1])

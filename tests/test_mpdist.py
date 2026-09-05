@@ -50,11 +50,11 @@ def test_mpdist_vect(T_A, T_B):
     T_subseq_isconstant = naive.rolling_isconstant(T_B, m)
     μ_Q, σ_Q = naive.compute_mean_std(T_A, m)
     M_T, Σ_T = naive.compute_mean_std(T_B, m)
-    comp_mpdist_vect = _mpdist_vect(
+    cmp_mpdist_vect = _mpdist_vect(
         T_A, T_B, m, μ_Q, σ_Q, M_T, Σ_T, Q_subseq_isconstant, T_subseq_isconstant
     )
 
-    npt.assert_almost_equal(ref_mpdist_vect, comp_mpdist_vect)
+    npt.assert_allclose(cmp_mpdist_vect, ref_mpdist_vect, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -67,7 +67,7 @@ def test_mpdist_vect_percentage(T_A, T_B, percentage):
     T_subseq_isconstant = naive.rolling_isconstant(T_B, m)
     μ_Q, σ_Q = naive.compute_mean_std(T_A, m)
     M_T, Σ_T = naive.compute_mean_std(T_B, m)
-    comp_mpdist_vect = _mpdist_vect(
+    cmp_mpdist_vect = _mpdist_vect(
         T_A,
         T_B,
         m,
@@ -80,7 +80,7 @@ def test_mpdist_vect_percentage(T_A, T_B, percentage):
         percentage=percentage,
     )
 
-    npt.assert_almost_equal(ref_mpdist_vect, comp_mpdist_vect)
+    npt.assert_allclose(cmp_mpdist_vect, ref_mpdist_vect, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -93,20 +93,20 @@ def test_mpdist_vect_k(T_A, T_B, k):
     T_subseq_isconstant = naive.rolling_isconstant(T_B, m)
     μ_Q, σ_Q = naive.compute_mean_std(T_A, m)
     M_T, Σ_T = naive.compute_mean_std(T_B, m)
-    comp_mpdist_vect = _mpdist_vect(
+    cmp_mpdist_vect = _mpdist_vect(
         T_A, T_B, m, μ_Q, σ_Q, M_T, Σ_T, Q_subseq_isconstant, T_subseq_isconstant, k=k
     )
 
-    npt.assert_almost_equal(ref_mpdist_vect, comp_mpdist_vect)
+    npt.assert_allclose(cmp_mpdist_vect, ref_mpdist_vect, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
 def test_mpdist(T_A, T_B):
     m = 3
     ref_mpdist = naive.mpdist(T_A, T_B, m)
-    comp_mpdist = mpdist(T_A, T_B, m)
+    cmp_mpdist = mpdist(T_A, T_B, m)
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -125,7 +125,7 @@ def test_mpdist_with_isconstant(T_A, T_B):
         T_A_subseq_isconstant=T_A_subseq_isconstant,
         T_B_subseq_isconstant=T_B_subseq_isconstant,
     )
-    comp_mpdist = mpdist(
+    cmp_mpdist = mpdist(
         T_A,
         T_B,
         m,
@@ -133,7 +133,7 @@ def test_mpdist_with_isconstant(T_A, T_B):
         T_B_subseq_isconstant=T_B_subseq_isconstant,
     )
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -141,9 +141,9 @@ def test_mpdist_with_isconstant(T_A, T_B):
 def test_mpdist_percentage(T_A, T_B, percentage):
     m = 3
     ref_mpdist = naive.mpdist(T_A, T_B, m, percentage=percentage)
-    comp_mpdist = mpdist(T_A, T_B, m, percentage=percentage)
+    cmp_mpdist = mpdist(T_A, T_B, m, percentage=percentage)
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -151,9 +151,9 @@ def test_mpdist_percentage(T_A, T_B, percentage):
 def test_mpdist_k(T_A, T_B, k):
     m = 3
     ref_mpdist = naive.mpdist(T_A, T_B, m, k=k)
-    comp_mpdist = mpdist(T_A, T_B, m, k=k)
+    cmp_mpdist = mpdist(T_A, T_B, m, k=k)
 
-    npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+    npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -165,9 +165,9 @@ def test_mpdisted(T_A, T_B, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 3
         ref_mpdist = naive.mpdist(T_A, T_B, m)
-        comp_mpdist = mpdisted(dask_client, T_A, T_B, m)
+        cmp_mpdist = mpdisted(dask_client, T_A, T_B, m)
 
-        npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+        npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -191,7 +191,7 @@ def test_mpdisted_with_isconstant(T_A, T_B, dask_cluster):
             T_A_subseq_isconstant=T_A_subseq_isconstant,
             T_B_subseq_isconstant=T_B_subseq_isconstant,
         )
-        comp_mpdist = mpdisted(
+        cmp_mpdist = mpdisted(
             dask_client,
             T_A,
             T_B,
@@ -200,7 +200,7 @@ def test_mpdisted_with_isconstant(T_A, T_B, dask_cluster):
             T_B_subseq_isconstant=T_B_subseq_isconstant,
         )
 
-        npt.assert_almost_equal(ref_mpdist, comp_mpdist)
+        npt.assert_allclose(cmp_mpdist, ref_mpdist, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -225,8 +225,8 @@ def test_mpdist_vect_with_isconstant(T_A, T_B):
     T_subseq_isconstant = T_B_subseq_isconstant
     μ_Q, σ_Q = naive.compute_mean_std(T_A, m)
     M_T, Σ_T = naive.compute_mean_std(T_B, m)
-    comp_mpdist_vect = _mpdist_vect(
+    cmp_mpdist_vect = _mpdist_vect(
         T_A, T_B, m, μ_Q, σ_Q, M_T, Σ_T, Q_subseq_isconstant, T_subseq_isconstant
     )
 
-    npt.assert_almost_equal(ref_mpdist_vect, comp_mpdist_vect)
+    npt.assert_allclose(cmp_mpdist_vect, ref_mpdist_vect, atol=1.5e-07)

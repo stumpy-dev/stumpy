@@ -18,9 +18,7 @@ from stumpy import core, rng
 if cuda.is_available():
     from stumpy.gpu_aamp_ostinato import gpu_aamp_ostinato
 else:  # pragma: no cover
-    from stumpy.core import (  # noqa: F401
-        _gpu_aamp_ostinato_driver_not_found as gpu_aamp_ostinato,
-    )
+    from stumpy.core import _gpu_aamp_ostinato_dnf as gpu_aamp_ostinato  # noqa: F401
 
 TEST_THREADS_PER_BLOCK = 10
 
