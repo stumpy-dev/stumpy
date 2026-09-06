@@ -655,23 +655,41 @@ def make_sliding_dot_product(boundaries=None, default_func=None):
 
     Parameters
     ----------
-    boundaries : nested list
+    boundaries : nested list, default None
         A list of items, where each item is a list of 3 elements:
         * index 0: (LB_m, UB_m)
         * index 1: (LB_n, UB_n)
         * index 2: func
         where, fucn is the sdp function for computing
         the sliding dot product of ``Q`` and ``T``, when
-        m=len(Q) falls into [LB_m, UB_m], and n=len(T) falls
-        into [LB_n, UB_n].
+        m=len(Q) falls into range [LB_m, UB_m], and n=len(T)
+        falls into range [LB_n, UB_n].
+        When this is None (default), it will automatically be set to
+        the following value:
+        [
+            [
+                (3, config.STUMPY_NJIT_SDP_Q_LENGTH),
+                (3, np.inf),
+                sdp._njit_sliding_dot_product,
+            ]
+        ]
 
-    default_func : class 'function'
-        A callable object for
+    default_func : class 'function', default None
+        A callable object that is used for computing
+        the sliding dot product between a query `Q` and
+        time series `T`. This is used when len(Q) and len(T)
+        values do not fall into any boundary provided
+        in `boundaries`. When None (default), this will
+        automatically be set to `sdp._pyfftw_sliding_dot_product`
+        if available. If not, it will be automatically set to
+        `sdp._sliding_dot_product`.
 
     Returns
     -------
-    output : numpy.ndarray
-        Sliding dot product between `Q` and `T`.
+    sliding_dot_product : callable
+        A callable object that computes the sliding dot product between ``Q``
+        and ``T`` using different methods based on len(Q) and len(T). It
+        internally checks the boundary in `boundaries` and choose a function
     """
     stumpy_default_func = sdp._sliding_dot_product
     if sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
@@ -712,7 +730,8 @@ def make_sliding_dot_product(boundaries=None, default_func=None):
         out : numpy.ndarray
             Sliding dot product between ``Q`` and ``T``.
         """
-        m, n = len(Q), len(T)
+        m = len(Q)
+        n = len(T)
         if m == n:
             return np.array([np.dot(Q, T)])
 
