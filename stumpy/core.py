@@ -648,33 +648,85 @@ def check_window_size(m, max_size=None, n=None):
             warnings.warn(msg)
 
 
-def sliding_dot_product(Q, T):
+def make_sliding_dot_product(boundaries=None, default_func=None):
     """
-    Calculate the sliding window dot product.
+    A closure to compute the sliding dot product that allows users
+    to use different methods in different cases
 
     Parameters
     ----------
-    Q : numpy.ndarray
-        Query array or subsequence
+    boundaries : nested list
+        A list of items, where each item is a list of 3 elements:
+        * index 0: (LB_m, UB_m)
+        * index 1: (LB_n, UB_n)
+        * index 2: func
+        where, fucn is the sdp function for computing
+        the sliding dot product of ``Q`` and ``T``, when
+        m=len(Q) falls into [LB_m, UB_m], and n=len(T) falls
+        into [LB_n, UB_n].
 
-    T : numpy.ndarray
-        Time series or sequence
+    default_func : class 'function'
+        A callable object for
 
     Returns
     -------
     output : numpy.ndarray
         Sliding dot product between `Q` and `T`.
     """
-    if len(Q) == len(T):
-        out = np.array([np.dot(Q, T)])
-    elif len(Q) <= config.STUMPY_NJIT_SDP_Q_LENGTH:
-        out = sdp._njit_sliding_dot_product(Q, T)
-    elif sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
-        out = sdp._pyfftw_sliding_dot_product(Q, T)
-    else:
-        out = sdp._sliding_dot_product(Q, T)
+    stumpy_default_func = sdp._sliding_dot_product
+    if sdp.PYFFTW_IS_AVAILABLE:  # pragma: no cover
+        stumpy_default_func = sdp._pyfftw_sliding_dot_product
 
-    return out
+    if default_func is None:
+        default_func = stumpy_default_func
+
+    if boundaries is None:
+        boundaries = [
+            # [
+            #   (LB_m, UB_m),
+            #   (LB_n, UB_n),
+            #   func
+            # ]
+            [
+                (3, 2**6),
+                (3, np.inf),
+                sdp._njit_sliding_dot_product,
+            ],
+        ]
+
+    def sliding_dot_product(Q, T):
+        """
+        Compute the sliding dot product between ``Q`` and ``T``
+        by using different methods according to len(Q) and len(T)
+
+        Parameters
+        ----------
+        Q : numpy.ndarray
+            Query array or subsequence.
+
+        T : numpy.ndarray
+            Time series or sequence.
+
+        Returns
+        -------
+        out : numpy.ndarray
+            Sliding dot product between ``Q`` and ``T``.
+        """
+        m, n = len(Q), len(T)
+        if m == n:
+            return np.array([np.dot(Q, T)])
+
+        for item in boundaries:
+            (LB_m, UB_m), (LB_n, UB_n), func = item
+            if LB_m <= m <= UB_m and LB_n <= n <= UB_n:
+                return func(Q, T)
+
+        return default_func(Q, T)
+
+    return sliding_dot_product
+
+
+sliding_dot_product = make_sliding_dot_product()
 
 
 @njit(
