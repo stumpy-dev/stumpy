@@ -688,7 +688,7 @@ def make_sliding_dot_product(boundaries=None, default_func=None):
             #   func
             # ]
             [
-                (3, 2**6),
+                (3, config.STUMPY_NJIT_SDP_Q_LENGTH),
                 (3, np.inf),
                 sdp._njit_sliding_dot_product,
             ],
