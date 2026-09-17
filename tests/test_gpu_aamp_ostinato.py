@@ -3,6 +3,7 @@ from unittest.mock import patch
 import mersenne
 import numpy as np
 import numpy.testing as npt
+
 try:
     from numba_cuda_mlir import cuda
 except ModuleNotFoundError:
