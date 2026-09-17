@@ -5,7 +5,7 @@ import numpy.testing as npt
 import pandas as pd
 
 try:
-    from numba-cuda-mlir import cuda
+    from numba_cuda_mlir import cuda
 except ModuleNotFoundError:
     from numba import cuda
 

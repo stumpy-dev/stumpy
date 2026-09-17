@@ -6,8 +6,9 @@ import naive
 import numpy as np
 import numpy.testing as npt
 import pytest
+
 try:
-    from numba-cuda-mlir import cuda
+    from numba_cuda_mlir import cuda
 except ModuleNotFoundError:
     from numba import cuda
 
