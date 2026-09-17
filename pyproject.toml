@@ -126,15 +126,23 @@ flake8 = 'flake8 --extend-exclude=.venv/,.pixi/ ./'
 [tool.pixi.feature.numba-cuda]
 platforms = ["linux-64", "linux-aarch64"]
 
+[tool.pixi.feature.numba-cuda.system-requirements]
+cuda = "13.0"
+
 [tool.pixi.feature.numba-cuda-mlir]
 platforms = ["linux-64", "linux-aarch64"]
 
+[tool.pixi.feature.numba-cuda-mlir.system-requirements]
+cuda = "13.0"
+
 [tool.pixi.feature.numba-cuda.dependencies]
+cuda-version = "13.0"
 cuda-nvcc = "*"
 numba-cuda = "*"
 numpy = "<2.5"
 
 [tool.pixi.feature.numba-cuda-mlir.dependencies]
+cuda-version = "13.0"
 cuda-nvcc = "*"
 numba-cuda-mlir = "*"
 
