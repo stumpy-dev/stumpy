@@ -3,7 +3,10 @@ import numpy as np
 import numpy.testing as npt
 import tornado.ioloop
 from dask.distributed import Client, LocalCluster
-from numba import cuda
+try:
+    from numba-cuda-mlir import cuda
+except ModuleNotFoundError:
+    from numba import cuda
 
 from stumpy import core, rng
 from stumpy.aamp import aamp

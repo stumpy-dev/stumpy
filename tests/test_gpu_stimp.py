@@ -3,7 +3,10 @@ from unittest.mock import patch
 
 import numpy as np
 import numpy.testing as npt
-from numba import cuda
+try:
+    from numba-cuda-mlir import cuda
+except ModuleNotFoundError:
+    from numba import cuda
 
 if cuda.is_available():
     from stumpy.gpu_stimp import gpu_stimp

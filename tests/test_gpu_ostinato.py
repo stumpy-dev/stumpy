@@ -2,7 +2,10 @@ import functools
 
 import numpy as np
 import numpy.testing as npt
-from numba import cuda
+try:
+    from numba-cuda-mlir import cuda
+except ModuleNotFoundError:
+    from numba import cuda
 
 try:
     from numba.errors import NumbaPerformanceWarning
