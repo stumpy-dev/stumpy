@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "stumpy"
 version = "1.14.1"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     {name = "Sean M. Law", email = "seanmylaw@gmail.com"}
 ]
@@ -23,11 +23,11 @@ classifiers = [
     "Operating System :: MacOS",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 keywords = ["time series", "matrix profile", "motif", "discord"]
 maintainers = [
@@ -73,7 +73,7 @@ platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 [tool.pixi.dependencies]
 # All Conda dependencies.
 # Ignores PyPI [dependencies] and [project.optional-dependencies] above
-python = ">=3.10"
+python = ">=3.11"
 numpy = ">=1.24"
 scipy = ">=1.10"
 numba = ">=0.61.2"

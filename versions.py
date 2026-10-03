@@ -96,7 +96,7 @@ def get_min_numba_numpy_version(min_python):
             .pipe(
                 lambda df: df.assign(
                     MIN_PYTHON_SPEC=(
-                        df.Python.str.split().str[1].replace({"<": "="}, regex=True)
+                        df.Python.str.split().str[1].replace({"<=": ">="}, regex=True)
                         + df.Python.str.split().str[0].replace({".x": ""}, regex=True)
                     ).apply(SpecifierSet)
                 )
@@ -112,6 +112,11 @@ def get_min_numba_numpy_version(min_python):
                 COMPATIBLE=lambda row: row.apply(
                     check_python_compatibility, axis=1, args=(Version(min_python),)
                 )
+            )
+            # Only grab the first n rows that have the same minimum Python
+            # version as the first row
+            .pipe(
+                lambda df: df.query("MIN_PYTHON_SPEC == @df.iloc[0]['MIN_PYTHON_SPEC']")
             )
             .query("COMPATIBLE == True")
             .pipe(lambda df: df.assign(MINOR=df.Numba.str.split(".").str[1]))
