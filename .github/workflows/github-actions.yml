@@ -40,9 +40,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set Up Python
+        id: setup-python
         uses: actions/setup-python@v5
+        continue-on-error: true
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check Python Version Availability
+        if: steps.setup-python.outcome == 'failure'
+        run: |
+          echo "The Python version you need is not available yet. Exiting job gracefully."
+          exit 0
       - name: Display Python Version
         run: python -c "import sys; print(sys.version)"
         shell: bash
