@@ -46,26 +46,34 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Check Python Version Availability
+        id: checker
         if: steps.setup-python.outcome == 'failure'
         run: |
-          echo "The Python version you need is not available yet. Exiting job gracefully."
-          exit 0
+          echo "skip=true" >> $GITHUB_OUTPUT
+          echo "The Python version you need is not available yet. Skipping workflow."
+          echo "skip=true" >> $GITHUB_OUTPUT
       - name: Display Python Version
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -c "import sys; print(sys.version)"
         shell: bash
       - name: Upgrade Pip
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -m pip install --upgrade pip
         shell: bash
       - name: Install STUMPY And Other Dependencies
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -m pip install --editable .[ci]
         shell: bash
       - name: Run Black
+        if: steps.checker.outputs.should_skip != 'true'
         run: black --check --diff ./
         shell: bash
       - name: Run Flake8
+        if: steps.checker.outputs.should_skip != 'true'
         run: flake8 ./
         shell: bash
       - name: Install OpenMP
+        if: steps.checker.outputs.should_skip != 'true'
         run: |
              if [ "$RUNNER_OS" == "macOS" ]; then
                   echo "Installing OpenMP"
@@ -80,9 +88,11 @@ jobs:
              fi        
         shell: bash
       - name: Show Full Numba Environment
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -m numba -s
         shell: bash
       - name: Run Unit Tests
+        if: steps.checker.outputs.should_skip != 'true'
         run: ./test.sh unit
         shell: bash
   coverage-testing:
@@ -95,25 +105,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set Up Python
+        id: setup-python
         uses: actions/setup-python@v5
+        continue-on-error: true
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check Python Version Availability
+        id: checker
+        if: steps.setup-python.outcome == 'failure'
+        run: |
+          echo "skip=true" >> $GITHUB_OUTPUT
+          echo "The Python version you need is not available yet. Skipping workflow."
+          echo "skip=true" >> $GITHUB_OUTPUT
       - name: Display Python Version
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -c "import sys; print(sys.version)"
         shell: bash
       - name: Upgrade Pip
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -m pip install --upgrade pip
         shell: bash
       - name: Install STUMPY And Other Dependencies
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -m pip install --editable .[ci]
         shell: bash
       - name: Run Black
+        if: steps.checker.outputs.should_skip != 'true'
         run: black --check --diff ./
         shell: bash
       - name: Run Flake8
+        if: steps.checker.outputs.should_skip != 'true'
         run: flake8 ./
         shell: bash
       - name: Link OpenMP
+        if: steps.checker.outputs.should_skip != 'true'
         run: |
              if [ "$RUNNER_OS" == "macOS" ]; then
                   echo "Installing OpenMP"
@@ -128,8 +153,10 @@ jobs:
              fi
         shell: bash
       - name: Show Full Numba Environment
+        if: steps.checker.outputs.should_skip != 'true'
         run: python -m numba -s
         shell: bash
       - name: Run Coverage Tests
+        if: steps.checker.outputs.should_skip != 'true'
         run: ./test.sh coverage
         shell: bash
