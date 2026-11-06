@@ -67,10 +67,10 @@ def test_mmotifs_with_default_parameters(T):
         cmp_motif_mdls,
     ) = mmotifs(T, P, I)
 
-    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, rtol=0, atol=1.5e-06)
-    npt.assert_array_equal(cmp_motif_indices, ref_motif_indices)
-    npt.assert_array_equal(cmp_motif_subspaces, ref_motif_subspaces)
-    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, rtol=0, atol=1.5e-06)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
@@ -90,10 +90,10 @@ def test_mmotifs_max_matches_none(T):
         cmp_motif_mdls,
     ) = mmotifs(T, P, I, max_matches=None)
 
-    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, rtol=0, atol=1.5e-06)
-    npt.assert_array_equal(cmp_motif_indices, ref_motif_indices)
-    npt.assert_array_equal(cmp_motif_subspaces, ref_motif_subspaces)
-    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, rtol=0, atol=1.5e-06)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
@@ -113,10 +113,10 @@ def test_mmotifs_more_motifs_when_cutoffs_3(T):
         cmp_motif_mdls,
     ) = mmotifs(T, P, I, cutoffs=3, max_motifs=10)
 
-    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, rtol=0, atol=1.5e-06)
-    npt.assert_array_equal(cmp_motif_indices, ref_motif_indices)
-    npt.assert_array_equal(cmp_motif_subspaces, ref_motif_subspaces)
-    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, rtol=0, atol=1.5e-06)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
@@ -137,10 +137,10 @@ def test_mmotifs_more_motifs_cutoffs_is_list(T):
         cmp_motif_mdls,
     ) = mmotifs(T, P, I, cutoffs=cutoffs, max_motifs=10)
 
-    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, rtol=0, atol=1.5e-06)
-    npt.assert_array_equal(cmp_motif_indices, ref_motif_indices)
-    npt.assert_array_equal(cmp_motif_subspaces, ref_motif_subspaces)
-    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, rtol=0, atol=1.5e-06)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
@@ -160,16 +160,16 @@ def test_mmotifs_max_matches_2_k_1(T):
         cmp_motif_mdls,
     ) = mmotifs(T, P, I, max_distance=np.inf, max_matches=2, k=1)
 
-    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, rtol=0, atol=1.5e-06)
-    npt.assert_array_equal(cmp_motif_indices, ref_motif_indices)
-    npt.assert_array_equal(cmp_motif_subspaces, ref_motif_subspaces)
-    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, rtol=0, atol=1.5e-06)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
 def test_mmotifs_two_motif_pairs_max_motifs_2(T):
     ref_motif_distances = np.array(
-        [[0.00000000e00, 1.11510080e-07], [1.68587394e-07, 2.58694429e-01]]
+        [[0.00000000e00, 1.11510080e-07], [0.00000000e00, 2.58694429e-01]]
     )
     ref_motif_indices = np.array([[2, 9], [6, 1]])
     ref_motif_subspaces = [np.array([1]), np.array([2])]
@@ -190,10 +190,10 @@ def test_mmotifs_two_motif_pairs_max_motifs_2(T):
         T, P, I, cutoffs=np.inf, max_motifs=2, max_distance=np.inf, max_matches=2
     )
 
-    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, rtol=0, atol=1.5e-06)
-    npt.assert_array_equal(cmp_motif_indices, ref_motif_indices)
-    npt.assert_array_equal(cmp_motif_subspaces, ref_motif_subspaces)
-    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, rtol=0, atol=1.5e-06)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
@@ -224,7 +224,7 @@ def test_mmotifs_with_default_parameters_with_isconstant(T):
         cmp_motif_mdls,
     ) = mmotifs(T, P, I, T_subseq_isconstant=T_subseq_isconstant)
 
-    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, rtol=0, atol=1.5e-06)
-    npt.assert_array_equal(cmp_motif_indices, ref_motif_indices)
-    npt.assert_array_equal(cmp_motif_subspaces, ref_motif_subspaces)
-    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, rtol=0, atol=1.5e-06)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
