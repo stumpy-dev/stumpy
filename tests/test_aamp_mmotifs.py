@@ -52,12 +52,12 @@ test_data = [
 
 
 def test_aamp_mmotifs_default_parameters():
-    motif_distances_ref = np.array(
+    ref_motif_distances = np.array(
         [[0.0, 0.06315749, 0.25275899, 0.34087884, 0.3452315]]
     )
-    motif_indices_ref = np.array([[19, 77, 63, 52, 71]])
-    motif_subspaces_ref = [np.array([2])]
-    motif_mdls_ref = [
+    ref_motif_indices = np.array([[19, 77, 63, 52, 71]])
+    ref_motif_subspaces = [np.array([2])]
+    ref_motif_mdls = [
         np.array([411.60964047, 423.69925001, 449.11032383, 476.95855027, 506.62406252])
     ]
 
@@ -69,97 +69,97 @@ def test_aamp_mmotifs_default_parameters():
         excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
         P, I = naive.maamp(T, m, excl_zone)
         (
-            motif_distances_cmp,
-            motif_indices_cmp,
-            motif_subspaces_cmp,
-            motif_mdls_cmp,
+            cmp_motif_distances,
+            cmp_motif_indices,
+            cmp_motif_subspaces,
+            cmp_motif_mdls,
         ) = aamp_mmotifs(T, P, I)
 
-        npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-        npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-        npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-        npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+        npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+        npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+        npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+        npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
 def test_aamp_mmotifs_max_distance(T):
-    motif_distances_ref = np.array(
+    ref_motif_distances = np.array(
         [[0.0, 1.41421356, 4.46430286, 6.85346628, 8.207923, 8.50529247]]
     )
-    motif_indices_ref = np.array([[2, 9, 0, 11, 7, 5]])
-    motif_subspaces_ref = [np.array([3])]
-    motif_mdls_ref = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
+    ref_motif_indices = np.array([[2, 9, 0, 11, 7, 5]])
+    ref_motif_subspaces = [np.array([3])]
+    ref_motif_mdls = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
 
     m = 4
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
     P, I = naive.maamp(T, m, excl_zone)
     (
-        motif_distances_cmp,
-        motif_indices_cmp,
-        motif_subspaces_cmp,
-        motif_mdls_cmp,
+        cmp_motif_distances,
+        cmp_motif_indices,
+        cmp_motif_subspaces,
+        cmp_motif_mdls,
     ) = aamp_mmotifs(T, P, I, max_distance=np.inf)
 
-    npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-    npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-    npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-    npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
 def test_aamp_mmotifs_max_distance_max_matches_none(T):
-    motif_distances_ref = np.array(
+    ref_motif_distances = np.array(
         [[0.0, 1.41421356, 4.46430286, 6.85346628, 8.207923, 8.50529247]]
     )
-    motif_indices_ref = np.array([[2, 9, 0, 11, 7, 5]])
-    motif_subspaces_ref = [np.array([3])]
-    motif_mdls_ref = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
+    ref_motif_indices = np.array([[2, 9, 0, 11, 7, 5]])
+    ref_motif_subspaces = [np.array([3])]
+    ref_motif_mdls = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
 
     m = 4
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
     P, I = naive.maamp(T, m, excl_zone)
     (
-        motif_distances_cmp,
-        motif_indices_cmp,
-        motif_subspaces_cmp,
-        motif_mdls_cmp,
+        cmp_motif_distances,
+        cmp_motif_indices,
+        cmp_motif_subspaces,
+        cmp_motif_mdls,
     ) = aamp_mmotifs(T, P, I, max_distance=np.inf, max_matches=None)
 
-    npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-    npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-    npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-    npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
 def test_aamp_mmotifs_max_motifs_1_max_matches_2_k_1(T):
-    motif_distances_ref = np.array([[0.0, 2.87778559]])
-    motif_indices_ref = np.array([[0, 5]])
-    motif_subspaces_ref = [np.array([2, 1])]
-    motif_mdls_ref = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
+    ref_motif_distances = np.array([[0.0, 2.87778559]])
+    ref_motif_indices = np.array([[0, 5]])
+    ref_motif_subspaces = [np.array([2, 1])]
+    ref_motif_mdls = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
 
     m = 4
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
     P, I = naive.maamp(T, m, excl_zone)
     (
-        motif_distances_cmp,
-        motif_indices_cmp,
-        motif_subspaces_cmp,
-        motif_mdls_cmp,
+        cmp_motif_distances,
+        cmp_motif_indices,
+        cmp_motif_subspaces,
+        cmp_motif_mdls,
     ) = aamp_mmotifs(T, P, I, max_distance=np.inf, max_matches=2, k=1)
 
-    npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-    npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-    npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-    npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
 def test_aamp_mmotifs_more_motif_pairs_cutoffs_3(T):
-    motif_distances_ref = np.array([[0.0, 1.41421356], [0.0, 2.06639783]])
-    motif_indices_ref = np.array([[2, 9], [0, 5]])
-    motif_subspaces_ref = [np.array([3]), np.array([2])]
-    motif_mdls_ref = [
+    ref_motif_distances = np.array([[0.0, 1.41421356], [0.0, 2.06639783]])
+    ref_motif_indices = np.array([[2, 9], [0, 5]])
+    ref_motif_subspaces = [np.array([3]), np.array([2])]
+    ref_motif_mdls = [
         np.array([244.0, 260.67970001, 279.86313714, 281.35940001]),
         np.array([254.33985, 260.67970001, 279.86313714, 291.20703549]),
     ]
@@ -168,52 +168,52 @@ def test_aamp_mmotifs_more_motif_pairs_cutoffs_3(T):
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
     P, I = naive.maamp(T, m, excl_zone)
     (
-        motif_distances_cmp,
-        motif_indices_cmp,
-        motif_subspaces_cmp,
-        motif_mdls_cmp,
+        cmp_motif_distances,
+        cmp_motif_indices,
+        cmp_motif_subspaces,
+        cmp_motif_mdls,
     ) = aamp_mmotifs(
         T, P, I, max_distance=np.inf, cutoffs=3, max_matches=2, max_motifs=10
     )
 
-    npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-    npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-    npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-    npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
 def test_aamp_mmotifs_more_motif_pairs_cutoffs_as_list(T):
-    motif_distances_ref = np.array([[0.0, 1.41421356]])
-    motif_indices_ref = np.array([[2, 9]])
-    motif_subspaces_ref = [np.array([3])]
-    motif_mdls_ref = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
+    ref_motif_distances = np.array([[0.0, 1.41421356]])
+    ref_motif_indices = np.array([[2, 9]])
+    ref_motif_subspaces = [np.array([3])]
+    ref_motif_mdls = [np.array([244.0, 260.67970001, 279.86313714, 281.35940001])]
 
     m = 4
     cutoffs = [2, 3, 4, 5]
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
     P, I = naive.maamp(T, m, excl_zone)
     (
-        motif_distances_cmp,
-        motif_indices_cmp,
-        motif_subspaces_cmp,
-        motif_mdls_cmp,
+        cmp_motif_distances,
+        cmp_motif_indices,
+        cmp_motif_subspaces,
+        cmp_motif_mdls,
     ) = aamp_mmotifs(
         T, P, I, max_distance=np.inf, cutoffs=cutoffs, max_matches=2, max_motifs=10
     )
 
-    npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-    npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-    npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-    npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", test_data)
 def test_aamp_mmotifs_two_motif_pairs_max_motifs_2(T):
-    motif_distances_ref = np.array([[0.0, 1.41421356], [0.0, 2.06639783]])
-    motif_indices_ref = np.array([[2, 9], [0, 5]])
-    motif_subspaces_ref = [np.array([3]), np.array([2])]
-    motif_mdls_ref = [
+    ref_motif_distances = np.array([[0.0, 1.41421356], [0.0, 2.06639783]])
+    ref_motif_indices = np.array([[2, 9], [0, 5]])
+    ref_motif_subspaces = [np.array([3]), np.array([2])]
+    ref_motif_mdls = [
         np.array([244.0, 260.67970001, 279.86313714, 281.35940001]),
         np.array([254.33985, 260.67970001, 279.86313714, 291.20703549]),
     ]
@@ -222,10 +222,10 @@ def test_aamp_mmotifs_two_motif_pairs_max_motifs_2(T):
     excl_zone = int(np.ceil(m / config.STUMPY_EXCL_ZONE_DENOM))
     P, I = naive.maamp(T, m, excl_zone)
     (
-        motif_distances_cmp,
-        motif_indices_cmp,
-        motif_subspaces_cmp,
-        motif_mdls_cmp,
+        cmp_motif_distances,
+        cmp_motif_indices,
+        cmp_motif_subspaces,
+        cmp_motif_mdls,
     ) = aamp_mmotifs(
         T,
         P,
@@ -236,7 +236,7 @@ def test_aamp_mmotifs_two_motif_pairs_max_motifs_2(T):
         max_motifs=2,
     )
 
-    npt.assert_array_almost_equal(motif_distances_ref, motif_distances_cmp)
-    npt.assert_array_almost_equal(motif_indices_ref, motif_indices_cmp)
-    npt.assert_array_almost_equal(motif_subspaces_ref, motif_subspaces_cmp)
-    npt.assert_array_almost_equal(motif_mdls_ref, motif_mdls_cmp)
+    npt.assert_allclose(cmp_motif_distances, ref_motif_distances, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_indices, ref_motif_indices, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_subspaces, ref_motif_subspaces, atol=1.5e-07)
+    npt.assert_allclose(cmp_motif_mdls, ref_motif_mdls, atol=1.5e-07)
