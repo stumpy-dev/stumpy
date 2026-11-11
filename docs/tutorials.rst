@@ -27,3 +27,4 @@ Tutorials
     Tutorial_Multidimensional_Motif_Discovery.ipynb
     Tutorial_Annotation_Vectors.ipynb
     Tutorial_Shapelet_Discovery.ipynb
+    Tutorial_Motif_Feature_Encoding.ipynb
