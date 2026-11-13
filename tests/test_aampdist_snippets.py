@@ -3,7 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from stumpy import rng
+from stumpy import config, rng
 from stumpy.aampdist_snippets import _get_all_aampdist_profiles, aampdist_snippets
 
 test_data = [rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64)]
@@ -19,7 +19,9 @@ def test_get_all_aampdist_profiles(T, m):
     ref_profiles = naive.get_all_aampdist_profiles(T, m)
     cmp_profiles = _get_all_aampdist_profiles(T, m)
 
-    npt.assert_allclose(cmp_profiles, ref_profiles, atol=1.5e-07)
+    npt.assert_allclose(
+        cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
 
 
 @pytest.mark.parametrize("T", test_data)
@@ -29,7 +31,9 @@ def test_get_all_aampdist_profiles_s(T, m, s):
     ref_profiles = naive.get_all_aampdist_profiles(T, m, s=s)
     cmp_profiles = _get_all_aampdist_profiles(T, m, s=s)
 
-    npt.assert_allclose(cmp_profiles, ref_profiles, atol=1.5e-07)
+    npt.assert_allclose(
+        cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
 
 
 @pytest.mark.parametrize("T", test_data)
@@ -68,15 +72,19 @@ def test_aampdist_snippets(T, m, k):
         npt.assert_allclose(
             cmp_aampdist_snippets,
             ref_aampdist_snippets,
-            atol=1.5e-07,
+            atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
         )
-        npt.assert_allclose(cmp_indices, ref_indices, atol=1.5e-07)
+        npt.assert_allclose(
+            cmp_indices, ref_indices, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+        )
         # npt.assert_allclose(
-        #     cmp_profiles, ref_profiles, atol=1.5e-07
+        #     cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         # )
-        npt.assert_allclose(cmp_fractions, ref_fractions, atol=1.5e-07)
+        npt.assert_allclose(
+            cmp_fractions, ref_fractions, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+        )
         # npt.assert_allclose(
-        #     cmp_areas, ref_areas, atol=1.5e-07
+        #     cmp_areas, ref_areas, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         # )
         npt.assert_allclose(cmp_regimes, ref_regimes, atol=1.5e-07)
 
@@ -108,14 +116,22 @@ def test_aampdist_snippets_percentage(T, m, k, percentage):
         cmp_regimes,
     ) = aampdist_snippets(T, m, k, percentage=percentage)
 
-    npt.assert_allclose(cmp_aampdist_snippets, ref_aampdist_snippets, atol=1.5e-07)
-    npt.assert_allclose(cmp_indices, ref_indices, atol=1.5e-07)
+    npt.assert_allclose(
+        cmp_aampdist_snippets,
+        ref_aampdist_snippets,
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+    )
+    npt.assert_allclose(
+        cmp_indices, ref_indices, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
     # npt.assert_allclose(
-    #     cmp_profiles, ref_profiles, atol=1.5e-07
+    #     cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     # )
-    npt.assert_allclose(cmp_fractions, ref_fractions, atol=1.5e-07)
+    npt.assert_allclose(
+        cmp_fractions, ref_fractions, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
     # npt.assert_allclose(
-    #     cmp_areas, ref_areas, atol=1.5e-07
+    #     cmp_areas, ref_areas, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     # )
     npt.assert_allclose(cmp_regimes, ref_regimes, atol=1.5e-07)
 
@@ -147,13 +163,21 @@ def test_aampdist_snippets_s(T, m, k, s):
         cmp_regimes,
     ) = aampdist_snippets(T, m, k, s=s)
 
-    npt.assert_allclose(cmp_aampdist_snippets, ref_aampdist_snippets, atol=1.5e-07)
-    npt.assert_allclose(cmp_indices, ref_indices, atol=1.5e-07)
+    npt.assert_allclose(
+        cmp_aampdist_snippets,
+        ref_aampdist_snippets,
+        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+    )
+    npt.assert_allclose(
+        cmp_indices, ref_indices, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
     # npt.assert_allclose(
-    #     cmp_profiles, ref_profiles, atol=1.5e-07
+    #     cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     # )
-    npt.assert_allclose(cmp_fractions, ref_fractions, atol=1.5e-07)
+    npt.assert_allclose(
+        cmp_fractions, ref_fractions, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
     # npt.assert_allclose(
-    #     cmp_areas, ref_areas, atol=1.5e-07
+    #     cmp_areas, ref_areas, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     # )
     npt.assert_allclose(cmp_regimes, ref_regimes, atol=1.5e-07)
