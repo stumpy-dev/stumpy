@@ -47,14 +47,14 @@ def test_multi_mass_seeded():
 
         Q = T[:, trivial_idx : trivial_idx + m]
 
-        ref = naive.multi_mass(Q, T, m)
+        ref_result = naive.multi_mass(Q, T, m)
 
         T_subseq_isconstant = core.rolling_isconstant(T, m)
         M_T, Σ_T = core.compute_mean_std(T, m)
 
         Q_subseq_isconstant = np.expand_dims(T_subseq_isconstant[:, trivial_idx], 1)
 
-        comp = _multi_mass(
+        cmp_result = _multi_mass(
             Q,
             T,
             m,
@@ -67,7 +67,9 @@ def test_multi_mass_seeded():
             query_idx=trivial_idx,
         )
 
-        npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(
+            cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+        )
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -76,14 +78,14 @@ def test_multi_mass(T, m):
 
     Q = T[:, trivial_idx : trivial_idx + m]
 
-    ref = naive.multi_mass(Q, T, m)
+    ref_result = naive.multi_mass(Q, T, m)
 
     T_subseq_isconstant = core.rolling_isconstant(T, m)
     M_T, Σ_T = core.compute_mean_std(T, m)
 
     Q_subseq_isconstant = np.expand_dims(T_subseq_isconstant[:, trivial_idx], 1)
 
-    comp = _multi_mass(
+    cmp_result = _multi_mass(
         Q,
         T,
         m,
@@ -96,7 +98,9 @@ def test_multi_mass(T, m):
         query_idx=trivial_idx,
     )
 
-    npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+    npt.assert_allclose(
+        cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -105,9 +109,9 @@ def test_multi_distance_profile(T, m):
         ref_D = naive.multi_distance_profile(query_idx, T, m)
 
         M_T, Σ_T = core.compute_mean_std(T, m)
-        comp_D = multi_distance_profile(query_idx, T, m)
+        cmp_D = multi_distance_profile(query_idx, T, m)
 
-        npt.assert_almost_equal(ref_D, comp_D)
+        npt.assert_allclose(cmp_D, ref_D, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -121,7 +125,7 @@ def test_get_first_mstump_profile(T, m):
 
     T_subseq_isconstant = core.rolling_isconstant(T, m)
     M_T, Σ_T = core.compute_mean_std(T, m)
-    comp_P, comp_I = _get_first_mstump_profile(
+    cmp_P, cmp_I = _get_first_mstump_profile(
         start,
         T,
         T,
@@ -135,8 +139,8 @@ def test_get_first_mstump_profile(T, m):
         T_subseq_isconstant,
     )
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_equal(cmp_I, ref_I)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -152,10 +156,10 @@ def test_get_multi_QT(T, m):
         )
         ref_QT_first[dim] = naive_rolling_window_dot_product(T[dim, :m], T[dim])
 
-    comp_QT, comp_QT_first = _get_multi_QT(start, T, m)
+    cmp_QT, cmp_QT_first = _get_multi_QT(start, T, m)
 
-    npt.assert_almost_equal(ref_QT, comp_QT)
-    npt.assert_almost_equal(ref_QT_first, comp_QT_first)
+    npt.assert_allclose(cmp_QT, ref_QT, atol=1.5e-07)
+    npt.assert_allclose(cmp_QT_first, ref_QT_first, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -165,8 +169,8 @@ def test_subspace(T, m):
 
     for k in range(T.shape[0]):
         ref_S = naive.subspace(T, m, motif_idx, nn_idx, k)
-        comp_S = subspace(T, m, motif_idx, nn_idx, k)
-        npt.assert_almost_equal(ref_S, comp_S)
+        cmp_S = subspace(T, m, motif_idx, nn_idx, k)
+        npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -179,8 +183,8 @@ def test_subspace_include(T, m):
 
             for k in range(T.shape[0]):
                 ref_S = naive.subspace(T, m, motif_idx, nn_idx, k, include)
-                comp_S = subspace(T, m, motif_idx, nn_idx, k, include)
-                npt.assert_almost_equal(ref_S, comp_S)
+                cmp_S = subspace(T, m, motif_idx, nn_idx, k, include)
+                npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -190,8 +194,8 @@ def test_subspace_discords(T, m):
 
     for k in range(T.shape[0]):
         ref_S = naive.subspace(T, m, discord_idx, nn_idx, k, discords=True)
-        comp_S = subspace(T, m, discord_idx, nn_idx, k, discords=True)
-        npt.assert_almost_equal(ref_S, comp_S)
+        cmp_S = subspace(T, m, discord_idx, nn_idx, k, discords=True)
+        npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -206,8 +210,8 @@ def test_subspace_include_discords(T, m):
                 ref_S = naive.subspace(
                     T, m, discord_idx, nn_idx, k, include, discords=True
                 )
-                comp_S = subspace(T, m, discord_idx, nn_idx, k, include, discords=True)
-                npt.assert_almost_equal(ref_S, comp_S)
+                cmp_S = subspace(T, m, discord_idx, nn_idx, k, include, discords=True)
+                npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -216,11 +220,11 @@ def test_mdl(T, m):
     nn_idx = np.full(T.shape[0], 4)
 
     ref_MDL, ref_S = naive.mdl(T, m, subseq_idx, nn_idx)
-    comp_MDL, comp_S = mdl(T, m, subseq_idx, nn_idx)
-    npt.assert_almost_equal(ref_MDL, comp_MDL)
+    cmp_MDL, cmp_S = mdl(T, m, subseq_idx, nn_idx)
+    npt.assert_allclose(cmp_MDL, ref_MDL, atol=1.5e-07)
 
-    for ref, cmp in zip(ref_S, comp_S):
-        npt.assert_almost_equal(ref, cmp)
+    for ref_result, cmp_result in zip(ref_S, cmp_S):
+        npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 def test_naive_mstump():
@@ -233,10 +237,14 @@ def test_naive_mstump():
     ref_P = ref_mp[np.newaxis, :, 0]
     ref_I = ref_mp[np.newaxis, :, 1]
 
-    comp_P, comp_I = naive.mstump(T, m, zone)
+    cmp_P, cmp_I = naive.mstump(T, m, zone)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(
+        cmp_P.astype(np.float64), ref_P.astype(np.float64), atol=1.5e-07
+    )
+    npt.assert_allclose(
+        cmp_I.astype(np.float64), ref_I.astype(np.float64), atol=1.5e-07
+    )
 
 
 def test_mstump_int_input():
@@ -249,10 +257,10 @@ def test_mstump(T, m):
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.mstump(T, m, excl_zone)
-    comp_P, comp_I = mstump(T, m)
+    cmp_P, cmp_I = mstump(T, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -263,10 +271,10 @@ def test_mstump_include(T, m):
             excl_zone = int(np.ceil(m / 4))
 
             ref_P, ref_I = naive.mstump(T, m, excl_zone, include)
-            comp_P, comp_I = mstump(T, m, include)
+            cmp_P, cmp_I = mstump(T, m, include)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -274,10 +282,10 @@ def test_mstump_discords(T, m):
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.mstump(T, m, excl_zone, discords=True)
-    comp_P, comp_I = mstump(T, m, discords=True)
+    cmp_P, cmp_I = mstump(T, m, discords=True)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -289,10 +297,10 @@ def test_mstump_include_discords(T, m):
             excl_zone = int(np.ceil(m / 4))
 
             ref_P, ref_I = naive.mstump(T, m, excl_zone, include, discords=True)
-            comp_P, comp_I = mstump(T, m, include, discords=True)
+            cmp_P, cmp_I = mstump(T, m, include, discords=True)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -300,22 +308,22 @@ def test_mstump_wrapper(T, m):
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.mstump(T, m, excl_zone)
-    comp_P, comp_I = mstump(T, m)
+    cmp_P, cmp_I = mstump(T, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
     df = pd.DataFrame(T.T)
-    comp_P, comp_I = mstump(df, m)
+    cmp_P, cmp_I = mstump(df, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
     df = pl.DataFrame(T.T)
-    comp_P, comp_I = mstump(df, m)
+    cmp_P, cmp_I = mstump(df, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -327,16 +335,16 @@ def test_mstump_wrapper_include(T, m):
             excl_zone = int(np.ceil(m / 4))
 
             ref_P, ref_I = naive.mstump(T, m, excl_zone, include)
-            comp_P, comp_I = mstump(T, m, include)
+            cmp_P, cmp_I = mstump(T, m, include)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
             df = pd.DataFrame(T.T)
-            comp_P, comp_I = mstump(df, m, include)
+            cmp_P, cmp_I = mstump(df, m, include)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_constant_subsequence_self_join():
@@ -347,9 +355,9 @@ def test_constant_subsequence_self_join():
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.mstump(T, m, excl_zone)
-    comp_P, comp_I = mstump(T, m)
+    cmp_P, cmp_I = mstump(T, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)  # ignore indices
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)  # ignore indices
 
 
 def test_identical_subsequence_self_join():
@@ -363,10 +371,10 @@ def test_identical_subsequence_self_join():
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.mstump(T, m, excl_zone)
-    comp_P, comp_I = mstump(T, m)
+    cmp_P, cmp_I = mstump(T, m)
 
-    npt.assert_almost_equal(
-        ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION
+    npt.assert_allclose(
+        cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     )  # ignore indices
 
 
@@ -385,10 +393,10 @@ def test_mstump_nan_inf_self_join_first_dimension(
         T_sub[0, substitution_location] = substitute
 
         ref_P, ref_I = naive.mstump(T_sub, m, excl_zone)
-        comp_P, comp_I = mstump(T_sub, m)
+        cmp_P, cmp_I = mstump(T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -404,10 +412,10 @@ def test_mstump_nan_self_join_all_dimensions(T, m, substitute, substitution_loca
         T_sub[:, substitution_location] = substitute
 
         ref_P, ref_I = naive.mstump(T_sub, m, excl_zone)
-        comp_P, comp_I = mstump(T_sub, m)
+        cmp_P, cmp_I = mstump(T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_multi_mass_with_isconstant():
@@ -424,7 +432,7 @@ def test_multi_mass_with_isconstant():
     Q = rng.RNG.uniform(-1000, 1000, size=[d, m])
     Q_subseq_isconstant = rng.RNG.choice([True, False], size=(d, 1), replace=True)
 
-    ref = naive.multi_mass(
+    ref_result = naive.multi_mass(
         Q,
         T,
         m,
@@ -438,7 +446,7 @@ def test_multi_mass_with_isconstant():
     Q_subseq_isconstant = core.rolling_isconstant(Q, m, Q_subseq_isconstant)
     μ_Q, σ_Q = core.compute_mean_std(Q, m)
 
-    comp = _multi_mass(
+    cmp_result = _multi_mass(
         Q,
         T,
         m,
@@ -450,7 +458,9 @@ def test_multi_mass_with_isconstant():
         Q_subseq_isconstant=Q_subseq_isconstant,
     )
 
-    npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+    npt.assert_allclose(
+        cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
 
     # case 2: Q is a multi-subseq of T
     T = rng.RNG.uniform(-1000, 1000, size=[d, n])
@@ -462,7 +472,7 @@ def test_multi_mass_with_isconstant():
     Q = T[:, query_idx : query_idx + m]
     Q_subseq_isconstant = np.expand_dims(T_subseq_isconstant[:, query_idx], 1)
 
-    ref = naive.multi_mass(
+    ref_result = naive.multi_mass(
         Q,
         T,
         m,
@@ -476,7 +486,7 @@ def test_multi_mass_with_isconstant():
     Q_subseq_isconstant = core.rolling_isconstant(Q, m, Q_subseq_isconstant)
     μ_Q, σ_Q = core.compute_mean_std(Q, m)
 
-    comp = _multi_mass(
+    cmp_result = _multi_mass(
         Q,
         T,
         m,
@@ -489,7 +499,9 @@ def test_multi_mass_with_isconstant():
         query_idx=query_idx,
     )
 
-    npt.assert_almost_equal(ref, comp, decimal=config.STUMPY_TEST_PRECISION)
+    npt.assert_allclose(
+        cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+    )
 
 
 def test_multi_distance_profile_with_isconstant_case1():
@@ -508,11 +520,11 @@ def test_multi_distance_profile_with_isconstant_case1():
             query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
         )
 
-        comp_D = multi_distance_profile(
+        cmp_D = multi_distance_profile(
             query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
         )
 
-        npt.assert_almost_equal(ref_D, comp_D)
+        npt.assert_allclose(cmp_D, ref_D, atol=1.5e-07)
 
 
 def test_multi_distance_profile_with_isconstant_case2():
@@ -532,11 +544,11 @@ def test_multi_distance_profile_with_isconstant_case2():
         query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
     )
 
-    comp_D = multi_distance_profile(
+    cmp_D = multi_distance_profile(
         query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
     )
 
-    npt.assert_almost_equal(ref_D, comp_D)
+    npt.assert_allclose(cmp_D, ref_D, atol=1.5e-07)
 
 
 def test_multi_distance_profile_with_isconstant_case3():
@@ -559,11 +571,11 @@ def test_multi_distance_profile_with_isconstant_case3():
     ref_D = naive.multi_distance_profile(
         query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
     )
-    comp_D = multi_distance_profile(
+    cmp_D = multi_distance_profile(
         query_idx, T, m, T_subseq_isconstant=T_subseq_isconstant
     )
 
-    npt.assert_almost_equal(ref_D, comp_D)
+    npt.assert_allclose(cmp_D, ref_D, atol=1.5e-07)
 
 
 def test_mstump_with_isconstant_case1():
@@ -582,10 +594,10 @@ def test_mstump_with_isconstant_case1():
     ref_P, ref_I = naive.mstump(
         T, m, excl_zone, T_subseq_isconstant=T_subseq_isconstant
     )
-    comp_P, comp_I = mstump(T, m, T_subseq_isconstant=T_subseq_isconstant)
+    cmp_P, cmp_I = mstump(T, m, T_subseq_isconstant=T_subseq_isconstant)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_mstump_with_isconstant_case2():
@@ -608,7 +620,7 @@ def test_mstump_with_isconstant_case2():
     ref_P, ref_I = naive.mstump(
         T, m, excl_zone, T_subseq_isconstant=T_subseq_isconstant
     )
-    comp_P, comp_I = mstump(T, m, T_subseq_isconstant=T_subseq_isconstant)
+    cmp_P, cmp_I = mstump(T, m, T_subseq_isconstant=T_subseq_isconstant)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
