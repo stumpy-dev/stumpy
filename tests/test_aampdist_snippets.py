@@ -19,8 +19,8 @@ def test_get_all_aampdist_profiles(T, m):
     ref_profiles = naive.get_all_aampdist_profiles(T, m)
     cmp_profiles = _get_all_aampdist_profiles(T, m)
 
-    npt.assert_almost_equal(
-        ref_profiles, cmp_profiles, decimal=config.STUMPY_TEST_PRECISION
+    npt.assert_allclose(
+        cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     )
 
 
@@ -31,8 +31,8 @@ def test_get_all_aampdist_profiles_s(T, m, s):
     ref_profiles = naive.get_all_aampdist_profiles(T, m, s=s)
     cmp_profiles = _get_all_aampdist_profiles(T, m, s=s)
 
-    npt.assert_almost_equal(
-        ref_profiles, cmp_profiles, decimal=config.STUMPY_TEST_PRECISION
+    npt.assert_allclose(
+        cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     )
 
 
