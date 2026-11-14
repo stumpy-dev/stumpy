@@ -87,21 +87,21 @@ test_data = [
 def test_mass():
     Q = rng.RNG.random(10)
     T = rng.RNG.random(20)
-    ref = core.mass_absolute(Q, T)
-    comp = core.mass(Q, T, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = core.mass_absolute(Q, T)
+    cmp_result = core.mass(Q, T, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
     Q = rng.RNG.random(10)
     T = rng.RNG.random(20)
     T, T_subseq_isfinite = core.preprocess_non_normalized(T, 10)
     T_squared = np.sum(core.rolling_window(T * T, Q.shape[0]), axis=-1)
-    ref = core.mass_absolute(Q, T)
-    comp = core.mass(Q, T, M_T=T_subseq_isfinite, normalize=False)
-    npt.assert_almost_equal(ref, comp)
-    comp = core.mass(Q, T, Σ_T=T_squared, normalize=False)
-    npt.assert_almost_equal(ref, comp)
-    comp = core.mass(Q, T, M_T=T_subseq_isfinite, Σ_T=T_squared, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = core.mass_absolute(Q, T)
+    cmp_result = core.mass(Q, T, M_T=T_subseq_isfinite, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
+    cmp_result = core.mass(Q, T, Σ_T=T_squared, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
+    cmp_result = core.mass(Q, T, M_T=T_subseq_isfinite, Σ_T=T_squared, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -110,9 +110,11 @@ def test_stump(T, m):
         T = T.copy()
         T = T[0]
 
-    ref = aamp(T, m)
-    comp = stump(T, m, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = aamp(T, m)
+    cmp_result = stump(T, m, normalize=False)
+    npt.assert_allclose(
+        cmp_result.astype(np.float64), ref_result.astype(np.float64), atol=1.5e-07
+    )
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -121,9 +123,9 @@ def test_prescrump(T, m):
         T = T.copy()
         T = T[0]
 
-    ref = prescraamp(T, m)
-    comp = prescrump(T, m, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = prescraamp(T, m)
+    cmp_result = prescrump(T, m, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -133,15 +135,15 @@ def test_scrump(T, m):
         T = T[0]
 
     with rng.fix_state():
-        ref = scraamp(T, m)
+        ref_result = scraamp(T, m)
     with rng.fix_state():
-        comp = scrump(T, m, normalize=False)
-    npt.assert_almost_equal(ref.P_, comp.P_)
+        cmp_result = scrump(T, m, normalize=False)
+    npt.assert_allclose(cmp_result.P_, ref_result.P_, atol=1.5e-07)
 
     for i in range(10):
-        ref.update()
-        comp.update()
-        npt.assert_almost_equal(ref.P_, comp.P_)
+        ref_result.update()
+        cmp_result.update()
+        npt.assert_allclose(cmp_result.P_, ref_result.P_, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -150,15 +152,15 @@ def test_scrump_plus_plus(T, m):
         T = T.copy()
         T = T[0]
     with rng.fix_state():
-        ref = scraamp(T, m, pre_scraamp=True)
+        ref_result = scraamp(T, m, pre_scraamp=True)
     with rng.fix_state():
-        comp = scrump(T, m, pre_scrump=True, normalize=False)
-    npt.assert_almost_equal(ref.P_, comp.P_)
+        cmp_result = scrump(T, m, pre_scrump=True, normalize=False)
+    npt.assert_allclose(cmp_result.P_, ref_result.P_, atol=1.5e-07)
 
     for i in range(10):
-        ref.update()
-        comp.update()
-        npt.assert_almost_equal(ref.P_, comp.P_)
+        ref_result.update()
+        cmp_result.update()
+        npt.assert_allclose(cmp_result.P_, ref_result.P_, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -168,15 +170,15 @@ def test_scrump_plus_plus_full(T, m):
         T = T[0]
 
     with rng.fix_state():
-        ref = scraamp(T, m, percentage=0.1, pre_scraamp=True)
+        ref_result = scraamp(T, m, percentage=0.1, pre_scraamp=True)
     with rng.fix_state():
-        comp = scrump(T, m, percentage=0.1, pre_scrump=True, normalize=False)
-    npt.assert_almost_equal(ref.P_, comp.P_)
+        cmp_result = scrump(T, m, percentage=0.1, pre_scrump=True, normalize=False)
+    npt.assert_allclose(cmp_result.P_, ref_result.P_, atol=1.5e-07)
 
     for i in range(10):
-        ref.update()
-        comp.update()
-        npt.assert_almost_equal(ref.P_, comp.P_)
+        ref_result.update()
+        cmp_result.update()
+        npt.assert_allclose(cmp_result.P_, ref_result.P_, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -187,9 +189,11 @@ def test_stumped(T, m, dask_cluster):
         T = T[0]
 
     with Client(dask_cluster) as dask_client:
-        ref = aamped(dask_client, T, m)
-        comp = stumped(dask_client, T, m, normalize=False)
-        npt.assert_almost_equal(ref, comp)
+        ref_result = aamped(dask_client, T, m)
+        cmp_result = stumped(dask_client, T, m, normalize=False)
+        npt.assert_allclose(
+            cmp_result.astype(np.float64), ref_result.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -202,9 +206,11 @@ def test_gpu_stump(T, m):
         T = T.copy()
         T = T[0]
 
-    ref = gpu_aamp(T, m)
-    comp = gpu_stump(T, m, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = gpu_aamp(T, m)
+    cmp_result = gpu_stump(T, m, normalize=False)
+    npt.assert_allclose(
+        cmp_result.astype(np.float64), ref_result.astype(np.float64), atol=1.5e-07
+    )
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -214,12 +220,12 @@ def test_stumpi(T, m):
         T = T[0]
 
     ref_stream = aampi(T, m)
-    comp_stream = stumpi(T, m, normalize=False)
+    cmp_stream = stumpi(T, m, normalize=False)
     for i in range(10):
         t = rng.RNG.random()
         ref_stream.update(t)
-        comp_stream.update(t)
-        npt.assert_almost_equal(ref_stream.P_, comp_stream.P_)
+        cmp_stream.update(t)
+        npt.assert_allclose(cmp_stream.P_, ref_stream.P_, atol=1.5e-07)
 
 
 def test_ostinato():
@@ -227,11 +233,11 @@ def test_ostinato():
     Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = aamp_ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = ostinato(Ts, m, normalize=False)
+    cmp_radius, cmp_Ts_idx, cmp_subseq_idx = ostinato(Ts, m, normalize=False)
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+    npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+    npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+    npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -241,13 +247,13 @@ def test_ostinatoed(dask_cluster):
 
     with Client(dask_cluster) as dask_client:
         ref_radius, ref_Ts_idx, ref_subseq_idx = aamp_ostinatoed(dask_client, Ts, m)
-        comp_radius, comp_Ts_idx, comp_subseq_idx = ostinatoed(
+        cmp_radius, cmp_Ts_idx, cmp_subseq_idx = ostinatoed(
             dask_client, Ts, m, normalize=False
         )
 
-        npt.assert_almost_equal(ref_radius, comp_radius)
-        npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-        npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+        npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+        npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+        npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -259,11 +265,11 @@ def test_gpu_ostinato():
     Ts = [rng.RNG.random(n) for n in [64, 128, 256]]
 
     ref_radius, ref_Ts_idx, ref_subseq_idx = gpu_aamp_ostinato(Ts, m)
-    comp_radius, comp_Ts_idx, comp_subseq_idx = gpu_ostinato(Ts, m, normalize=False)
+    cmp_radius, cmp_Ts_idx, cmp_subseq_idx = gpu_ostinato(Ts, m, normalize=False)
 
-    npt.assert_almost_equal(ref_radius, comp_radius)
-    npt.assert_almost_equal(ref_Ts_idx, comp_Ts_idx)
-    npt.assert_almost_equal(ref_subseq_idx, comp_subseq_idx)
+    npt.assert_allclose(cmp_radius, ref_radius, atol=1.5e-07)
+    npt.assert_allclose(cmp_Ts_idx, ref_Ts_idx, atol=1.5e-07)
+    npt.assert_allclose(cmp_subseq_idx, ref_subseq_idx, atol=1.5e-07)
 
 
 def test_mpdist():
@@ -271,9 +277,9 @@ def test_mpdist():
     T_B = rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64)
     m = 5
 
-    ref = aampdist(T_A, T_B, m)
-    comp = mpdist(T_A, T_B, m, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = aampdist(T_A, T_B, m)
+    cmp_result = mpdist(T_A, T_B, m, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -283,9 +289,9 @@ def test_mpdisted(dask_cluster):
     m = 5
 
     with Client(dask_cluster) as dask_client:
-        ref = aampdisted(dask_client, T_A, T_B, m)
-        comp = mpdisted(dask_client, T_A, T_B, m, normalize=False)
-        npt.assert_almost_equal(ref, comp)
+        ref_result = aampdisted(dask_client, T_A, T_B, m)
+        cmp_result = mpdisted(dask_client, T_A, T_B, m, normalize=False)
+        npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -297,33 +303,33 @@ def test_gpu_mpdist():
     T_B = rng.RNG.uniform(-1000, 1000, size=64).astype(np.float64)
     m = 5
 
-    ref = gpu_aampdist(T_A, T_B, m)
-    comp = gpu_mpdist(T_A, T_B, m, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = gpu_aampdist(T_A, T_B, m)
+    cmp_result = gpu_mpdist(T_A, T_B, m, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
 def test_multi_distance_profile(T, m):
     for i in range(3):
-        ref = maamp_multi_distance_profile(i, T, m)
-        comp = multi_distance_profile(i, T, m, normalize=False)
-        npt.assert_almost_equal(ref, comp)
+        ref_result = maamp_multi_distance_profile(i, T, m)
+        cmp_result = multi_distance_profile(i, T, m, normalize=False)
+        npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
 def test_mstump(T, m):
-    ref = maamp(T, m)
-    comp = mstump(T, m, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = maamp(T, m)
+    cmp_result = mstump(T, m, normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
 @pytest.mark.parametrize("T, m", test_data)
 def test_mstumped(T, m, dask_cluster):
     with Client(dask_cluster) as dask_client:
-        ref = maamped(dask_client, T, m)
-        comp = mstumped(dask_client, T, m, normalize=False)
-        npt.assert_almost_equal(ref, comp)
+        ref_result = maamped(dask_client, T, m)
+        cmp_result = mstumped(dask_client, T, m, normalize=False)
+        npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -333,8 +339,8 @@ def test_subspace(T, m):
 
     for k in range(T.shape[0]):
         ref_S = maamp_subspace(T, m, subseq_idx, nn_idx, k)
-        comp_S = subspace(T, m, subseq_idx, nn_idx, k, normalize=False)
-        npt.assert_almost_equal(ref_S, comp_S)
+        cmp_S = subspace(T, m, subseq_idx, nn_idx, k, normalize=False)
+        npt.assert_allclose(cmp_S, ref_S, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -343,11 +349,11 @@ def test_mdl(T, m):
     nn_idx = np.full(T.shape[0], 4)
 
     ref_MDL, ref_S = maamp_mdl(T, m, subseq_idx, nn_idx)
-    comp_MDL, comp_S = mdl(T, m, subseq_idx, nn_idx, normalize=False)
-    npt.assert_almost_equal(ref_MDL, comp_MDL)
+    cmp_MDL, cmp_S = mdl(T, m, subseq_idx, nn_idx, normalize=False)
+    npt.assert_allclose(cmp_MDL, ref_MDL, atol=1.5e-07)
 
-    for ref, cmp in zip(ref_S, comp_S):
-        npt.assert_almost_equal(ref, cmp)
+    for ref_result, cmp_result in zip(ref_S, cmp_S):
+        npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -357,9 +363,9 @@ def test_motifs(T, m):
         T = T[0]
 
     mp = aamp(T, m)
-    ref = aamp_motifs(T, mp[:, 0])
-    comp = motifs(T, mp[:, 0], normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = aamp_motifs(T, mp[:, 0])
+    cmp_result = motifs(T, mp[:, 0], normalize=False)
+    npt.assert_allclose(cmp_result, ref_result, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -369,9 +375,11 @@ def test_match(T, m):
         T = T[0]
 
     Q = T[:m]
-    ref = aamp_match(Q, T)
-    comp = match(Q, T, normalize=False)
-    npt.assert_almost_equal(ref, comp)
+    ref_result = aamp_match(Q, T)
+    cmp_result = match(Q, T, normalize=False)
+    npt.assert_allclose(
+        cmp_result.astype(np.float64), ref_result.astype(np.float64), atol=1.5e-07
+    )
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -381,7 +389,7 @@ def test_mmotifs(T, m):
     cmp_distances, cmp_indices, cmp_subspaces, cmp_mdls = mmotifs(
         T, mps, indices, normalize=False
     )
-    npt.assert_almost_equal(ref_distances, cmp_distances)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:All-NaN slice encountered")
@@ -406,7 +414,7 @@ def test_snippets():
         cmp_areas,
         cmp_regimes,
     ) = snippets(T, m, k, normalize=False)
-    npt.assert_almost_equal(ref_snippets, cmp_snippets)
+    npt.assert_allclose(cmp_snippets, ref_snippets, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -416,26 +424,26 @@ def test_stimp(T, m):
         T = T[0]
     n = 3
     with rng.fix_state():
-        ref = aamp_stimp(T, m)
+        ref_result = aamp_stimp(T, m)
         for i in range(n):
-            ref.update()
+            ref_result.update()
 
     with rng.fix_state():
-        cmp = stimp(T, m, normalize=False)
+        cmp_result = stimp(T, m, normalize=False)
         for i in range(n):
-            cmp.update()
+            cmp_result.update()
 
         # Compare raw pan
-        ref_PAN = ref._PAN
-        cmp_PAN = cmp._PAN
+        ref_PAN = ref_result._PAN
+        cmp_PAN = cmp_result._PAN
 
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
 
-    npt.assert_almost_equal(ref_PAN, cmp_PAN)
+    npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
     # Compare transformed pan
-    npt.assert_almost_equal(ref.PAN_, cmp.PAN_)
+    npt.assert_allclose(cmp_result.PAN_, ref_result.PAN_, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -447,26 +455,26 @@ def test_stimped(T, m, dask_cluster):
     n = 3
     with Client(dask_cluster) as dask_client:
         with rng.fix_state():
-            ref = aamp_stimped(dask_client, T, m)
+            ref_result = aamp_stimped(dask_client, T, m)
             for i in range(n):
-                ref.update()
+                ref_result.update()
 
         with rng.fix_state():
-            cmp = stimped(dask_client, T, m, normalize=False)
+            cmp_result = stimped(dask_client, T, m, normalize=False)
             for i in range(n):
-                cmp.update()
+                cmp_result.update()
 
             # Compare raw pan
-            ref_PAN = ref._PAN
-            cmp_PAN = cmp._PAN
+            ref_PAN = ref_result._PAN
+            cmp_PAN = cmp_result._PAN
 
         naive.replace_inf(ref_PAN)
         naive.replace_inf(cmp_PAN)
 
-        npt.assert_almost_equal(ref_PAN, cmp_PAN)
+        npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
         # Compare transformed pan
-        npt.assert_almost_equal(ref.PAN_, cmp.PAN_)
+        npt.assert_allclose(cmp_result.PAN_, ref_result.PAN_, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -480,23 +488,23 @@ def test_gpu_stimp(T, m):
         T = T[0]
     n = 3
     with rng.fix_state():
-        ref = gpu_aamp_stimp(T, m)
+        ref_result = gpu_aamp_stimp(T, m)
         for i in range(n):
-            ref.update()
+            ref_result.update()
 
     with rng.fix_state():
-        cmp = gpu_stimp(T, m, normalize=False)
+        cmp_result = gpu_stimp(T, m, normalize=False)
         for i in range(n):
-            cmp.update()
+            cmp_result.update()
 
         # Compare raw pan
-        ref_PAN = ref._PAN
-        cmp_PAN = cmp._PAN
+        ref_PAN = ref_result._PAN
+        cmp_PAN = cmp_result._PAN
 
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
 
-    npt.assert_almost_equal(ref_PAN, cmp_PAN)
+    npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
     # Compare transformed pan
-    npt.assert_almost_equal(ref.PAN_, cmp.PAN_)
+    npt.assert_allclose(cmp_result.PAN_, ref_result.PAN_, atol=1.5e-07)
