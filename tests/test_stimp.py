@@ -69,7 +69,7 @@ def test_stimp_1_percent(T):
         naive.replace_inf(ref_PAN)
         naive.replace_inf(cmp_PAN)
 
-        npt.assert_almost_equal(ref_PAN, cmp_PAN)
+        npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
         # Compare transformed pan
         cmp_pan = pan.PAN_
@@ -80,7 +80,7 @@ def test_stimp_1_percent(T):
         naive.replace_inf(ref_pan)
         naive.replace_inf(cmp_pan)
 
-        npt.assert_almost_equal(ref_pan, cmp_pan)
+        npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", T)
@@ -122,7 +122,7 @@ def test_stimp_max_m(T):
         naive.replace_inf(ref_PAN)
         naive.replace_inf(cmp_PAN)
 
-        npt.assert_almost_equal(ref_PAN, cmp_PAN)
+        npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
         # Compare transformed pan
         cmp_pan = pan.PAN_
@@ -133,7 +133,7 @@ def test_stimp_max_m(T):
         naive.replace_inf(ref_pan)
         naive.replace_inf(cmp_pan)
 
-        npt.assert_almost_equal(ref_pan, cmp_pan)
+        npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", T)
@@ -169,7 +169,7 @@ def test_stimp_100_percent(T):
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
 
-    npt.assert_almost_equal(ref_PAN, cmp_PAN)
+    npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
     # Compare transformed pan
     cmp_pan = pan.PAN_
@@ -180,7 +180,7 @@ def test_stimp_100_percent(T):
     naive.replace_inf(ref_pan)
     naive.replace_inf(cmp_pan)
 
-    npt.assert_almost_equal(ref_pan, cmp_pan)
+    npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T", T)
@@ -212,7 +212,7 @@ def test_stimp_raw_mp(T):
 
         naive.replace_inf(ref_P_)
         naive.replace_inf(cmp_P_)
-        npt.assert_almost_equal(ref_P_, cmp_P_)
+        npt.assert_allclose(cmp_P_, ref_P_.astype(np.float64), atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -251,7 +251,7 @@ def test_stimped(T, dask_cluster):
         naive.replace_inf(ref_PAN)
         naive.replace_inf(cmp_PAN)
 
-        npt.assert_almost_equal(ref_PAN, cmp_PAN)
+        npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
         # Compare transformed pan
         cmp_pan = pan.PAN_
@@ -262,7 +262,7 @@ def test_stimped(T, dask_cluster):
         naive.replace_inf(ref_pan)
         naive.replace_inf(cmp_pan)
 
-        npt.assert_almost_equal(ref_pan, cmp_pan)
+        npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
 
 
 def test_stimp_1_percent_with_isconstant():
@@ -326,7 +326,7 @@ def test_stimp_1_percent_with_isconstant():
         naive.replace_inf(ref_PAN)
         naive.replace_inf(cmp_PAN)
 
-        npt.assert_almost_equal(ref_PAN, cmp_PAN)
+        npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
         # Compare transformed pan
         cmp_pan = pan.PAN_
@@ -337,7 +337,7 @@ def test_stimp_1_percent_with_isconstant():
         naive.replace_inf(ref_pan)
         naive.replace_inf(cmp_pan)
 
-        npt.assert_almost_equal(ref_pan, cmp_pan)
+        npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -384,7 +384,7 @@ def test_stimped_with_isconstant(dask_cluster):
         naive.replace_inf(ref_PAN)
         naive.replace_inf(cmp_PAN)
 
-        npt.assert_almost_equal(ref_PAN, cmp_PAN)
+        npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
         # Compare transformed pan
         cmp_pan = pan.PAN_
@@ -395,4 +395,4 @@ def test_stimped_with_isconstant(dask_cluster):
         naive.replace_inf(ref_pan)
         naive.replace_inf(cmp_pan)
 
-        npt.assert_almost_equal(ref_pan, cmp_pan)
+        npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
