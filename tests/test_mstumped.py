@@ -48,10 +48,10 @@ def test_mstumped(T, m, dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.mstump(T, m, excl_zone)
-        comp_P, comp_I = mstumped(dask_client, T, m)
+        cmp_P, cmp_I = mstumped(dask_client, T, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -65,10 +65,10 @@ def test_mstumped_include(T, m, dask_cluster):
                 excl_zone = int(np.ceil(m / 4))
 
                 ref_P, ref_I = naive.mstump(T, m, excl_zone, include)
-                comp_P, comp_I = mstumped(dask_client, T, m, include)
+                cmp_P, cmp_I = mstumped(dask_client, T, m, include)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -78,10 +78,10 @@ def test_mstumped_discords(T, m, dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.mstump(T, m, excl_zone, discords=True)
-        comp_P, comp_I = mstumped(dask_client, T, m, discords=True)
+        cmp_P, cmp_I = mstumped(dask_client, T, m, discords=True)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -95,10 +95,10 @@ def test_mstumped_include_discords(T, m, dask_cluster):
                 excl_zone = int(np.ceil(m / 4))
 
                 ref_P, ref_I = naive.mstump(T, m, excl_zone, include, discords=True)
-                comp_P, comp_I = mstumped(dask_client, T, m, include, discords=True)
+                cmp_P, cmp_I = mstumped(dask_client, T, m, include, discords=True)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -109,10 +109,10 @@ def test_mstumped_df(T, m, dask_cluster):
 
         ref_P, ref_I = naive.mstump(T, m, excl_zone)
         df = pd.DataFrame(T.T)
-        comp_P, comp_I = mstumped(dask_client, df, m)
+        cmp_P, cmp_I = mstumped(dask_client, df, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -127,9 +127,9 @@ def test_mstumped_constant_subsequence_self_join(dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.mstump(T, m, excl_zone)
-        comp_P, comp_I = mstumped(dask_client, T, m)
+        cmp_P, cmp_I = mstumped(dask_client, T, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)  # ignore indices
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -145,10 +145,10 @@ def test_mstumped_identical_subsequence_self_join(dask_cluster):
         excl_zone = int(np.ceil(m / 4))
 
         ref_P, ref_I = naive.mstump(T, m, excl_zone)
-        comp_P, comp_I = mstumped(dask_client, T, m)
+        cmp_P, cmp_I = mstumped(dask_client, T, m)
 
-        npt.assert_almost_equal(
-            ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )  # ignore indices
 
 
@@ -165,10 +165,10 @@ def test_mstumped_one_subsequence_inf_self_join_first_dimension(
         T_sub[0, substitution_location] = np.inf
 
         ref_P, ref_I = naive.mstump(T_sub, m, excl_zone)
-        comp_P, comp_I = mstumped(dask_client, T_sub, m)
+        cmp_P, cmp_I = mstumped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -184,10 +184,10 @@ def test_mstumped_one_subsequence_inf_self_join_all_dimensions(
         T_sub[:, substitution_location] = np.inf
 
         ref_P, ref_I = naive.mstump(T_sub, m, excl_zone)
-        comp_P, comp_I = mstumped(dask_client, T_sub, m)
+        cmp_P, cmp_I = mstumped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -203,10 +203,10 @@ def test_mstumped_one_subsequence_nan_self_join_first_dimension(
         T_sub[0, substitution_location] = np.nan
 
         ref_P, ref_I = naive.mstump(T_sub, m, excl_zone)
-        comp_P, comp_I = mstumped(dask_client, T_sub, m)
+        cmp_P, cmp_I = mstumped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -222,10 +222,10 @@ def test_mstumped_one_subsequence_nan_self_join_all_dimensions(
         T_sub[:, substitution_location] = np.nan
 
         ref_P, ref_I = naive.mstump(T_sub, m, excl_zone)
-        comp_P, comp_I = mstumped(dask_client, T_sub, m)
+        cmp_P, cmp_I = mstumped(dask_client, T_sub, m)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -248,9 +248,9 @@ def test_mstumped_with_isconstant(dask_cluster):
         ref_P, ref_I = naive.mstump(
             T, m, excl_zone, T_subseq_isconstant=T_subseq_isconstant
         )
-        comp_P, comp_I = mstumped(
+        cmp_P, cmp_I = mstumped(
             dask_client, T, m, T_subseq_isconstant=T_subseq_isconstant
         )
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
