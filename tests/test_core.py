@@ -1183,6 +1183,15 @@ def test_select_P_ABBA_val_inf():
     npt.assert_allclose(cmp, ref, atol=1.5e-07)
 
 
+def test_subspace_discords():
+    D = np.array([1.0, 3.0, 2.0])
+    ref = np.array([1, 2, 0])
+
+    for k in range(D.shape[0]):
+        cmp = core._subspace(D, k, discords=True)
+        npt.assert_array_equal(cmp, ref[: k + 1])
+
+
 def test_merge_topk_PI_without_overlap():
     # This is to test function `core._merge_topk_PI(PA, PB, IA, IB)` when there
     # is no overlap between row IA[i] and row IB[i].

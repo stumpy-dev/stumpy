@@ -694,7 +694,7 @@ def subspace(T, m, subseq_idx, nn_idx, k, include=None, discords=False):
     )
 
     if discords:
-        sorted_idx = D[::-1].argsort(axis=0, kind="mergesort")
+        sorted_idx = (-D).argsort(axis=0, kind="mergesort")
     else:
         sorted_idx = D.argsort(axis=0, kind="mergesort")
 
@@ -748,7 +748,7 @@ def maamp_subspace(T, m, subseq_idx, nn_idx, k, include=None, discords=False, p=
     )
 
     if discords:
-        sorted_idx = D[::-1].argsort(axis=0, kind="mergesort")
+        sorted_idx = (-D).argsort(axis=0, kind="mergesort")
     else:
         sorted_idx = D.argsort(axis=0, kind="mergesort")
 

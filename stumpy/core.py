@@ -3947,7 +3947,7 @@ def _subspace(D, k, include=None, discords=False):
         that `k+1` rows will be returned.
     """
     if discords:
-        sorted_idx = D[::-1].argsort(axis=0, kind="mergesort")
+        sorted_idx = (-D).argsort(axis=0, kind="mergesort")
     else:
         sorted_idx = D.argsort(axis=0, kind="mergesort")
 
