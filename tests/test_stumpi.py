@@ -29,10 +29,10 @@ def test_stumpi_self_join():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_
+        cmp_left_I = stream.left_I_
 
         ref_mp = naive.stump(stream.T_, m, exclusion_zone=zone, row_wise=True)
         ref_P = ref_mp[:, 0]
@@ -46,13 +46,13 @@ def test_stumpi_self_join():
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
     with rng.fix_state():
         T = rng.RNG.rand(30)
@@ -62,18 +62,18 @@ def test_stumpi_self_join():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_
+        cmp_left_I = stream.left_I_
 
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_self_join_egress():
@@ -91,30 +91,30 @@ def test_stumpi_self_join_egress():
 
         stream = stumpi(T, m, egress=True)
 
-        comp_P = stream.P_.copy()
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             ref_I = ref_mp.I_
@@ -123,13 +123,13 @@ def test_stumpi_self_join_egress():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
     with rng.fix_state():
         T = rng.RNG.rand(n)
@@ -143,20 +143,20 @@ def test_stumpi_self_join_egress():
 
         stream = stumpi(T, m, egress=True)
 
-        comp_P = stream.P_.copy()
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
@@ -164,10 +164,10 @@ def test_stumpi_self_join_egress():
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             ref_I = ref_mp.I_
@@ -176,13 +176,13 @@ def test_stumpi_self_join_egress():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("substitute", substitution_values)
@@ -203,8 +203,8 @@ def test_stumpi_init_nan_inf_self_join(substitute, substitution_locations):
                 t = rng.RNG.rand()
                 stream.update(t)
 
-            comp_P = stream.P_
-            comp_I = stream.I_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
 
             stream.T_[substitution_location] = substitute
             ref_mp = naive.stump(stream.T_, m, exclusion_zone=zone, row_wise=True)
@@ -212,9 +212,9 @@ def test_stumpi_init_nan_inf_self_join(substitute, substitution_locations):
             ref_I = ref_mp[:, 1]
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            naive.replace_inf(cmp_P)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
         with rng.fix_state():
             T = rng.RNG.rand(30)
@@ -228,13 +228,13 @@ def test_stumpi_init_nan_inf_self_join(substitute, substitution_locations):
                 t = rng.RNG.rand()
                 stream.update(t)
 
-            comp_P = stream.P_
-            comp_I = stream.I_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
 
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("substitute", substitution_values)
@@ -259,30 +259,30 @@ def test_stumpi_init_nan_inf_self_join_egress(substitute, substitution_locations
 
             stream = stumpi(T, m, egress=True)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
             for i in range(34):
                 t = rng.RNG.rand()
                 ref_mp.update(t)
                 stream.update(t)
 
-                comp_P = stream.P_.copy()
-                comp_I = stream.I_
-                comp_left_P = stream.left_P_.copy()
-                comp_left_I = stream.left_I_
+                cmp_P = stream.P_.copy()
+                cmp_I = stream.I_
+                cmp_left_P = stream.left_P_.copy()
+                cmp_left_I = stream.left_I_
 
                 ref_P = ref_mp.P_.copy()
                 ref_I = ref_mp.I_
@@ -291,13 +291,13 @@ def test_stumpi_init_nan_inf_self_join_egress(substitute, substitution_locations
 
                 naive.replace_inf(ref_P)
                 naive.replace_inf(ref_left_P)
-                naive.replace_inf(comp_P)
-                naive.replace_inf(comp_left_P)
+                naive.replace_inf(cmp_P)
+                naive.replace_inf(cmp_left_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_P, comp_left_P)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         with rng.fix_state():
             T = rng.RNG.rand(n)
@@ -315,30 +315,30 @@ def test_stumpi_init_nan_inf_self_join_egress(substitute, substitution_locations
 
             stream = stumpi(T, m, egress=True)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
             for i in range(34):
                 t = rng.RNG.rand()
                 ref_mp.update(t)
                 stream.update(t)
 
-                comp_P = stream.P_.copy()
-                comp_I = stream.I_
-                comp_left_P = stream.left_P_.copy()
-                comp_left_I = stream.left_I_
+                cmp_P = stream.P_.copy()
+                cmp_I = stream.I_
+                cmp_left_P = stream.left_P_.copy()
+                cmp_left_I = stream.left_I_
 
                 ref_P = ref_mp.P_.copy()
                 ref_I = ref_mp.I_
@@ -347,13 +347,13 @@ def test_stumpi_init_nan_inf_self_join_egress(substitute, substitution_locations
 
                 naive.replace_inf(ref_P)
                 naive.replace_inf(ref_left_P)
-                naive.replace_inf(comp_P)
-                naive.replace_inf(comp_left_P)
+                naive.replace_inf(cmp_P)
+                naive.replace_inf(cmp_left_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_P, comp_left_P)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("substitute", substitution_values)
@@ -373,8 +373,8 @@ def test_stumpi_stream_nan_inf_self_join(substitute, substitution_locations):
             for t in T[30:]:
                 stream.update(t)
 
-            comp_P = stream.P_
-            comp_I = stream.I_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
 
             stream.T_[30:][substitution_location] = substitute
             ref_mp = naive.stump(stream.T_, m, exclusion_zone=zone, row_wise=True)
@@ -382,10 +382,10 @@ def test_stumpi_stream_nan_inf_self_join(substitute, substitution_locations):
             ref_I = ref_mp[:, 1]
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
         with rng.fix_state():
             T = rng.RNG.rand(64)
@@ -397,13 +397,13 @@ def test_stumpi_stream_nan_inf_self_join(substitute, substitution_locations):
             for t in T[30:]:
                 stream.update(t)
 
-            comp_P = stream.P_
-            comp_I = stream.I_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
 
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("substitute", substitution_values)
@@ -424,20 +424,20 @@ def test_stumpi_stream_nan_inf_self_join_egress(substitute, substitution_locatio
 
             stream = stumpi(T[:n], m, egress=True)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
             if substitution_location == -1:
                 substitution_location = T[30:].shape[0] - 1
@@ -446,10 +446,10 @@ def test_stumpi_stream_nan_inf_self_join_egress(substitute, substitution_locatio
                 ref_mp.update(t)
                 stream.update(t)
 
-                comp_P = stream.P_.copy()
-                comp_I = stream.I_
-                comp_left_P = stream.left_P_.copy()
-                comp_left_I = stream.left_I_
+                cmp_P = stream.P_.copy()
+                cmp_I = stream.I_
+                cmp_left_P = stream.left_P_.copy()
+                cmp_left_I = stream.left_I_
 
                 ref_P = ref_mp.P_.copy()
                 ref_I = ref_mp.I_
@@ -458,13 +458,13 @@ def test_stumpi_stream_nan_inf_self_join_egress(substitute, substitution_locatio
 
                 naive.replace_inf(ref_P)
                 naive.replace_inf(ref_left_P)
-                naive.replace_inf(comp_P)
-                naive.replace_inf(comp_left_P)
+                naive.replace_inf(cmp_P)
+                naive.replace_inf(cmp_left_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_P, comp_left_P)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         with rng.fix_state():
             T = rng.RNG.rand(64)
@@ -477,20 +477,20 @@ def test_stumpi_stream_nan_inf_self_join_egress(substitute, substitution_locatio
 
             stream = stumpi(T[:n], m, egress=True)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
             if substitution_location == -1:  # pragma: no cover
                 substitution_location = T[n:].shape[0] - 1
@@ -499,10 +499,10 @@ def test_stumpi_stream_nan_inf_self_join_egress(substitute, substitution_locatio
                 ref_mp.update(t)
                 stream.update(t)
 
-                comp_P = stream.P_.copy()
-                comp_I = stream.I_
-                comp_left_P = stream.left_P_.copy()
-                comp_left_I = stream.left_I_
+                cmp_P = stream.P_.copy()
+                cmp_I = stream.I_
+                cmp_left_P = stream.left_P_.copy()
+                cmp_left_I = stream.left_I_
 
                 ref_P = ref_mp.P_.copy()
                 ref_I = ref_mp.I_
@@ -511,13 +511,13 @@ def test_stumpi_stream_nan_inf_self_join_egress(substitute, substitution_locatio
 
                 naive.replace_inf(ref_P)
                 naive.replace_inf(ref_left_P)
-                naive.replace_inf(comp_P)
-                naive.replace_inf(comp_left_P)
+                naive.replace_inf(cmp_P)
+                naive.replace_inf(cmp_left_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_P, comp_left_P)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_constant_subsequence_self_join():
@@ -533,18 +533,18 @@ def test_stumpi_constant_subsequence_self_join():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        # comp_I = stream.I_
+        cmp_P = stream.P_
+        # cmp_I = stream.I_
 
         ref_mp = naive.stump(stream.T_, m, exclusion_zone=zone, row_wise=True)
         ref_P = ref_mp[:, 0]
         # ref_I = ref_mp[:, 1]
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        # npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
     with rng.fix_state():
         T = np.concatenate(
@@ -556,13 +556,13 @@ def test_stumpi_constant_subsequence_self_join():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        # comp_I = stream.I_
+        cmp_P = stream.P_
+        # cmp_I = stream.I_
 
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        # npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_stumpi_constant_subsequence_self_join_egress():
@@ -581,30 +581,30 @@ def test_stumpi_constant_subsequence_self_join_egress():
 
         stream = stumpi(T, m, egress=True)
 
-        comp_P = stream.P_.copy()
-        # comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        # comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        # cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        # cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        # npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        # npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            # comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            # comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            # cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            # cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             # ref_I = ref_mp.I_
@@ -613,13 +613,13 @@ def test_stumpi_constant_subsequence_self_join_egress():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            # npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            # npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
     with rng.fix_state():
         T = np.concatenate(
@@ -635,30 +635,30 @@ def test_stumpi_constant_subsequence_self_join_egress():
 
         stream = stumpi(T, m, egress=True)
 
-        comp_P = stream.P_.copy()
-        # comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        # comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        # cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        # cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        # npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        # npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            # comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            # comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            # cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            # cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             # ref_I = ref_mp.I_
@@ -667,13 +667,13 @@ def test_stumpi_constant_subsequence_self_join_egress():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            # npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            # npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_identical_subsequence_self_join():
@@ -690,18 +690,18 @@ def test_stumpi_identical_subsequence_self_join():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        # comp_I = stream.I_
+        cmp_P = stream.P_
+        # cmp_I = stream.I_
 
         ref_mp = naive.stump(stream.T_, m, exclusion_zone=zone, row_wise=True)
         ref_P = ref_mp[:, 0]
         # ref_I = ref_mp[:, 1]
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
-        # npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
     with rng.fix_state():
         identical = rng.RNG.rand(8)
@@ -714,13 +714,13 @@ def test_stumpi_identical_subsequence_self_join():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        # comp_I = stream.I_
+        cmp_P = stream.P_
+        # cmp_I = stream.I_
 
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
-        # npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_stumpi_identical_subsequence_self_join_egress():
@@ -740,32 +740,32 @@ def test_stumpi_identical_subsequence_self_join_egress():
 
         stream = stumpi(T, m, egress=True)
 
-        comp_P = stream.P_.copy()
-        # comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        # comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        # cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        # cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
-        # npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(
-            ref_left_P, comp_left_P, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(
+            cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
-        # npt.assert_almost_equal(ref_left_I, comp_left_I)
+        # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            # comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            # comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            # cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            # cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             # ref_I = ref_mp.I_
@@ -774,15 +774,17 @@ def test_stumpi_identical_subsequence_self_join_egress():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
-            # npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(
-                ref_left_P, comp_left_P, decimal=config.STUMPY_TEST_PRECISION
+            npt.assert_allclose(
+                cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
             )
-            # npt.assert_almost_equal(ref_left_I, comp_left_I)
+            # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(
+                cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+            )
+            # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
     with rng.fix_state():
         identical = rng.RNG.rand(8)
@@ -798,32 +800,32 @@ def test_stumpi_identical_subsequence_self_join_egress():
 
         stream = stumpi(T, m, egress=True)
 
-        comp_P = stream.P_.copy()
-        # comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        # comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        # cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        # cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
-        # npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(
-            ref_left_P, comp_left_P, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(
+            cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
-        # npt.assert_almost_equal(ref_left_I, comp_left_I)
+        # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            # comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            # comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            # cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            # cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             # ref_I = ref_mp.I_
@@ -832,15 +834,17 @@ def test_stumpi_identical_subsequence_self_join_egress():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
-            # npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(
-                ref_left_P, comp_left_P, decimal=config.STUMPY_TEST_PRECISION
+            npt.assert_allclose(
+                cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
             )
-            # npt.assert_almost_equal(ref_left_I, comp_left_I)
+            # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(
+                cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+            )
+            # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_profile_index_match():
@@ -875,8 +879,8 @@ def test_stumpi_profile_index_match():
             axis=1,
         )
 
-        npt.assert_almost_equal(stream.P_, P)
-        npt.assert_almost_equal(stream.left_P_, left_P)
+        npt.assert_allclose(stream.P_, P, atol=1.5e-07)
+        npt.assert_allclose(stream.left_P_, left_P, atol=1.5e-07)
 
         n += 1
 
@@ -893,10 +897,10 @@ def test_stumpi_self_join_KNN():
                 t = rng.RNG.rand()
                 stream.update(t)
 
-            comp_P = stream.P_
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_
+            cmp_left_I = stream.left_I_
 
             ref_mp = naive.stump(stream.T_, m, exclusion_zone=zone, row_wise=True, k=k)
             ref_P = ref_mp[:, :k]
@@ -910,13 +914,13 @@ def test_stumpi_self_join_KNN():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         with rng.fix_state():
             T = rng.RNG.rand(30)
@@ -926,18 +930,18 @@ def test_stumpi_self_join_KNN():
                 t = rng.RNG.rand()
                 stream.update(t)
 
-            comp_P = stream.P_
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_
+            cmp_left_I = stream.left_I_
 
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_self_join_egress_KNN():
@@ -956,30 +960,30 @@ def test_stumpi_self_join_egress_KNN():
 
             stream = stumpi(T, m, egress=True, k=k)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
             for i in range(34):
                 t = rng.RNG.rand()
                 ref_mp.update(t)
                 stream.update(t)
 
-                comp_P = stream.P_.copy()
-                comp_I = stream.I_
-                comp_left_P = stream.left_P_.copy()
-                comp_left_I = stream.left_I_
+                cmp_P = stream.P_.copy()
+                cmp_I = stream.I_
+                cmp_left_P = stream.left_P_.copy()
+                cmp_left_I = stream.left_I_
 
                 ref_P = ref_mp.P_.copy()
                 ref_I = ref_mp.I_
@@ -988,13 +992,13 @@ def test_stumpi_self_join_egress_KNN():
 
                 naive.replace_inf(ref_P)
                 naive.replace_inf(ref_left_P)
-                naive.replace_inf(comp_P)
-                naive.replace_inf(comp_left_P)
+                naive.replace_inf(cmp_P)
+                naive.replace_inf(cmp_left_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_P, comp_left_P)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         with rng.fix_state():
             T = rng.RNG.rand(n)
@@ -1008,20 +1012,20 @@ def test_stumpi_self_join_egress_KNN():
 
             stream = stumpi(T, m, egress=True, k=k)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
             for i in range(34):
                 t = rng.RNG.rand()
@@ -1029,10 +1033,10 @@ def test_stumpi_self_join_egress_KNN():
                 ref_mp.update(t)
                 stream.update(t)
 
-                comp_P = stream.P_.copy()
-                comp_I = stream.I_
-                comp_left_P = stream.left_P_.copy()
-                comp_left_I = stream.left_I_
+                cmp_P = stream.P_.copy()
+                cmp_I = stream.I_
+                cmp_left_P = stream.left_P_.copy()
+                cmp_left_I = stream.left_I_
 
                 ref_P = ref_mp.P_.copy()
                 ref_I = ref_mp.I_
@@ -1041,13 +1045,13 @@ def test_stumpi_self_join_egress_KNN():
 
                 naive.replace_inf(ref_P)
                 naive.replace_inf(ref_left_P)
-                naive.replace_inf(comp_P)
-                naive.replace_inf(comp_left_P)
+                naive.replace_inf(cmp_P)
+                naive.replace_inf(cmp_left_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_P, comp_left_P)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_self_join_egress_passing_mp():
@@ -1066,30 +1070,30 @@ def test_stumpi_self_join_egress_passing_mp():
 
         stream = stumpi(T, m, egress=True, mp=mp)
 
-        comp_P = stream.P_.copy()
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             ref_I = ref_mp.I_
@@ -1098,13 +1102,13 @@ def test_stumpi_self_join_egress_passing_mp():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_self_join_with_isconstant():
@@ -1129,10 +1133,10 @@ def test_stumpi_self_join_with_isconstant():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_
+        cmp_left_I = stream.left_I_
 
         ref_mp = naive.stump(
             stream.T_,
@@ -1157,8 +1161,8 @@ def test_stumpi_self_join_with_isconstant():
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
         # comparing matrix profile indices are avoided as, in this case,
         # the performant version computes matrix profile in a diagonal
@@ -1166,10 +1170,10 @@ def test_stumpi_self_join_with_isconstant():
         # the full data (i.e. original `T` including egressed points).
         # which is in a `row_wise==True` manner
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        # npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        # npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         # with passing `mp`
         T = rng.RNG.rand(30)
@@ -1192,10 +1196,10 @@ def test_stumpi_self_join_with_isconstant():
             t = rng.RNG.rand()
             stream.update(t)
 
-        comp_P = stream.P_
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_
+        cmp_left_I = stream.left_I_
 
         ref_mp = naive.stump(
             stream.T_,
@@ -1220,13 +1224,13 @@ def test_stumpi_self_join_with_isconstant():
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
 
 def test_stumpi_self_join_egress_with_isconstant():
@@ -1256,30 +1260,30 @@ def test_stumpi_self_join_egress_with_isconstant():
             T, m, egress=True, T_subseq_isconstant_func=isconstant_custom_func
         )
 
-        comp_P = stream.P_.copy()
-        comp_I = stream.I_
-        comp_left_P = stream.left_P_.copy()
-        comp_left_I = stream.left_I_
+        cmp_P = stream.P_.copy()
+        cmp_I = stream.I_
+        cmp_left_P = stream.left_P_.copy()
+        cmp_left_I = stream.left_I_
 
         naive.replace_inf(ref_P)
         naive.replace_inf(ref_left_P)
-        naive.replace_inf(comp_P)
-        naive.replace_inf(comp_left_P)
+        naive.replace_inf(cmp_P)
+        naive.replace_inf(cmp_left_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_P, comp_left_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
             t = rng.RNG.rand()
             ref_mp.update(t)
             stream.update(t)
 
-            comp_P = stream.P_.copy()
-            comp_I = stream.I_
-            comp_left_P = stream.left_P_.copy()
-            comp_left_I = stream.left_I_
+            cmp_P = stream.P_.copy()
+            cmp_I = stream.I_
+            cmp_left_P = stream.left_P_.copy()
+            cmp_left_I = stream.left_I_
 
             ref_P = ref_mp.P_.copy()
             ref_I = ref_mp.I_
@@ -1288,14 +1292,14 @@ def test_stumpi_self_join_egress_with_isconstant():
 
             naive.replace_inf(ref_P)
             naive.replace_inf(ref_left_P)
-            naive.replace_inf(comp_P)
-            naive.replace_inf(comp_left_P)
+            naive.replace_inf(cmp_P)
+            naive.replace_inf(cmp_left_P)
 
             # Comparing the matrix profile indices is allowed as
             # both the naive and the performant versions follow
             # the same approach in updating the matrix profile (indices)
             # arrays.
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_P, comp_left_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_P, ref_left_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
