@@ -60,10 +60,12 @@ def test_stumped_self_join(T_A, T_B, dask_cluster):
         m = 3
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T_B, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, T_B, m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, T_B, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -76,14 +78,18 @@ def test_stumped_self_join_df(T_A, T_B, dask_cluster):
         m = 3
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T_B, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, pd.Series(T_B), m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, pd.Series(T_B), m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
-        comp_mp = stumped(dask_client, pl.Series(T_B), m, ignore_trivial=True)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        cmp_mp = stumped(dask_client, pl.Series(T_B), m, ignore_trivial=True)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -97,11 +103,13 @@ def test_stump_self_join_larger_window(T_A, T_B, m, dask_cluster):
         if len(T_B) > m:
             zone = int(np.ceil(m / 4))
             ref_mp = naive.stump(T_B, m, exclusion_zone=zone)
-            comp_mp = stumped(dask_client, T_B, m, ignore_trivial=True)
+            cmp_mp = stumped(dask_client, T_B, m, ignore_trivial=True)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
+            naive.replace_inf(cmp_mp)
 
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -115,11 +123,13 @@ def test_stump_self_join_larger_window_df(T_A, T_B, m, dask_cluster):
         if len(T_B) > m:
             zone = int(np.ceil(m / 4))
             ref_mp = naive.stump(T_B, m, exclusion_zone=zone)
-            comp_mp = stumped(dask_client, pd.Series(T_B), m, ignore_trivial=True)
+            cmp_mp = stumped(dask_client, pd.Series(T_B), m, ignore_trivial=True)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
+            naive.replace_inf(cmp_mp)
 
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -131,10 +141,12 @@ def test_stumped_A_B_join(T_A, T_B, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -146,12 +158,14 @@ def test_stumped_A_B_join_df(T_A, T_B, dask_cluster):
     with Client(dask_cluster) as dask_client:
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(
+        cmp_mp = stumped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:A large number of values are smaller")
@@ -168,10 +182,14 @@ def test_stumped_one_constant_subsequence_self_join(dask_cluster):
         m = 3
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T_A, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, T_A, m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, T_A, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:A large number of values are smaller")
@@ -188,10 +206,14 @@ def test_stumped_one_constant_subsequence_self_join_df(dask_cluster):
         m = 3
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T_A, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, pd.Series(T_A), m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, pd.Series(T_A), m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -208,10 +230,14 @@ def test_stumped_one_constant_subsequence_A_B_join(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -228,12 +254,16 @@ def test_stumped_one_constant_subsequence_A_B_join_df(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(
+        cmp_mp = stumped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -250,10 +280,14 @@ def test_stumped_one_constant_subsequence_A_B_join_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -270,12 +304,16 @@ def test_stumped_one_constant_subsequence_A_B_join_df_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(
+        cmp_mp = stumped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:A large number of values are smaller")
@@ -293,11 +331,13 @@ def test_stumped_identical_subsequence_self_join(dask_cluster):
         m = 3
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T_A, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, T_A, m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, T_A, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(
-            ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
         )  # ignore indices
 
 
@@ -316,11 +356,13 @@ def test_stumped_identical_subsequence_A_B_join(dask_cluster):
         T_B[11 : 11 + identical.shape[0]] = identical
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(
-            ref_mp[:, 0], comp_mp[:, 0], decimal=config.STUMPY_TEST_PRECISION
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
         )  # ignore indices
 
 
@@ -340,10 +382,12 @@ def test_stumped_one_subsequence_inf_A_B_join(
         T_B_sub[substitution_location_B] = np.inf
 
         ref_mp = naive.stump(T_A, m, T_B=T_B_sub)
-        comp_mp = stumped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -363,10 +407,12 @@ def test_stumped_one_subsequence_inf_self_join(
 
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T_B_sub, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, T_B_sub, m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, T_B_sub, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -380,11 +426,13 @@ def test_stumped_nan_zero_mean_self_join(dask_cluster):
 
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, T, m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, T, m, ignore_trivial=True)
 
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -403,10 +451,12 @@ def test_stumped_one_subsequence_nan_A_B_join(
         T_B_sub[substitution_location_B] = np.nan
 
         ref_mp = naive.stump(T_A, m, T_B=T_B_sub)
-        comp_mp = stumped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -426,10 +476,12 @@ def test_stumped_one_subsequence_nan_self_join(
 
         zone = int(np.ceil(m / 4))
         ref_mp = naive.stump(T_B_sub, m, exclusion_zone=zone)
-        comp_mp = stumped(dask_client, T_B_sub, m, ignore_trivial=True)
+        cmp_mp = stumped(dask_client, T_B_sub, m, ignore_trivial=True)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -448,10 +500,14 @@ def test_two_constant_subsequences_A_B_join_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_B, m, T_B=T_A)
-        comp_mp = stumped(dask_client, T_B, m, T_A, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_B, m, T_A, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -470,12 +526,16 @@ def test_constant_subsequence_A_B_join_df_swap(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_B, m, T_B=T_A)
-        comp_mp = stumped(
+        cmp_mp = stumped(
             dask_client, pd.Series(T_B), m, pd.Series(T_A), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -494,10 +554,14 @@ def test_two_constant_subsequences_A_B_join(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:\\s+A large number of values are smaller")
@@ -516,12 +580,16 @@ def test_two_constant_subsequences_A_B_join_df(dask_cluster):
         )
         m = 3
         ref_mp = naive.stump(T_A, m, T_B=T_B)
-        comp_mp = stumped(
+        cmp_mp = stumped(
             dask_client, pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp[:, 0], comp_mp[:, 0])  # ignore indices
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp[:, 0].astype(np.float64),
+            ref_mp[:, 0].astype(np.float64),
+            atol=1.5e-07,
+        )  # ignore indices
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -544,10 +612,12 @@ def test_stumped_two_subsequences_inf_A_B_join(
         T_B_sub[substitution_location_B] = np.inf
 
         ref_mp = naive.stump(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -570,10 +640,12 @@ def test_stumped_two_subsequences_nan_A_B_join(
         T_B_sub[substitution_location_B] = np.nan
 
         ref_mp = naive.stump(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -596,10 +668,12 @@ def test_stumped_two_subsequences_nan_inf_A_B_join(
         T_B_sub[substitution_location_B] = np.inf
 
         ref_mp = naive.stump(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -622,10 +696,12 @@ def test_stumped_two_subsequences_nan_inf_A_B_join_swap(
         T_B_sub[substitution_location_B] = np.nan
 
         ref_mp = naive.stump(T_A_sub, m, T_B=T_B_sub)
-        comp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
+        cmp_mp = stumped(dask_client, T_A_sub, m, T_B_sub, ignore_trivial=False)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -639,10 +715,12 @@ def test_stumped_self_join_KNN(T_A, T_B, dask_cluster):
         zone = int(np.ceil(m / 4))
         for k in range(2, 4):
             ref_mp = naive.stump(T_B, m, exclusion_zone=zone, k=k)
-            comp_mp = stumped(dask_client, T_B, m, ignore_trivial=True, k=k)
+            cmp_mp = stumped(dask_client, T_B, m, ignore_trivial=True, k=k)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -655,10 +733,12 @@ def test_stumped_A_B_join_KNN(T_A, T_B, dask_cluster):
         m = 3
         for k in range(2, 4):
             ref_mp = naive.stump(T_A, m, T_B=T_B, k=k)
-            comp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False, k=k)
+            cmp_mp = stumped(dask_client, T_A, m, T_B, ignore_trivial=False, k=k)
             naive.replace_inf(ref_mp)
-            naive.replace_inf(comp_mp)
-            npt.assert_almost_equal(ref_mp, comp_mp)
+            naive.replace_inf(cmp_mp)
+            npt.assert_allclose(
+                cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+            )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -682,7 +762,7 @@ def test_stumped_self_join_custom_isconstant(T_A, T_B, dask_cluster):
             exclusion_zone=zone,
             T_A_subseq_isconstant=T_B_subseq_isconstant,
         )
-        comp_mp = stumped(
+        cmp_mp = stumped(
             dask_client,
             T_A=T_B,
             m=m,
@@ -690,8 +770,10 @@ def test_stumped_self_join_custom_isconstant(T_A, T_B, dask_cluster):
             T_A_subseq_isconstant=T_B_subseq_isconstant,
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
         # case 2: custom isconstant is func
         ref_mp = naive.stump(
@@ -700,7 +782,7 @@ def test_stumped_self_join_custom_isconstant(T_A, T_B, dask_cluster):
             exclusion_zone=zone,
             T_A_subseq_isconstant=isconstant_custom_func,
         )
-        comp_mp = stumped(
+        cmp_mp = stumped(
             dask_client,
             T_A=T_B,
             m=m,
@@ -708,5 +790,7 @@ def test_stumped_self_join_custom_isconstant(T_A, T_B, dask_cluster):
             T_A_subseq_isconstant=isconstant_custom_func,
         )
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
