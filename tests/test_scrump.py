@@ -36,10 +36,10 @@ def test_prescrump_self_join(T_A, T_B):
             ref_P, ref_I = naive.prescrump(T_B, m, T_B, s=s, exclusion_zone=zone)
 
         with rng.fix_state():
-            comp_P, comp_I = prescrump(T_B, m, s=s)
+            cmp_P, cmp_I = prescrump(T_B, m, s=s)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -51,10 +51,10 @@ def test_prescrump_A_B_join(T_A, T_B):
             ref_P, ref_I = naive.prescrump(T_A, m, T_B, s=s)
 
         with rng.fix_state():
-            comp_P, comp_I = prescrump(T_A, m, T_B=T_B, s=s)
+            cmp_P, cmp_I = prescrump(T_A, m, T_B=T_B, s=s)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -66,10 +66,10 @@ def test_prescrump_A_B_join_swap(T_A, T_B):
             ref_P, ref_I = naive.prescrump(T_B, m, T_A, s=s)
 
         with rng.fix_state():
-            comp_P, comp_I = prescrump(T_B, m, T_B=T_A, s=s)
+            cmp_P, cmp_I = prescrump(T_B, m, T_B=T_A, s=s)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -82,10 +82,10 @@ def test_prescrump_self_join_larger_window(T_A, T_B, m):
                 ref_P, ref_I = naive.prescrump(T_B, m, T_B, s=s, exclusion_zone=zone)
 
             with rng.fix_state():
-                comp_P, comp_I = prescrump(T_B, m, s=s)
+                cmp_P, cmp_I = prescrump(T_B, m, s=s)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -109,12 +109,12 @@ def test_prescrump_self_join_with_isconstant(T_A, T_B):
             )
 
         with rng.fix_state():
-            comp_P, comp_I = prescrump(
+            cmp_P, cmp_I = prescrump(
                 T_B, m, s=s, T_A_subseq_isconstant=isconstant_custom_func
             )
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_scrump_int_input():
@@ -139,17 +139,17 @@ def test_scrump_self_join(T_A, T_B, percentages):
                 T_B, m, ignore_trivial=True, percentage=percentage, pre_scrump=False
             )
             approx.update()
-            comp_P = approx.P_
-            comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            cmp_I = approx.I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            naive.replace_inf(cmp_P)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -173,18 +173,18 @@ def test_scrump_A_B_join(T_A, T_B, percentages):
                 pre_scrump=False,
             )
             approx.update()
-            comp_P = approx.P_
-            comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            cmp_I = approx.I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -208,18 +208,18 @@ def test_scrump_A_B_join_swap(T_A, T_B, percentages):
                 pre_scrump=False,
             )
             approx.update()
-            comp_P = approx.P_
-            # comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            # cmp_I = approx.I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -240,18 +240,18 @@ def test_scrump_self_join_larger_window(T_A, T_B, m, percentages):
                     T_B, m, ignore_trivial=True, percentage=percentage, pre_scrump=False
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -288,17 +288,17 @@ def test_scrump_self_join_with_isconstant(T_A, T_B, percentages):
                 T_A_subseq_isconstant=isconstant_custom_func,
             )
             approx.update()
-            comp_P = approx.P_
-            comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            cmp_I = approx.I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            naive.replace_inf(cmp_P)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -307,36 +307,36 @@ def test_scrump_self_join_full(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.stump(T_B, m, exclusion_zone=zone, row_wise=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scrump(T_B, m, ignore_trivial=True, percentage=1.0, pre_scrump=False)
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
     ref_mp = stump(T_B, m, ignore_trivial=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -344,36 +344,36 @@ def test_scrump_A_B_join_full(T_A, T_B):
     m = 3
 
     ref_mp = naive.stump(T_A, m, T_B=T_B, row_wise=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scrump(T_A, m, T_B, ignore_trivial=False, percentage=1.0, pre_scrump=False)
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
     ref_mp = stump(T_A, m, T_B=T_B, ignore_trivial=False)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -381,25 +381,25 @@ def test_scrump_A_B_join_full_swap(T_A, T_B):
     m = 3
 
     ref_mp = naive.stump(T_B, m, T_B=T_A, row_wise=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scrump(T_B, m, T_A, ignore_trivial=False, percentage=1.0, pre_scrump=False)
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -409,25 +409,25 @@ def test_scrump_self_join_full_larger_window(T_A, T_B, m):
         zone = int(np.ceil(m / 4))
 
         ref_mp = naive.stump(T_B, m, exclusion_zone=zone, row_wise=True)
-        ref_P = ref_mp[:, 0]
-        ref_I = ref_mp[:, 1]
-        ref_left_I = ref_mp[:, 2]
-        ref_right_I = ref_mp[:, 3]
+        ref_P = ref_mp[:, 0].astype(np.float64)
+        ref_I = ref_mp[:, 1].astype(np.int64)
+        ref_left_I = ref_mp[:, 2].astype(np.int64)
+        ref_right_I = ref_mp[:, 3].astype(np.int64)
 
         approx = scrump(T_B, m, ignore_trivial=True, percentage=1.0, pre_scrump=False)
         approx.update()
-        comp_P = approx.P_
-        comp_I = approx.I_
-        comp_left_I = approx.left_I_
-        comp_right_I = approx.right_I_
+        cmp_P = approx.P_
+        cmp_I = approx.I_
+        cmp_left_I = approx.left_I_
+        cmp_right_I = approx.right_I_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
-        npt.assert_almost_equal(ref_right_I, comp_right_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -458,16 +458,16 @@ def test_scrump_plus_plus_self_join(T_A, T_B, percentages):
                     s=s,
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
                 ref_P = ref_P
                 ref_I = ref_I
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -499,20 +499,20 @@ def test_scrump_plus_plus_A_B_join(T_A, T_B, percentages):
                     s=s,
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
                 ref_P = ref_P
                 ref_I = ref_I
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -521,27 +521,27 @@ def test_scrump_plus_plus_self_join_full(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.stump(T_B, m, exclusion_zone=zone, row_wise=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scrump(
         T_B, m, ignore_trivial=True, percentage=1.0, pre_scrump=True, s=zone
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -550,27 +550,27 @@ def test_scrump_plus_plus_A_B_join_full(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.stump(T_A, m, T_B=T_B, row_wise=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scrump(
         T_A, m, T_B=T_B, ignore_trivial=False, percentage=1.0, pre_scrump=True, s=zone
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -579,27 +579,27 @@ def test_scrump_plus_plus_A_B_join_full_swap(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.stump(T_B, m, T_B=T_A, row_wise=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scrump(
         T_B, m, T_B=T_A, ignore_trivial=False, percentage=1.0, pre_scrump=True, s=zone
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("percentages", percentages)
@@ -620,18 +620,18 @@ def test_scrump_constant_subsequence_self_join(percentages):
                 T, m, ignore_trivial=True, percentage=percentage, pre_scrump=False
             )
             approx.update()
-            comp_P = approx.P_
-            comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            cmp_I = approx.I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("percentages", percentages)
@@ -652,18 +652,20 @@ def test_scrump_identical_subsequence_self_join(percentages):
                 T, m, ignore_trivial=True, percentage=percentage, pre_scrump=False
             )
             approx.update()
-            comp_P = approx.P_
-            # comp_I = approx.I_
-            # comp_left_I = approx.left_I_
-            # comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            # cmp_I = approx.I_
+            # cmp_left_I = approx.left_I_
+            # cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
-            # npt.assert_almost_equal(ref_I, comp_I)
-            # npt.assert_almost_equal(ref_left_I, comp_left_I)
-            # npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(
+                cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+            )
+            # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            # npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -692,18 +694,18 @@ def test_scrump_nan_inf_self_join(
             with rng.fix_state():
                 approx = scrump(T_B_sub, m, percentage=percentage, pre_scrump=False)
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("percentages", percentages)
@@ -722,18 +724,18 @@ def test_scrump_nan_zero_mean_self_join(percentages):
         with rng.fix_state():
             approx = scrump(T, m, percentage=percentage, pre_scrump=False)
             approx.update()
-            comp_P = approx.P_
-            comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            cmp_I = approx.I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -746,10 +748,10 @@ def test_prescrump_A_B_join_larger_window(T_A, T_B):
                 ref_P, ref_I = naive.prescrump(T_A, m, T_B, s=s)
 
             with rng.fix_state():
-                comp_P, comp_I = prescrump(T_A, m, T_B, s=s)
+                cmp_P, cmp_I = prescrump(T_A, m, T_B, s=s)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -764,10 +766,10 @@ def test_prescrump_self_join_KNN(T_A, T_B):
                 )
 
             with rng.fix_state():
-                comp_P, comp_I = prescrump(T_B, m, s=s, k=k)
+                cmp_P, cmp_I = prescrump(T_B, m, s=s, k=k)
 
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_P, comp_P)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -780,10 +782,10 @@ def test_prescrump_A_B_join_KNN(T_A, T_B):
                 ref_P, ref_I = naive.prescrump(T_A, m, T_B, s=s)
 
             with rng.fix_state():
-                comp_P, comp_I = prescrump(T_A, m, T_B=T_B, s=s)
+                cmp_P, cmp_I = prescrump(T_A, m, T_B=T_B, s=s)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -809,17 +811,17 @@ def test_scrump_self_join_KNN(T_A, T_B, percentages):
                     k=k,
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                naive.replace_inf(cmp_P)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -844,18 +846,18 @@ def test_scrump_A_B_join_KNN(T_A, T_B, percentages):
                     k=k,
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -887,14 +889,14 @@ def test_scrump_plus_plus_self_join_KNN(T_A, T_B, percentages):
                         k=k,
                     )
                     approx.update()
-                    comp_P = approx.P_
-                    comp_I = approx.I_
+                    cmp_P = approx.P_
+                    cmp_I = approx.I_
 
                     naive.replace_inf(ref_P)
-                    naive.replace_inf(comp_P)
+                    naive.replace_inf(cmp_P)
 
-                    npt.assert_almost_equal(ref_P, comp_P)
-                    npt.assert_almost_equal(ref_I, comp_I)
+                    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -911,10 +913,10 @@ def test_prescrump_self_join_larger_window_m_5_k_5(T_A, T_B):
                 )
 
             with rng.fix_state():
-                comp_P, comp_I = prescrump(T_B, m, s=s, k=k)
+                cmp_P, cmp_I = prescrump(T_B, m, s=s, k=k)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -928,10 +930,10 @@ def test_prescrump_A_B_join_larger_window_m_5_k_5(T_A, T_B):
                 ref_P, ref_I = naive.prescrump(T_A, m, T_B, s=s, k=k)
 
             with rng.fix_state():
-                comp_P, comp_I = prescrump(T_A, m, T_B, s=s, k=k)
+                cmp_P, cmp_I = prescrump(T_A, m, T_B, s=s, k=k)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_prescrump_self_join_KNN_no_overlap():
@@ -1034,10 +1036,10 @@ def test_prescrump_self_join_KNN_no_overlap():
             state = mersenne.seed_to_state(seed)
             with rng.fix_state(state):
                 ref_P, ref_I = naive.prescrump(T, m, T, s=1, exclusion_zone=zone, k=k)
-                comp_P, comp_I = prescrump(T, m, s=1, k=k)
+                cmp_P, cmp_I = prescrump(T, m, s=1, k=k)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -1065,9 +1067,9 @@ def test_prescrump_self_join_larger_window_m_5_k_5_with_isconstant(T_A, T_B):
                 )
 
             with rng.fix_state():
-                comp_P, comp_I = prescrump(
+                cmp_P, cmp_I = prescrump(
                     T_B, m, s=s, k=k, T_A_subseq_isconstant=isconstant_custom_func
                 )
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
