@@ -65,10 +65,12 @@ def test_stumped_ray_self_join(T_A, T_B, ray_cluster):
     m = 3
     zone = int(np.ceil(m / 4))
     ref_mp = naive.stump(T_B, m, exclusion_zone=zone)
-    comp_mp = stumped(ray, T_B, m, ignore_trivial=True)
+    cmp_mp = stumped(ray, T_B, m, ignore_trivial=True)
     naive.replace_inf(ref_mp)
-    naive.replace_inf(comp_mp)
-    npt.assert_almost_equal(ref_mp, comp_mp)
+    naive.replace_inf(cmp_mp)
+    npt.assert_allclose(
+        cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+    )
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -83,10 +85,12 @@ def test_aamped_ray_self_join(T_A, T_B, ray_cluster):
     m = 3
     for p in [1.0, 2.0, 3.0]:
         ref_mp = naive.aamp(T_B, m, p=p)
-        comp_mp = aamped(ray, T_B, m, p=p)
+        cmp_mp = aamped(ray, T_B, m, p=p)
         naive.replace_inf(ref_mp)
-        naive.replace_inf(comp_mp)
-        npt.assert_almost_equal(ref_mp, comp_mp)
+        naive.replace_inf(cmp_mp)
+        npt.assert_allclose(
+            cmp_mp.astype(np.float64), ref_mp.astype(np.float64), atol=1.5e-07
+        )
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -98,10 +102,10 @@ def test_mstumped_ray(T, m, ray_cluster):
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.mstump(T, m, excl_zone)
-    comp_P, comp_I = mstumped(ray, T, m)
+    cmp_P, cmp_I = mstumped(ray, T, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:\\s+Port 8787 is already in use:UserWarning")
@@ -113,10 +117,10 @@ def test_maamped_ray(T, m, ray_cluster):
     excl_zone = int(np.ceil(m / 4))
 
     ref_P, ref_I = naive.maamp(T, m, excl_zone)
-    comp_P, comp_I = maamped(ray, T, m)
+    cmp_P, cmp_I = maamped(ray, T, m)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -157,7 +161,7 @@ def test_stimped_ray(T, ray_cluster):
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
 
-    npt.assert_almost_equal(ref_PAN, cmp_PAN)
+    npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
     # Compare transformed pan
     cmp_pan = pan.PAN_
@@ -168,7 +172,7 @@ def test_stimped_ray(T, ray_cluster):
     naive.replace_inf(ref_pan)
     naive.replace_inf(cmp_pan)
 
-    npt.assert_almost_equal(ref_pan, cmp_pan)
+    npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
@@ -208,7 +212,7 @@ def test_aamp_stimped_ray(T, ray_cluster):
     naive.replace_inf(ref_PAN)
     naive.replace_inf(cmp_PAN)
 
-    npt.assert_almost_equal(ref_PAN, cmp_PAN)
+    npt.assert_allclose(cmp_PAN, ref_PAN, atol=1.5e-07)
 
     # Compare transformed pan
     cmp_pan = pan.PAN_
@@ -225,4 +229,4 @@ def test_aamp_stimped_ray(T, ray_cluster):
     naive.replace_inf(ref_pan)
     naive.replace_inf(cmp_pan)
 
-    npt.assert_almost_equal(ref_pan, cmp_pan)
+    npt.assert_allclose(cmp_pan, ref_pan, atol=1.5e-07)
