@@ -16,14 +16,14 @@ test_data = [
 @pytest.mark.parametrize("Value, IR, IL", test_data)
 def test_atsc(Value, IR, IL):
     j = 2
-    ref = np.array([2, 4, 6, 8, 10], np.int64)
-    comp = atsc(IL, IR, j)
-    npt.assert_equal(ref, comp)
+    ref_chain = np.array([2, 4, 6, 8, 10], np.int64)
+    cmp_chain = atsc(IL, IR, j)
+    npt.assert_array_equal(cmp_chain, ref_chain)
 
 
 @pytest.mark.parametrize("Value, IR, IL", test_data)
 def test_allc(Value, IR, IL):
-    S_ref = [
+    ref_chains = [
         np.array([1, 7, 11], dtype=np.int64),
         np.array([0], dtype=np.int64),
         np.array([3], dtype=np.int64),
@@ -31,11 +31,11 @@ def test_allc(Value, IR, IL):
         np.array([2, 4, 6, 8, 10], dtype=np.int64),
         np.array([5], dtype=np.int64),
     ]
-    C_ref = np.array([2, 4, 6, 8, 10], dtype=np.int64)
-    S_comp, C_comp = allc(IL, IR)
+    ref_longest_chain = np.array([2, 4, 6, 8, 10], dtype=np.int64)
+    cmp_chains, cmp_longest_chain = allc(IL, IR)
 
-    S_ref = sorted(S_ref, key=lambda x: (len(x), list(x)))
-    S_comp = sorted(S_comp, key=lambda x: (len(x), list(x)))
+    ref_chains = sorted(ref_chains, key=lambda x: (len(x), list(x)))
+    cmp_chains = sorted(cmp_chains, key=lambda x: (len(x), list(x)))
 
-    npt.assert_equal(S_ref, S_comp)
-    npt.assert_equal(C_ref, C_comp)
+    npt.assert_equal(cmp_chains, ref_chains)
+    npt.assert_array_equal(cmp_longest_chain, ref_longest_chain)
