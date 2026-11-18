@@ -443,7 +443,7 @@ def test_compute_mean_std_multidimensional_chunked_many(Q, T):
 @pytest.mark.parametrize("Q, T", test_data)
 def test_calculate_squared_distance_profile(Q, T):
     m = Q.shape[0]
-    ref = (
+    ref_distances = (
         np.linalg.norm(
             core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
         )
@@ -457,7 +457,7 @@ def test_calculate_squared_distance_profile(Q, T):
     T_subseq_isconstant = core.rolling_isconstant(T, m)
     M_T, Σ_T = core.compute_mean_std(T, m)
 
-    cmp = core._calculate_squared_distance_profile(
+    cmp_distances = core._calculate_squared_distance_profile(
         m,
         QT,
         μ_Q,
@@ -467,13 +467,13 @@ def test_calculate_squared_distance_profile(Q, T):
         Q_subseq_isconstant,
         T_subseq_isconstant,
     )
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
 def test_calculate_distance_profile(Q, T):
     m = Q.shape[0]
-    ref = np.linalg.norm(
+    ref_distances = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
 
@@ -484,7 +484,7 @@ def test_calculate_distance_profile(Q, T):
     T_subseq_isconstant = core.rolling_isconstant(T, m)
     M_T, Σ_T = core.compute_mean_std(T, m)
 
-    cmp = core.calculate_distance_profile(
+    cmp_distances = core.calculate_distance_profile(
         m,
         QT,
         μ_Q,
@@ -494,17 +494,17 @@ def test_calculate_distance_profile(Q, T):
         Q_subseq_isconstant,
         T_subseq_isconstant,
     )
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
 def test_mueen_calculate_distance_profile(Q, T):
     m = Q.shape[0]
-    ref = np.linalg.norm(
+    ref_distances = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    cmp = core.mueen_calculate_distance_profile(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mueen_calculate_distance_profile(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -512,11 +512,11 @@ def test_mass(Q, T):
     Q = Q.copy()
     T = T.copy()
     m = Q.shape[0]
-    ref = np.linalg.norm(
+    ref_distances = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    cmp = core.mass(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -526,13 +526,13 @@ def test_mass_Q_nan(Q, T):
     T = T.copy()
     m = Q.shape[0]
 
-    ref = np.linalg.norm(
+    ref_distances = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    ref[np.isnan(ref)] = np.inf
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -542,13 +542,13 @@ def test_mass_Q_inf(Q, T):
     T = T.copy()
     m = Q.shape[0]
 
-    ref = np.linalg.norm(
+    ref_distances = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    ref[np.isnan(ref)] = np.inf
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
     T[1] = 1e10
 
 
@@ -559,13 +559,13 @@ def test_mass_T_nan(Q, T):
     T[1] = np.nan
     m = Q.shape[0]
 
-    ref = np.linalg.norm(
+    ref_distances = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    ref[np.isnan(ref)] = np.inf
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -575,13 +575,13 @@ def test_mass_T_inf(Q, T):
     T[1] = np.inf
     m = Q.shape[0]
 
-    ref = np.linalg.norm(
+    ref_distances = np.linalg.norm(
         core.z_norm(core.rolling_window(T, m), 1) - core.z_norm(Q), axis=1
     )
-    ref[np.isnan(ref)] = np.inf
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
     T[1] = 1e10
 
 
@@ -591,15 +591,15 @@ def test_p_norm_distance_profile(Q, T):
     T = T.copy()
     m = Q.shape[0]
     for p in [1.0, 1.5, 2.0]:
-        ref = cdist(
+        ref_distances = cdist(
             core.rolling_window(Q, m),
             core.rolling_window(T, m),
             metric="minkowski",
             p=p,
         ).flatten()
-        ref = np.power(ref, p)
-        cmp = core._p_norm_distance_profile(Q, T, p)
-        npt.assert_allclose(cmp, ref, atol=1.5e-07)
+        ref_distances = np.power(ref_distances, p)
+        cmp_distances = core._p_norm_distance_profile(Q, T, p)
+        npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -608,9 +608,9 @@ def test_mass_absolute(Q, T):
     T = T.copy()
     m = Q.shape[0]
     for p in [1.0, 2.0, 3.0]:
-        ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1, ord=p)
-        cmp = core.mass_absolute(Q, T, p=p)
-        npt.assert_allclose(cmp, ref, atol=1.5e-07)
+        ref_distances = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1, ord=p)
+        cmp_distances = core.mass_absolute(Q, T, p=p)
+        npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -620,11 +620,11 @@ def test_mass_absolute_Q_nan(Q, T):
     T = T.copy()
     m = Q.shape[0]
 
-    ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
-    ref[np.isnan(ref)] = np.inf
+    ref_distances = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass_absolute(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -634,11 +634,11 @@ def test_mass_absolute_Q_inf(Q, T):
     T = T.copy()
     m = Q.shape[0]
 
-    ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
-    ref[np.isnan(ref)] = np.inf
+    ref_distances = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass_absolute(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -648,11 +648,11 @@ def test_mass_absolute_T_nan(Q, T):
     T[1] = np.nan
     m = Q.shape[0]
 
-    ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
-    ref[np.isnan(ref)] = np.inf
+    ref_distances = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass_absolute(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("Q, T", test_data)
@@ -662,11 +662,11 @@ def test_mass_absolute_T_inf(Q, T):
     T[1] = np.inf
     m = Q.shape[0]
 
-    ref = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
-    ref[np.isnan(ref)] = np.inf
+    ref_distances = np.linalg.norm(core.rolling_window(T, m) - Q, axis=1)
+    ref_distances[np.isnan(ref_distances)] = np.inf
 
-    cmp = core.mass_absolute(Q, T)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_distances = core.mass_absolute(Q, T)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 def test_mass_absolute_sqrt_input_negative():
@@ -724,9 +724,9 @@ def test_mass_absolute_sqrt_input_negative():
             -9.71,
         ]
     )
-    ref = 0.0
-    cmp = core.mass_absolute(Q, Q)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    ref_distances = 0.0
+    cmp_distances = core.mass_absolute(Q, Q)
+    npt.assert_allclose(cmp_distances, ref_distances, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -759,56 +759,56 @@ def test_mass_absolute_distance_matrix(T_A, T_B):
 
 def test_apply_exclusion_zone():
     T = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
-    ref = np.empty(T.shape, dtype=np.float64)
-    cmp = np.empty(T.shape, dtype=np.float64)
+    ref_values = np.empty(T.shape, dtype=np.float64)
+    cmp_values = np.empty(T.shape, dtype=np.float64)
     exclusion_zone = 2
 
     for i in range(T.shape[0]):
-        ref[:] = T[:]
-        naive.apply_exclusion_zone(ref, i, exclusion_zone, np.inf)
+        ref_values[:] = T[:]
+        naive.apply_exclusion_zone(ref_values, i, exclusion_zone, np.inf)
 
-        cmp[:] = T[:]
-        core.apply_exclusion_zone(cmp, i, exclusion_zone, np.inf)
+        cmp_values[:] = T[:]
+        core.apply_exclusion_zone(cmp_values, i, exclusion_zone, np.inf)
 
-        naive.replace_inf(ref)
-        naive.replace_inf(cmp)
-        npt.assert_array_equal(cmp, ref)
+        naive.replace_inf(ref_values)
+        naive.replace_inf(cmp_values)
+        npt.assert_array_equal(cmp_values, ref_values)
 
 
 def test_apply_exclusion_zone_int():
     T = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.int64)
-    ref = np.empty(T.shape, dtype=np.int64)
-    cmp = np.empty(T.shape, dtype=np.int64)
+    ref_values = np.empty(T.shape, dtype=np.int64)
+    cmp_values = np.empty(T.shape, dtype=np.int64)
     exclusion_zone = 2
 
     for i in range(T.shape[0]):
-        ref[:] = T[:]
-        naive.apply_exclusion_zone(ref, i, exclusion_zone, -1)
+        ref_values[:] = T[:]
+        naive.apply_exclusion_zone(ref_values, i, exclusion_zone, -1)
 
-        cmp[:] = T[:]
-        core.apply_exclusion_zone(cmp, i, exclusion_zone, -1)
+        cmp_values[:] = T[:]
+        core.apply_exclusion_zone(cmp_values, i, exclusion_zone, -1)
 
-        naive.replace_inf(ref)
-        naive.replace_inf(cmp)
-        npt.assert_array_equal(cmp, ref)
+        naive.replace_inf(ref_values)
+        naive.replace_inf(cmp_values)
+        npt.assert_array_equal(cmp_values, ref_values)
 
 
 def test_apply_exclusion_zone_bool():
     T = np.ones(10, dtype=bool)
-    ref = np.empty(T.shape, dtype=bool)
-    cmp = np.empty(T.shape, dtype=bool)
+    ref_values = np.empty(T.shape, dtype=bool)
+    cmp_values = np.empty(T.shape, dtype=bool)
     exclusion_zone = 2
 
     for i in range(T.shape[0]):
-        ref[:] = T[:]
-        naive.apply_exclusion_zone(ref, i, exclusion_zone, False)
+        ref_values[:] = T[:]
+        naive.apply_exclusion_zone(ref_values, i, exclusion_zone, False)
 
-        cmp[:] = T[:]
-        core.apply_exclusion_zone(cmp, i, exclusion_zone, False)
+        cmp_values[:] = T[:]
+        core.apply_exclusion_zone(cmp_values, i, exclusion_zone, False)
 
-        naive.replace_inf(ref)
-        naive.replace_inf(cmp)
-        npt.assert_array_equal(cmp, ref)
+        naive.replace_inf(ref_values)
+        naive.replace_inf(cmp_values)
+        npt.assert_array_equal(cmp_values, ref_values)
 
 
 def test_apply_exclusion_zone_multidimensional():
@@ -816,20 +816,20 @@ def test_apply_exclusion_zone_multidimensional():
         [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
         dtype=np.float64,
     )
-    ref = np.empty(T.shape, dtype=np.float64)
-    cmp = np.empty(T.shape, dtype=np.float64)
+    ref_values = np.empty(T.shape, dtype=np.float64)
+    cmp_values = np.empty(T.shape, dtype=np.float64)
     exclusion_zone = 2
 
     for i in range(T.shape[1]):
-        ref[:, :] = T[:, :]
-        naive.apply_exclusion_zone(ref, i, exclusion_zone, np.inf)
+        ref_values[:, :] = T[:, :]
+        naive.apply_exclusion_zone(ref_values, i, exclusion_zone, np.inf)
 
-        cmp[:, :] = T[:, :]
-        core.apply_exclusion_zone(cmp, i, exclusion_zone, np.inf)
+        cmp_values[:, :] = T[:, :]
+        core.apply_exclusion_zone(cmp_values, i, exclusion_zone, np.inf)
 
-        naive.replace_inf(ref)
-        naive.replace_inf(cmp)
-        npt.assert_array_equal(cmp, ref)
+        naive.replace_inf(ref_values)
+        naive.replace_inf(cmp_values)
+        npt.assert_array_equal(cmp_values, ref_values)
 
 
 def test_preprocess():
@@ -955,72 +955,74 @@ def test_count_diagonal_ndist():
 def test_get_array_ranges():
     x = np.array([3, 9, 2, 1, 5, 4, 7, 7, 8, 6], dtype=np.int64)
     for n_chunks in range(2, 5):
-        ref = naive.get_array_ranges(x, n_chunks, False)
+        ref_ranges = naive.get_array_ranges(x, n_chunks, False)
 
-        cmp = core._get_array_ranges(x, n_chunks, False)
-        npt.assert_allclose(cmp, ref, atol=1.5e-07)
+        cmp_ranges = core._get_array_ranges(x, n_chunks, False)
+        npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_get_array_ranges_exhausted():
     x = np.array([3, 3, 3, 11, 11, 11], dtype=np.int64)
     n_chunks = 6
 
-    ref = naive.get_array_ranges(x, n_chunks, False)
+    ref_ranges = naive.get_array_ranges(x, n_chunks, False)
 
-    cmp = core._get_array_ranges(x, n_chunks, False)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_ranges = core._get_array_ranges(x, n_chunks, False)
+    npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_get_array_ranges_exhausted_truncated():
     x = np.array([3, 3, 3, 11, 11, 11], dtype=np.int64)
     n_chunks = 6
 
-    ref = naive.get_array_ranges(x, n_chunks, True)
+    ref_ranges = naive.get_array_ranges(x, n_chunks, True)
 
-    cmp = core._get_array_ranges(x, n_chunks, True)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_ranges = core._get_array_ranges(x, n_chunks, True)
+    npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_get_array_ranges_empty_array():
     x = np.array([], dtype=np.int64)
     n_chunks = 6
 
-    ref = naive.get_array_ranges(x, n_chunks, False)
+    ref_ranges = naive.get_array_ranges(x, n_chunks, False)
 
-    cmp = core._get_array_ranges(x, n_chunks, False)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_ranges = core._get_array_ranges(x, n_chunks, False)
+    npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_get_ranges():
-    ref = np.array([[0, 3], [3, 6]])
+    ref_ranges = np.array([[0, 3], [3, 6]])
     size = 6
     n_chunks = 2
-    cmp = core._get_ranges(size, n_chunks, False)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_ranges = core._get_ranges(size, n_chunks, False)
+    npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_get_ranges_exhausted():
-    ref = np.array([[0, 1], [1, 2], [2, 3], [3, 3], [3, 4], [4, 5], [5, 6], [6, 6]])
+    ref_ranges = np.array(
+        [[0, 1], [1, 2], [2, 3], [3, 3], [3, 4], [4, 5], [5, 6], [6, 6]]
+    )
     size = 6
     n_chunks = 8
-    cmp = core._get_ranges(size, n_chunks, False)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_ranges = core._get_ranges(size, n_chunks, False)
+    npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_get_ranges_exhausted_truncated():
-    ref = np.array([[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6]])
+    ref_ranges = np.array([[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6]])
     size = 6
     n_chunks = 8
-    cmp = core._get_ranges(size, n_chunks, True)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_ranges = core._get_ranges(size, n_chunks, True)
+    npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_get_ranges_zero_size():
-    ref = np.empty((0, 2))
+    ref_ranges = np.empty((0, 2))
     size = 0
     n_chunks = 8
-    cmp = core._get_ranges(size, n_chunks, True)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_ranges = core._get_ranges(size, n_chunks, True)
+    npt.assert_allclose(cmp_ranges, ref_ranges, atol=1.5e-07)
 
 
 def test_rolling_isfinite():
@@ -1031,14 +1033,14 @@ def test_rolling_isfinite():
     a[5] = np.nan
     a[9] = np.nan
 
-    ref = np.all(core.rolling_window(np.isfinite(a), w), axis=1)
-    cmp = core.rolling_isfinite(a, w)
+    ref_isfinite = np.all(core.rolling_window(np.isfinite(a), w), axis=1)
+    cmp_isfinite = core.rolling_isfinite(a, w)
 
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    npt.assert_allclose(cmp_isfinite, ref_isfinite, atol=1.5e-07)
 
     # test `a` as all boolean isfinite array
-    cmp = core.rolling_isfinite(np.isfinite(a), w)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_isfinite = core.rolling_isfinite(np.isfinite(a), w)
+    npt.assert_allclose(cmp_isfinite, ref_isfinite, atol=1.5e-07)
 
 
 def test_rolling_isconstant():
@@ -1050,10 +1052,10 @@ def test_rolling_isconstant():
     a[4:7] = 77.0
     a[9:12] = [77.0, np.nan, 77.0]
 
-    ref = naive.rolling_isconstant(a, w)
-    cmp = core.rolling_isconstant(a, w)
+    ref_isconstant = naive.rolling_isconstant(a, w)
+    cmp_isconstant = core.rolling_isconstant(a, w)
 
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    npt.assert_allclose(cmp_isconstant, ref_isconstant, atol=1.5e-07)
 
 
 def test_compare_parameters():
@@ -1065,28 +1067,28 @@ def test_compare_parameters():
 def test_jagged_list_to_array():
     arr = [np.array([0, 1]), np.array([0]), np.array([0, 1, 2, 3])]
 
-    ref = np.array([[0, 1, -1, -1], [0, -1, -1, -1], [0, 1, 2, 3]], dtype="int64")
-    cmp = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
-    npt.assert_array_equal(cmp, ref)
+    ref_array = np.array([[0, 1, -1, -1], [0, -1, -1, -1], [0, 1, 2, 3]], dtype="int64")
+    cmp_array = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
+    npt.assert_array_equal(cmp_array, ref_array)
 
-    ref = np.array(
+    ref_array = np.array(
         [[0, 1, np.nan, np.nan], [0, np.nan, np.nan, np.nan], [0, 1, 2, 3]],
         dtype="float64",
     )
-    cmp = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
-    npt.assert_array_equal(cmp, ref)
+    cmp_array = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
+    npt.assert_array_equal(cmp_array, ref_array)
 
 
 def test_jagged_list_to_array_empty():
     arr = []
 
-    ref = np.array([[]], dtype="int64")
-    cmp = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
-    npt.assert_array_equal(cmp, ref)
+    ref_array = np.array([[]], dtype="int64")
+    cmp_array = core._jagged_list_to_array(arr, fill_value=-1, dtype="int64")
+    npt.assert_array_equal(cmp_array, ref_array)
 
-    ref = np.array([[]], dtype="float64")
-    cmp = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
-    npt.assert_array_equal(cmp, ref)
+    ref_array = np.array([[]], dtype="float64")
+    cmp_array = core._jagged_list_to_array(arr, fill_value=np.nan, dtype="float64")
+    npt.assert_array_equal(cmp_array, ref_array)
 
 
 def test_get_mask_slices():
@@ -1177,10 +1179,10 @@ def test_select_P_ABBA_val_inf():
     P_ABBA[k:] = np.inf
     p_abba = P_ABBA.copy()
 
-    cmp = core._select_P_ABBA_value(P_ABBA, k=k)
+    cmp_value = core._select_P_ABBA_value(P_ABBA, k=k)
     p_abba.sort()
-    ref = p_abba[k - 1]
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    ref_value = p_abba[k - 1]
+    npt.assert_allclose(cmp_value, ref_value, atol=1.5e-07)
 
 
 def test_merge_topk_PI_without_overlap():
@@ -1436,35 +1438,35 @@ def test_merge_topk_ρI_with_1D_input_hardcoded():
 def test_shift_insert_at_index():
     for k in range(1, 6):
         a = rng.RNG.rand(k)
-        ref = np.empty(k, dtype=np.float64)
-        cmp = np.empty(k, dtype=np.float64)
+        ref_values = np.empty(k, dtype=np.float64)
+        cmp_values = np.empty(k, dtype=np.float64)
 
         indices = np.arange(k + 1)
         values = rng.RNG.rand(k + 1)
 
         # test shift = "right"
         for idx, v in zip(indices, values):
-            ref[:] = a
-            cmp[:] = a
+            ref_values[:] = a
+            cmp_values[:] = a
 
-            ref = np.insert(ref, idx, v)[:-1]
+            ref_values = np.insert(ref_values, idx, v)[:-1]
             core._shift_insert_at_index(
-                cmp, idx, v, shift="right"
-            )  # update cmp in place
+                cmp_values, idx, v, shift="right"
+            )  # update cmp_values in place
 
-            npt.assert_allclose(cmp, ref, atol=1.5e-07)
+            npt.assert_allclose(cmp_values, ref_values, atol=1.5e-07)
 
         # test shift = "left"
         for idx, v in zip(indices, values):
-            ref[:] = a
-            cmp[:] = a
+            ref_values[:] = a
+            cmp_values[:] = a
 
-            ref = np.insert(ref, idx, v)[1:]
+            ref_values = np.insert(ref_values, idx, v)[1:]
             core._shift_insert_at_index(
-                cmp, idx, v, shift="left"
-            )  # update cmp in place
+                cmp_values, idx, v, shift="left"
+            )  # update cmp_values in place
 
-            npt.assert_allclose(cmp, ref, atol=1.5e-07)
+            npt.assert_allclose(cmp_values, ref_values, atol=1.5e-07)
 
 
 def test_check_P():
@@ -1477,11 +1479,11 @@ def test_find_matches_all():
     max_distance = np.inf
     D = rng.RNG.rand(64)
     for excl_zone in range(3):
-        ref = naive.find_matches(D, excl_zone, max_distance, max_matches=None)
-        cmp = core._find_matches(D, excl_zone, max_distance, max_matches=None)
+        ref_matches = naive.find_matches(D, excl_zone, max_distance, max_matches=None)
+        cmp_matches = core._find_matches(D, excl_zone, max_distance, max_matches=None)
 
         npt.assert_allclose(
-            cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07
+            cmp_matches.astype(np.float64), ref_matches.astype(np.float64), atol=1.5e-07
         )
 
 
@@ -1490,11 +1492,11 @@ def test_find_matches_maxmatch():
     D = rng.RNG.rand(64)
     for excl_zone in range(3):
         max_matches = rng.RNG.randint(0, 100)
-        ref = naive.find_matches(D, excl_zone, max_distance, max_matches)
-        cmp = core._find_matches(D, excl_zone, max_distance, max_matches)
+        ref_matches = naive.find_matches(D, excl_zone, max_distance, max_matches)
+        cmp_matches = core._find_matches(D, excl_zone, max_distance, max_matches)
 
         npt.assert_allclose(
-            cmp.astype(np.float64), ref.astype(np.float64), atol=1.5e-07
+            cmp_matches.astype(np.float64), ref_matches.astype(np.float64), atol=1.5e-07
         )
 
 

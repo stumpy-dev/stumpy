@@ -102,9 +102,9 @@ substitution_values = [np.nan, np.inf]
 
 @pytest.mark.parametrize("I", test_data)
 def test_nnmark(I):
-    ref = naive_nnmark(I)
-    cmp = _nnmark(I)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    ref_marks = naive_nnmark(I)
+    cmp_marks = _nnmark(I)
+    npt.assert_allclose(cmp_marks, ref_marks, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)
@@ -112,21 +112,21 @@ def test_cac(I):
     L = 5
     excl_factor = 1
     custom_iac = _iac(I.shape[0])
-    ref = naive_cac(I, L, excl_factor, custom_iac)
+    ref_cac = naive_cac(I, L, excl_factor, custom_iac)
     bidirectional = True
-    cmp = _cac(I, L, bidirectional, excl_factor)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_cac = _cac(I, L, bidirectional, excl_factor)
+    npt.assert_allclose(cmp_cac, ref_cac, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)
 def test_cac_custom_iac(I):
     L = 5
     excl_factor = 1
-    ref = naive_cac(I, L, excl_factor)
+    ref_cac = naive_cac(I, L, excl_factor)
     custom_iac = naive_iac(I.shape[0])
     bidirectional = True
-    cmp = _cac(I, L, bidirectional, excl_factor, custom_iac)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    cmp_cac = _cac(I, L, bidirectional, excl_factor, custom_iac)
+    npt.assert_allclose(cmp_cac, ref_cac, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)
@@ -135,9 +135,9 @@ def test_rea(I):
     excl_factor = 1
     cac = naive_cac(I, L, excl_factor)
     n_regimes = 3
-    ref = naive_rea(cac, n_regimes, L, excl_factor)
-    cmp = _rea(cac, n_regimes, L, excl_factor)
-    npt.assert_allclose(cmp, ref, atol=1.5e-07)
+    ref_regimes = naive_rea(cac, n_regimes, L, excl_factor)
+    cmp_regimes = _rea(cac, n_regimes, L, excl_factor)
+    npt.assert_allclose(cmp_regimes, ref_regimes, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("I", test_data)

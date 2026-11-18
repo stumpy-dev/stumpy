@@ -34,14 +34,16 @@ def test_multi_mass_absolute_seeded():
 
         Q = T[:, trivial_idx : trivial_idx + m]
 
-        ref = naive.multi_mass_absolute(Q, T, m)
+        ref_distances = naive.multi_mass_absolute(Q, T, m)
 
         T, T_subseq_isfinite = core.preprocess_non_normalized(T, m)
-        cmp = _multi_mass_absolute(
+        cmp_distances = _multi_mass_absolute(
             Q, T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite
         )
 
-        npt.assert_allclose(cmp, ref, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(
+            cmp_distances, ref_distances, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+        )
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -51,14 +53,16 @@ def test_multi_mass_absolute(T, m):
     Q = T[:, trivial_idx : trivial_idx + m]
 
     for p in [1.0, 2.0, 3.0]:
-        ref = naive.multi_mass_absolute(Q, T, m, p=p)
+        ref_distances = naive.multi_mass_absolute(Q, T, m, p=p)
 
         _T, T_subseq_isfinite = core.preprocess_non_normalized(T, m)
-        cmp = _multi_mass_absolute(
+        cmp_distances = _multi_mass_absolute(
             Q, _T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite, p=p
         )
 
-        npt.assert_allclose(cmp, ref, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(
+            cmp_distances, ref_distances, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+        )
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -157,8 +161,8 @@ def test_maamp_mdl(T, m):
         cmp_MDL, cmp_S = maamp_mdl(T, m, subseq_idx, nn_idx, p=p)
         npt.assert_allclose(cmp_MDL, ref_MDL, atol=1.5e-07)
 
-        for ref, cmp in zip(ref_S, cmp_S):
-            npt.assert_allclose(cmp, ref, atol=1.5e-07)
+        for ref_subspace, cmp_subspace in zip(ref_S, cmp_S):
+            npt.assert_allclose(cmp_subspace, ref_subspace, atol=1.5e-07)
 
 
 def test_naive_maamp():
