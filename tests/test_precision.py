@@ -54,8 +54,8 @@ def test_mpdist_snippets_s():
             cmp_regimes,
         ) = snippets(T, m, k, s=s)
 
-        npt.assert_almost_equal(
-            ref_fractions, cmp_fractions, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_fractions, ref_fractions, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
 
 
@@ -68,12 +68,12 @@ def test_distace_profile():
 
     for i in range(len(T) - m + 1):
         Q = T[i : i + m]
-        D_ref = naive.distance_profile(Q, T, m)
-        D_comp = core.mass(
+        ref_D = naive.distance_profile(Q, T, m)
+        cmp_D = core.mass(
             Q, T, M_T=M_T, Σ_T=Σ_T, T_subseq_isconstant=T_subseq_isconstant, query_idx=i
         )
 
-        npt.assert_almost_equal(D_ref, D_comp)
+        npt.assert_allclose(cmp_D, ref_D, atol=1.5e-07)
 
 
 def test_calculate_squared_distance():
@@ -115,10 +115,10 @@ def test_calculate_squared_distance():
                     T_subseq_isconstant[i],
                 )
 
-                comp = dist_ij - dist_ji
+                cmp = dist_ij - dist_ji
                 ref = 0.0
 
-                npt.assert_almost_equal(ref, comp, decimal=14)
+                npt.assert_allclose(cmp, ref, atol=1.5e-14)
 
 
 @pytest.mark.parametrize(
@@ -163,22 +163,22 @@ def test_snippets(seed, m, k, s):
             cmp_regimes,
         ) = snippets(T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func)
 
-        npt.assert_almost_equal(
-            ref_snippets, cmp_snippets, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_snippets, ref_snippets, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
-        npt.assert_almost_equal(
-            ref_indices, cmp_indices, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_indices, ref_indices, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
-        npt.assert_almost_equal(
-            ref_profiles, cmp_profiles, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
-        npt.assert_almost_equal(
-            ref_fractions, cmp_fractions, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_fractions, ref_fractions, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
-        npt.assert_almost_equal(
-            ref_areas, cmp_areas, decimal=config.STUMPY_TEST_PRECISION
+        npt.assert_allclose(
+            cmp_areas, ref_areas, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
         )
-        npt.assert_almost_equal(ref_regimes, cmp_regimes)
+        npt.assert_allclose(cmp_regimes, ref_regimes, atol=1.5e-07)
 
 
 @pytest.mark.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -213,7 +213,7 @@ def test_distance_symmetry_property_in_gpu():
         d_ij = mp_AB[0, 0]
         d_ji = mp_BA[0, 0]
 
-        comp = d_ij - d_ji
+        cmp = d_ij - d_ji
         ref = 0.0
 
-        npt.assert_almost_equal(comp, ref, decimal=15)
+        npt.assert_allclose(cmp, ref, atol=1.5e-15)
