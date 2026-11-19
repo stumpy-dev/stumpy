@@ -37,10 +37,10 @@ def test_prescraamp_self_join(T_A, T_B):
                 )
 
             with rng.fix_state():
-                comp_P, comp_I = prescraamp(T_B, m, s=s, p=p)
+                cmp_P, cmp_I = prescraamp(T_B, m, s=s, p=p)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -53,10 +53,10 @@ def test_prescraamp_A_B_join(T_A, T_B):
                 ref_P, ref_I = naive.prescraamp(T_A, m, T_B, s=s, p=p)
 
             with rng.fix_state():
-                comp_P, comp_I = prescraamp(T_A, m, T_B=T_B, s=s, p=p)
+                cmp_P, cmp_I = prescraamp(T_A, m, T_B=T_B, s=s, p=p)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -68,10 +68,10 @@ def test_prescraamp_A_B_join_swap(T_A, T_B):
             ref_P, ref_I = naive.prescraamp(T_B, m, T_A, s=s)
 
         with rng.fix_state():
-            comp_P, comp_I = prescraamp(T_B, m, T_B=T_A, s=s)
+            cmp_P, cmp_I = prescraamp(T_B, m, T_B=T_A, s=s)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -84,10 +84,10 @@ def test_prescraamp_self_join_larger_window(T_A, T_B, m):
                 ref_P, ref_I = naive.prescraamp(T_B, m, T_B, s=s, exclusion_zone=zone)
 
             with rng.fix_state():
-                comp_P, comp_I = prescraamp(T_B, m, s=s)
+                cmp_P, cmp_I = prescraamp(T_B, m, s=s)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 def test_scraamp_int_input():
@@ -120,17 +120,17 @@ def test_scraamp_self_join(T_A, T_B, percentages):
                     p=p,
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            naive.replace_inf(cmp_P)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -156,18 +156,18 @@ def test_scraamp_A_B_join(T_A, T_B, percentages):
                     p=p,
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -191,18 +191,18 @@ def test_scraamp_A_B_join_swap(T_A, T_B, percentages):
                 pre_scraamp=False,
             )
             approx.update()
-            comp_P = approx.P_
+            cmp_P = approx.P_
             # comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
-        npt.assert_almost_equal(ref_right_I, comp_right_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -227,18 +227,18 @@ def test_scraamp_self_join_larger_window(T_A, T_B, m, percentages):
                     pre_scraamp=False,
                 )
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -247,36 +247,36 @@ def test_scraamp_self_join_full(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.aamp(T_B, m, exclusion_zone=zone)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scraamp(T_B, m, ignore_trivial=True, percentage=1.0, pre_scraamp=False)
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
     ref_mp = aamp(T_B, m, ignore_trivial=True)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -284,38 +284,38 @@ def test_scraamp_A_B_join_full(T_A, T_B):
     m = 3
 
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scraamp(
         T_A, m, T_B, ignore_trivial=False, percentage=1.0, pre_scraamp=False
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
     ref_mp = aamp(T_A, m, T_B=T_B, ignore_trivial=False)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -323,27 +323,27 @@ def test_scraamp_A_B_join_full_swap(T_A, T_B):
     m = 3
 
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scraamp(
         T_B, m, T_A, ignore_trivial=False, percentage=1.0, pre_scraamp=False
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -353,25 +353,25 @@ def test_scraamp_self_join_full_larger_window(T_A, T_B, m):
         zone = int(np.ceil(m / 4))
 
         ref_mp = naive.aamp(T_B, m, exclusion_zone=zone)
-        ref_P = ref_mp[:, 0]
-        ref_I = ref_mp[:, 1]
-        ref_left_I = ref_mp[:, 2]
-        ref_right_I = ref_mp[:, 3]
+        ref_P = ref_mp[:, 0].astype(np.float64)
+        ref_I = ref_mp[:, 1].astype(np.int64)
+        ref_left_I = ref_mp[:, 2].astype(np.int64)
+        ref_right_I = ref_mp[:, 3].astype(np.int64)
 
         approx = scraamp(T_B, m, ignore_trivial=True, percentage=1.0, pre_scraamp=False)
         approx.update()
-        comp_P = approx.P_
-        comp_I = approx.I_
-        comp_left_I = approx.left_I_
-        comp_right_I = approx.right_I_
+        cmp_P = approx.P_
+        cmp_I = approx.I_
+        cmp_left_I = approx.left_I_
+        cmp_right_I = approx.right_I_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
-        npt.assert_almost_equal(ref_right_I, comp_right_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -404,16 +404,16 @@ def test_scraamp_plus_plus_self_join(T_A, T_B, percentages):
                         p=p,
                     )
                     approx.update()
-                    comp_P = approx.P_
-                    comp_I = approx.I_
+                    cmp_P = approx.P_
+                    cmp_I = approx.I_
                     # comp_left_I = approx.left_I_
                     # comp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
                 # npt.assert_almost_equal(ref_left_I, comp_left_I)
                 # npt.assert_almost_equal(ref_right_I, comp_right_I)
 
@@ -450,18 +450,18 @@ def test_scraamp_plus_plus_A_B_join(T_A, T_B, percentages):
                         p=p,
                     )
                     approx.update()
-                    comp_P = approx.P_
-                    comp_I = approx.I_
-                    comp_left_I = approx.left_I_
-                    comp_right_I = approx.right_I_
+                    cmp_P = approx.P_
+                    cmp_I = approx.I_
+                    cmp_left_I = approx.left_I_
+                    cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -470,27 +470,27 @@ def test_scraamp_plus_plus_self_join_full(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.aamp(T_B, m, exclusion_zone=zone)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scraamp(
         T_B, m, ignore_trivial=True, percentage=1.0, pre_scraamp=True, s=zone
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -499,27 +499,27 @@ def test_scraamp_plus_plus_A_B_join_full(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.aamp(T_A, m, T_B=T_B)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scraamp(
         T_A, m, T_B=T_B, ignore_trivial=False, percentage=1.0, pre_scraamp=True, s=zone
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -528,27 +528,27 @@ def test_scraamp_plus_plus_A_B_join_full_swap(T_A, T_B):
     zone = int(np.ceil(m / 4))
 
     ref_mp = naive.aamp(T_B, m, T_B=T_A)
-    ref_P = ref_mp[:, 0]
-    ref_I = ref_mp[:, 1]
-    ref_left_I = ref_mp[:, 2]
-    ref_right_I = ref_mp[:, 3]
+    ref_P = ref_mp[:, 0].astype(np.float64)
+    ref_I = ref_mp[:, 1].astype(np.int64)
+    ref_left_I = ref_mp[:, 2].astype(np.int64)
+    ref_right_I = ref_mp[:, 3].astype(np.int64)
 
     approx = scraamp(
         T_B, m, T_B=T_A, ignore_trivial=False, percentage=1.0, pre_scraamp=True, s=zone
     )
     approx.update()
-    comp_P = approx.P_
-    comp_I = approx.I_
-    comp_left_I = approx.left_I_
-    comp_right_I = approx.right_I_
+    cmp_P = approx.P_
+    cmp_I = approx.I_
+    cmp_left_I = approx.left_I_
+    cmp_right_I = approx.right_I_
 
     naive.replace_inf(ref_P)
-    naive.replace_inf(comp_P)
+    naive.replace_inf(cmp_P)
 
-    npt.assert_almost_equal(ref_P, comp_P)
-    npt.assert_almost_equal(ref_I, comp_I)
-    npt.assert_almost_equal(ref_left_I, comp_left_I)
-    npt.assert_almost_equal(ref_right_I, comp_right_I)
+    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+    npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("percentages", percentages)
@@ -567,15 +567,15 @@ def test_scraamp_constant_subsequence_self_join(percentages):
                 T, m, ignore_trivial=True, percentage=percentage, pre_scraamp=False
             )
             approx.update()
-            comp_P = approx.P_
+            cmp_P = approx.P_
             # comp_I = approx.I_
             # comp_left_I = approx.left_I_
             # comp_right_I = approx.right_I_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
         # npt.assert_almost_equal(ref_I, comp_I)
         # npt.assert_almost_equal(ref_left_I, comp_left_I)
         # npt.assert_almost_equal(ref_right_I, comp_right_I)
@@ -599,15 +599,15 @@ def test_scraamp_identical_subsequence_self_join(percentages):
                 T, m, ignore_trivial=True, percentage=percentage, pre_scraamp=False
             )
             approx.update()
-            comp_P = approx.P_
+            cmp_P = approx.P_
             # comp_I = approx.I_
             # comp_left_I = approx.left_I_
             # comp_right_I = approx.right_I_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P, decimal=config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
         # npt.assert_almost_equal(ref_I, comp_I)
         # npt.assert_almost_equal(ref_left_I, comp_left_I)
         # npt.assert_almost_equal(ref_right_I, comp_right_I)
@@ -639,18 +639,18 @@ def test_scraamp_nan_inf_self_join(
             with rng.fix_state():
                 approx = scraamp(T_B_sub, m, percentage=percentage, pre_scraamp=False)
                 approx.update()
-                comp_P = approx.P_
-                comp_I = approx.I_
-                comp_left_I = approx.left_I_
-                comp_right_I = approx.right_I_
+                cmp_P = approx.P_
+                cmp_I = approx.I_
+                cmp_left_I = approx.left_I_
+                cmp_right_I = approx.right_I_
 
             naive.replace_inf(ref_P)
-            naive.replace_inf(comp_P)
+            naive.replace_inf(cmp_P)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
-            npt.assert_almost_equal(ref_left_I, comp_left_I)
-            npt.assert_almost_equal(ref_right_I, comp_right_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+            npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("percentages", percentages)
@@ -669,18 +669,18 @@ def test_scraamp_nan_zero_mean_self_join(percentages):
         with rng.fix_state():
             approx = scraamp(T, m, percentage=percentage, pre_scraamp=False)
             approx.update()
-            comp_P = approx.P_
-            comp_I = approx.I_
-            comp_left_I = approx.left_I_
-            comp_right_I = approx.right_I_
+            cmp_P = approx.P_
+            cmp_I = approx.I_
+            cmp_left_I = approx.left_I_
+            cmp_right_I = approx.right_I_
 
         naive.replace_inf(ref_P)
-        naive.replace_inf(comp_P)
+        naive.replace_inf(cmp_P)
 
-        npt.assert_almost_equal(ref_P, comp_P)
-        npt.assert_almost_equal(ref_I, comp_I)
-        npt.assert_almost_equal(ref_left_I, comp_left_I)
-        npt.assert_almost_equal(ref_right_I, comp_right_I)
+        npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+        npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+        npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -693,10 +693,10 @@ def test_prescraamp_A_B_join_larger_window(T_A, T_B):
                 ref_P, ref_I = naive.prescraamp(T_A, m, T_B, s=s)
 
             with rng.fix_state():
-                comp_P, comp_I = prescraamp(T_A, m, T_B, s=s)
+                cmp_P, cmp_I = prescraamp(T_A, m, T_B, s=s)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -712,10 +712,10 @@ def test_prescraamp_self_join_KNN(T_A, T_B):
                     )
 
                 with rng.fix_state():
-                    comp_P, comp_I = prescraamp(T_B, m, s=s, p=p, k=k)
+                    cmp_P, cmp_I = prescraamp(T_B, m, s=s, p=p, k=k)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -729,10 +729,10 @@ def test_prescraamp_A_B_join_KNN(T_A, T_B):
                     ref_P, ref_I = naive.prescraamp(T_A, m, T_B, s=s, p=p, k=k)
 
                 with rng.fix_state():
-                    comp_P, comp_I = prescraamp(T_A, m, T_B=T_B, s=s, p=p, k=k)
+                    cmp_P, cmp_I = prescraamp(T_A, m, T_B=T_B, s=s, p=p, k=k)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -760,17 +760,17 @@ def test_scraamp_self_join_KNN(T_A, T_B, percentages):
                         k=k,
                     )
                     approx.update()
-                    comp_P = approx.P_
-                    comp_I = approx.I_
-                    comp_left_I = approx.left_I_
-                    comp_right_I = approx.right_I_
+                    cmp_P = approx.P_
+                    cmp_I = approx.I_
+                    cmp_left_I = approx.left_I_
+                    cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                naive.replace_inf(cmp_P)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -797,18 +797,18 @@ def test_scraamp_A_B_join_KNN(T_A, T_B, percentages):
                         k=k,
                     )
                     approx.update()
-                    comp_P = approx.P_
-                    comp_I = approx.I_
-                    comp_left_I = approx.left_I_
-                    comp_right_I = approx.right_I_
+                    cmp_P = approx.P_
+                    cmp_I = approx.I_
+                    cmp_left_I = approx.left_I_
+                    cmp_right_I = approx.right_I_
 
                 naive.replace_inf(ref_P)
-                naive.replace_inf(comp_P)
+                naive.replace_inf(cmp_P)
 
-                npt.assert_almost_equal(ref_P, comp_P)
-                npt.assert_almost_equal(ref_I, comp_I)
-                npt.assert_almost_equal(ref_left_I, comp_left_I)
-                npt.assert_almost_equal(ref_right_I, comp_right_I)
+                npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
+                npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -842,16 +842,16 @@ def test_scraamp_plus_plus_self_join_KNN(T_A, T_B, percentages):
                             k=k,
                         )
                         approx.update()
-                        comp_P = approx.P_
-                        comp_I = approx.I_
+                        cmp_P = approx.P_
+                        cmp_I = approx.I_
                         # comp_left_I = approx.left_I_
                         # comp_right_I = approx.right_I_
 
                     naive.replace_inf(ref_P)
-                    naive.replace_inf(comp_P)
+                    naive.replace_inf(cmp_P)
 
-                    npt.assert_almost_equal(ref_P, comp_P)
-                    npt.assert_almost_equal(ref_I, comp_I)
+                    npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+                    npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
                     # npt.assert_almost_equal(ref_left_I, comp_left_I)
                     # npt.assert_almost_equal(ref_right_I, comp_right_I)
 
@@ -871,10 +871,10 @@ def test_prescraamp_self_join_larger_window_m_5_k_5(T_A, T_B, m):
                 )
 
             with rng.fix_state():
-                comp_P, comp_I = prescraamp(T_B, m, s=s, k=k)
+                cmp_P, cmp_I = prescraamp(T_B, m, s=s, k=k)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
 @pytest.mark.parametrize("T_A, T_B", test_data)
@@ -889,7 +889,7 @@ def test_prescraamp_A_B_join_larger_window_m_5_k_5(T_A, T_B):
                 ref_P, ref_I = naive.prescraamp(T_A, m, T_B, s=s, k=k)
 
             with rng.fix_state():
-                comp_P, comp_I = prescraamp(T_A, m, T_B, s=s, k=k)
+                cmp_P, cmp_I = prescraamp(T_A, m, T_B, s=s, k=k)
 
-            npt.assert_almost_equal(ref_P, comp_P)
-            npt.assert_almost_equal(ref_I, comp_I)
+            npt.assert_allclose(cmp_P, ref_P, atol=1.5e-07)
+            npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
