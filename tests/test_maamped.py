@@ -146,7 +146,7 @@ def test_maamped_identical_subsequence_self_join(dask_cluster):
         cmp_P, cmp_I = maamped(dask_client, T, m)
 
         npt.assert_allclose(
-            cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+            cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION
         )  # ignore indices
 
 

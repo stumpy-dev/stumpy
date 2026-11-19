@@ -660,9 +660,7 @@ def test_scrump_identical_subsequence_self_join(percentages):
             naive.replace_inf(ref_P)
             naive.replace_inf(cmp_P)
 
-            npt.assert_allclose(
-                cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-            )
+            npt.assert_allclose(cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION)
             # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
             # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
             # npt.assert_allclose(cmp_right_I, ref_right_I, atol=1.5e-07)

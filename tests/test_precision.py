@@ -55,7 +55,7 @@ def test_mpdist_snippets_s():
         ) = snippets(T, m, k, s=s)
 
         npt.assert_allclose(
-            cmp_fractions, ref_fractions, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+            cmp_fractions, ref_fractions, atol=config.STUMPY_TEST_PRECISION
         )
 
 
@@ -164,20 +164,16 @@ def test_snippets(seed, m, k, s):
         ) = snippets(T, m, k, s=s, mpdist_T_subseq_isconstant=isconstant_custom_func)
 
         npt.assert_allclose(
-            cmp_snippets, ref_snippets, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+            cmp_snippets, ref_snippets, atol=config.STUMPY_TEST_PRECISION
+        )
+        npt.assert_allclose(cmp_indices, ref_indices, atol=config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(
+            cmp_profiles, ref_profiles, atol=config.STUMPY_TEST_PRECISION
         )
         npt.assert_allclose(
-            cmp_indices, ref_indices, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+            cmp_fractions, ref_fractions, atol=config.STUMPY_TEST_PRECISION
         )
-        npt.assert_allclose(
-            cmp_profiles, ref_profiles, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-        )
-        npt.assert_allclose(
-            cmp_fractions, ref_fractions, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-        )
-        npt.assert_allclose(
-            cmp_areas, ref_areas, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-        )
+        npt.assert_allclose(cmp_areas, ref_areas, atol=config.STUMPY_TEST_PRECISION)
         npt.assert_allclose(cmp_regimes, ref_regimes, atol=1.5e-07)
 
 

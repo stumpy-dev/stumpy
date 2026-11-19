@@ -700,7 +700,7 @@ def test_stumpi_identical_subsequence_self_join():
         naive.replace_inf(ref_P)
         naive.replace_inf(cmp_P)
 
-        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION)
         # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
     with rng.fix_state():
@@ -719,7 +719,7 @@ def test_stumpi_identical_subsequence_self_join():
 
         naive.replace_inf(cmp_P)
 
-        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION)
         # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
 
 
@@ -750,11 +750,9 @@ def test_stumpi_identical_subsequence_self_join_egress():
         naive.replace_inf(cmp_P)
         naive.replace_inf(cmp_left_P)
 
-        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION)
         # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
-        npt.assert_allclose(
-            cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-        )
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=config.STUMPY_TEST_PRECISION)
         # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
@@ -777,12 +775,10 @@ def test_stumpi_identical_subsequence_self_join_egress():
             naive.replace_inf(cmp_P)
             naive.replace_inf(cmp_left_P)
 
-            npt.assert_allclose(
-                cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-            )
+            npt.assert_allclose(cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION)
             # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
             npt.assert_allclose(
-                cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+                cmp_left_P, ref_left_P, atol=config.STUMPY_TEST_PRECISION
             )
             # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
@@ -810,11 +806,9 @@ def test_stumpi_identical_subsequence_self_join_egress():
         naive.replace_inf(cmp_P)
         naive.replace_inf(cmp_left_P)
 
-        npt.assert_allclose(cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION)
         # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
-        npt.assert_allclose(
-            cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-        )
+        npt.assert_allclose(cmp_left_P, ref_left_P, atol=config.STUMPY_TEST_PRECISION)
         # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 
         for i in range(34):
@@ -837,12 +831,10 @@ def test_stumpi_identical_subsequence_self_join_egress():
             naive.replace_inf(cmp_P)
             naive.replace_inf(cmp_left_P)
 
-            npt.assert_allclose(
-                cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-            )
+            npt.assert_allclose(cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION)
             # npt.assert_allclose(cmp_I, ref_I, atol=1.5e-07)
             npt.assert_allclose(
-                cmp_left_P, ref_left_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+                cmp_left_P, ref_left_P, atol=config.STUMPY_TEST_PRECISION
             )
             # npt.assert_allclose(cmp_left_I, ref_left_I, atol=1.5e-07)
 

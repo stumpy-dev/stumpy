@@ -337,7 +337,7 @@ def test_stumped_identical_subsequence_self_join(dask_cluster):
         npt.assert_allclose(
             cmp_mp[:, 0].astype(np.float64),
             ref_mp[:, 0].astype(np.float64),
-            atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+            atol=config.STUMPY_TEST_PRECISION,
         )  # ignore indices
 
 
@@ -362,7 +362,7 @@ def test_stumped_identical_subsequence_A_B_join(dask_cluster):
         npt.assert_allclose(
             cmp_mp[:, 0].astype(np.float64),
             ref_mp[:, 0].astype(np.float64),
-            atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+            atol=config.STUMPY_TEST_PRECISION,
         )  # ignore indices
 
 

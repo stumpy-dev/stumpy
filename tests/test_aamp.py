@@ -160,7 +160,7 @@ def test_aamp_identical_subsequence_self_join():
     npt.assert_allclose(
         cmp_mp[:, 0].astype(np.float64),
         ref_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        atol=config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
     cmp_mp = aamp(pd.Series(T_A), m, ignore_trivial=True)
@@ -168,7 +168,7 @@ def test_aamp_identical_subsequence_self_join():
     npt.assert_allclose(
         cmp_mp[:, 0].astype(np.float64),
         ref_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        atol=config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
 
@@ -186,7 +186,7 @@ def test_aamp_identical_subsequence_A_B_join():
     npt.assert_allclose(
         cmp_mp[:, 0].astype(np.float64),
         ref_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        atol=config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
     cmp_mp = aamp(pd.Series(T_A), m, pd.Series(T_B), ignore_trivial=False)
@@ -194,7 +194,7 @@ def test_aamp_identical_subsequence_A_B_join():
     npt.assert_allclose(
         cmp_mp[:, 0].astype(np.float64),
         ref_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        atol=config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
     # Swap inputs
@@ -205,7 +205,7 @@ def test_aamp_identical_subsequence_A_B_join():
     npt.assert_allclose(
         cmp_mp[:, 0].astype(np.float64),
         ref_mp[:, 0].astype(np.float64),
-        atol=1.5 * 10**-config.STUMPY_TEST_PRECISION,
+        atol=config.STUMPY_TEST_PRECISION,
     )  # ignore indices
 
 

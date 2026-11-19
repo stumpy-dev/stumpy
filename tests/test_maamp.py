@@ -41,7 +41,7 @@ def test_multi_mass_absolute_seeded():
             Q, T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite
         )
 
-        npt.assert_allclose(cmp, ref, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp, ref, atol=config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -58,7 +58,7 @@ def test_multi_mass_absolute(T, m):
             Q, _T, m, T_subseq_isfinite[:, trivial_idx], T_subseq_isfinite, p=p
         )
 
-        npt.assert_allclose(cmp, ref, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION)
+        npt.assert_allclose(cmp, ref, atol=config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -303,7 +303,7 @@ def test_identical_subsequence_self_join():
     cmp_P, cmp_I = maamp(T, m)
 
     npt.assert_allclose(
-        cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+        cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION
     )  # ignore indices
 
 

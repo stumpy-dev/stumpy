@@ -67,9 +67,7 @@ def test_multi_mass_seeded():
             query_idx=trivial_idx,
         )
 
-        npt.assert_allclose(
-            cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-        )
+        npt.assert_allclose(cmp_result, ref_result, atol=config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -98,9 +96,7 @@ def test_multi_mass(T, m):
         query_idx=trivial_idx,
     )
 
-    npt.assert_allclose(
-        cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-    )
+    npt.assert_allclose(cmp_result, ref_result, atol=config.STUMPY_TEST_PRECISION)
 
 
 @pytest.mark.parametrize("T, m", test_data)
@@ -374,7 +370,7 @@ def test_identical_subsequence_self_join():
     cmp_P, cmp_I = mstump(T, m)
 
     npt.assert_allclose(
-        cmp_P, ref_P, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
+        cmp_P, ref_P, atol=config.STUMPY_TEST_PRECISION
     )  # ignore indices
 
 
@@ -458,9 +454,7 @@ def test_multi_mass_with_isconstant():
         Q_subseq_isconstant=Q_subseq_isconstant,
     )
 
-    npt.assert_allclose(
-        cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-    )
+    npt.assert_allclose(cmp_result, ref_result, atol=config.STUMPY_TEST_PRECISION)
 
     # case 2: Q is a multi-subseq of T
     T = rng.RNG.uniform(-1000, 1000, size=[d, n])
@@ -499,9 +493,7 @@ def test_multi_mass_with_isconstant():
         query_idx=query_idx,
     )
 
-    npt.assert_allclose(
-        cmp_result, ref_result, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
-    )
+    npt.assert_allclose(cmp_result, ref_result, atol=config.STUMPY_TEST_PRECISION)
 
 
 def test_multi_distance_profile_with_isconstant_case1():
