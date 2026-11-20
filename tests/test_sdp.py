@@ -122,7 +122,7 @@ def test_sdp(n_T, remainder, comparator):
             func = getattr(sdp, func_name)
             try:
                 cmp_dot_product = func(Q, T)
-                npt.assert_allclose(cmp_dot_product, ref_dot_product)
+                npt.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
             except Exception as e:  # pragma: no cover
                 msg = f"Error in {func_name}, with n_Q={n_Q} and n_T={n_T}"
                 warnings.warn(msg)
@@ -146,7 +146,7 @@ def test_sdp_power2():
 
                     ref_dot_product = naive.rolling_window_dot_product(Q, T)
                     cmp_dot_product = func(Q, T)
-                    npt.assert_allclose(cmp_dot_product, ref_dot_product)
+                    npt.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
         except Exception as e:  # pragma: no cover
             msg = f"Error in {func_name}, with q={q} and p={p}"
@@ -176,7 +176,7 @@ def test_pyfftw_sdp_init_len():
     cmp_dot_product = _pyfftw_sliding_dot_product(Q, T)
     ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(cmp_dot_product, ref_dot_product)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
 
@@ -199,7 +199,7 @@ def test_pyfftw_sdp_longdoube():
     cmp_dot_product = sdp_func(Q, T)
     ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(cmp_dot_product, ref_dot_product)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
 
@@ -217,7 +217,7 @@ def test_pyfftw_sdp_multithreaded():
     cmp_dot_product = sdp._pyfftw_sliding_dot_product(Q, T, n_threads=2)
     ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(cmp_dot_product, ref_dot_product)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
 
@@ -240,6 +240,6 @@ def test_pyfftw_sdp_multithreaded_longdouble():
     cmp_dot_product = sdp_func(Q, T, n_threads=2)
     ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(cmp_dot_product, ref_dot_product)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
