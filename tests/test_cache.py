@@ -32,8 +32,8 @@ def test_cache_save_after_clear():
     # calls to `cache.save()` will automatically save both `.nbi` and `.nbc` cache files
     cache.save()  # Save both `.nbi` and `.nbc` cache files
 
-    comp_cache = cache._get_cache(cache_dir)
+    cmp_cache = cache._get_cache(cache_dir)
 
-    assert sorted(ref_cache) == sorted(comp_cache)
+    assert sorted(cmp_cache) == sorted(ref_cache)
 
     cache.clear(cache_dir)

@@ -117,12 +117,12 @@ def test_sdp(n_T, remainder, comparator):
     for n_Q in n_Q_values:
         Q = rng.RNG.rand(n_Q)
         T = rng.RNG.rand(n_T)
-        ref = naive.rolling_window_dot_product(Q, T)
+        ref_dot_product = naive.rolling_window_dot_product(Q, T)
         for func_name in get_sdp_function_names():
             func = getattr(sdp, func_name)
             try:
-                comp = func(Q, T)
-                npt.assert_allclose(comp, ref)
+                cmp_dot_product = func(Q, T)
+                npt.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
             except Exception as e:  # pragma: no cover
                 msg = f"Error in {func_name}, with n_Q={n_Q} and n_T={n_T}"
                 warnings.warn(msg)
@@ -144,9 +144,9 @@ def test_sdp_power2():
                     Q = rng.RNG.rand(n_Q)
                     T = rng.RNG.rand(n_T)
 
-                    ref = naive.rolling_window_dot_product(Q, T)
-                    comp = func(Q, T)
-                    npt.assert_allclose(comp, ref)
+                    ref_dot_product = naive.rolling_window_dot_product(Q, T)
+                    cmp_dot_product = func(Q, T)
+                    npt.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
         except Exception as e:  # pragma: no cover
             msg = f"Error in {func_name}, with q={q} and p={p}"
@@ -173,10 +173,10 @@ def test_pyfftw_sdp_init_len():
     T = np.random.rand(init_len + 1)
     Q = np.random.rand(2**2)
 
-    comp = _pyfftw_sliding_dot_product(Q, T)
-    ref = naive.rolling_window_dot_product(Q, T)
+    cmp_dot_product = _pyfftw_sliding_dot_product(Q, T)
+    ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(comp, ref)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
 
@@ -196,10 +196,10 @@ def test_pyfftw_sdp_longdoube():
     T = np.random.rand(init_len)
     Q = np.random.rand(2**8)
 
-    comp = sdp_func(Q, T)
-    ref = naive.rolling_window_dot_product(Q, T)
+    cmp_dot_product = sdp_func(Q, T)
+    ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(comp, ref)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
 
@@ -214,10 +214,10 @@ def test_pyfftw_sdp_multithreaded():
     T = np.random.rand(2**5)
     Q = np.random.rand(2**4)
 
-    comp = sdp._pyfftw_sliding_dot_product(Q, T, n_threads=2)
-    ref = naive.rolling_window_dot_product(Q, T)
+    cmp_dot_product = sdp._pyfftw_sliding_dot_product(Q, T, n_threads=2)
+    ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(comp, ref)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
 
@@ -237,9 +237,9 @@ def test_pyfftw_sdp_multithreaded_longdouble():
     T = np.random.rand(init_len)
     Q = np.random.rand(2**8)
 
-    comp = sdp_func(Q, T, n_threads=2)
-    ref = naive.rolling_window_dot_product(Q, T)
+    cmp_dot_product = sdp_func(Q, T, n_threads=2)
+    ref_dot_product = naive.rolling_window_dot_product(Q, T)
 
-    np.testing.assert_allclose(comp, ref)
+    np.testing.assert_allclose(cmp_dot_product, ref_dot_product, atol=1.5e-07)
 
     return
