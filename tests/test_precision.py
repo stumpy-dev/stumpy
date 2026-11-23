@@ -115,10 +115,12 @@ def test_calculate_squared_distance():
                     T_subseq_isconstant[i],
                 )
 
-                cmp = dist_ij - dist_ji
-                ref = 0.0
+                cmp_distance_difference = dist_ij - dist_ji
+                ref_distance_difference = 0.0
 
-                npt.assert_allclose(cmp, ref, atol=1.5e-14)
+                npt.assert_allclose(
+                    cmp_distance_difference, ref_distance_difference, atol=1.5e-14
+                )
 
 
 @pytest.mark.parametrize(
@@ -213,7 +215,9 @@ def test_distance_symmetry_property_in_gpu():
         d_ij = mp_AB[0, 0]
         d_ji = mp_BA[0, 0]
 
-        cmp = d_ij - d_ji
-        ref = 0.0
+        cmp_distance_difference = d_ij - d_ji
+        ref_distance_difference = 0.0
 
-        npt.assert_allclose(cmp, ref, atol=1.5e-15)
+        npt.assert_allclose(
+            cmp_distance_difference, ref_distance_difference, atol=1.5e-15
+        )
