@@ -272,3 +272,30 @@ def test_mpdist_snippets_s_with_isconstant(T, m, k, s):
         cmp_areas, ref_areas, atol=1.5 * 10**-config.STUMPY_TEST_PRECISION
     )
     npt.assert_allclose(cmp_regimes, ref_regimes, atol=1.5e-07)
+
+
+def test_mpdist_snippets_tied_areas():
+    # In GH-984, windows starting at 40 and 56 tie for the third snippet.
+    with rng.fix_seed(455):
+        T = rng.RNG.uniform(-1000, 1000, 64)
+    m = 8
+    isconstant = functools.partial(
+        naive.isconstant_func_stddev_threshold, quantile_threshold=0.05
+    )
+    ref_profiles = naive.get_all_mpdist_profiles(
+        T, m, s=3, mpdist_T_subseq_isconstant=isconstant
+    )
+    cmp_snippets, cmp_indices, cmp_profiles, _, cmp_areas, _ = snippets(
+        T, m, k=3, s=3, mpdist_T_subseq_isconstant=isconstant
+    )
+
+    npt.assert_array_equal(cmp_indices[:2], [16, 32])
+    assert cmp_indices[2] in (40, 56)
+    npt.assert_array_equal(cmp_snippets, [T[i : i + m] for i in cmp_indices])
+    # Check each selected profile against the independent reference at its own index.
+    selected = ref_profiles[cmp_indices // m]
+    atol = 1.5 * 10**-config.STUMPY_TEST_PRECISION
+    npt.assert_allclose(cmp_profiles, selected, atol=atol)
+    npt.assert_allclose(
+        cmp_areas, np.minimum.accumulate(selected).sum(axis=1), atol=atol
+    )
